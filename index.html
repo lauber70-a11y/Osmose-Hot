@@ -270,7 +270,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Version Ultra-Robuste
+        Osmose Hot • Version Anti-Bug Apostrophes
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -831,7 +831,7 @@
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
                         <button onclick="sendResponse('Vote', 'Aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">❤️</button>
-                        <button onclick="sendResponse('Vote', 'Aime pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
+                        <button onclick="sendResponse('Vote', 'Refus_Aime_Pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
                     </div>`;
             } else if (cardData.type === 'yesno') {
                 optionsContainer.innerHTML = `
@@ -856,10 +856,15 @@
             }
         }
 
-        // --- FONCTION D'ENVOI SÉCURISÉE ---
+        // --- FONCTION D'ENVOI SÉCURISÉE SANS AUCUNE APOSTROPHE ---
         function sendResponse(actionType, value) {
             if (conn && conn.open === true) {
-                conn.send({ action: actionType, value: value });
+                // Traduction propre des valeurs techniques pour l'affichage de l'écran Maître
+                let displayValue = value;
+                if (value === 'Veto') displayValue = 'Veto / Refuse';
+                if (value === 'Refus_Aime_Pas') displayValue = 'J aime pas';
+
+                conn.send({ action: actionType, value: displayValue });
                 alert("Réponse envoyée !");
             } else {
                 alert("Erreur : Non connecté au Maître du Jeu.");
