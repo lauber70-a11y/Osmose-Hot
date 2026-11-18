@@ -40,8 +40,8 @@
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-white mb-1">💾 Import / Export JSON</h3>
-                    <p>Sauvegardez toutes vos cartes personnalisées en un clic dans un fichier, ou importez-en de nouvelles facilement.</p>
+                    <h3 class="font-bold text-white mb-1">⏱️ Chronomètre Maître</h3>
+                    <p>C'est le Maître du Jeu qui choisit la durée et déclenche le chronomètre à distance depuis ses contrôles.</p>
                 </div>
 
                 <div class="bg-pink-950/30 border border-pink-500/30 p-3 rounded-xl">
@@ -65,7 +65,7 @@
         </div>
     </div>
 
-    <!-- MODALE DE GESTION DES CARTES + IMPORT/EXPORT JSON -->
+    <!-- MODALE DE GESTION DES CARTES -->
     <div id="deck-manager-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl text-left my-8 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -73,7 +73,6 @@
                 <button onclick="toggleDeckManager()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
             </div>
 
-            <!-- Bloc Sauvegarde / Restauration JSON -->
             <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex gap-2">
                 <button onclick="exportJSON()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
                     <span>📤</span> Exporter JSON
@@ -81,7 +80,6 @@
                 <button onclick="triggerImportJSON()" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
                     <span>📥</span> Importer JSON
                 </button>
-                <!-- Input fichier invisible pour l'import -->
                 <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSON(event)">
             </div>
             
@@ -143,9 +141,16 @@
                 <span>📸</span> Envoyer une photo flash instantanée
             </button>
 
-            <!-- Envoyer une carte sur-mesure en direct -->
+            <!-- Choisir et envoyer depuis la pioche -->
+            <div class="bg-gradient-to-r from-indigo-950/40 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 space-y-3">
+                <h3 class="font-bold text-indigo-300 text-sm">📤 Choisir et envoyer depuis la pioche</h3>
+                <select id="master-deck-select" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+                <button onclick="sendCardFromDeck()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-xs shadow transition text-white">Envoyer cette carte au Duo 🚀</button>
+            </div>
+
+            <!-- Envoyer une carte sur-mesure à la volée -->
             <div class="bg-gradient-to-r from-pink-950/40 to-purple-950/40 p-4 rounded-2xl border border-pink-500/30 space-y-3">
-                <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte en direct</h3>
+                <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte libre (sur-mesure)</h3>
                 <input type="text" id="live-card-prompt" placeholder="Ex: Dis-moi ton plus beau souvenir..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
                 <div class="flex gap-2">
                     <select id="live-card-type" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
@@ -155,7 +160,25 @@
                         <option value="text">💬 Texte</option>
                     </select>
                 </div>
-                <button onclick="sendLiveCard()" class="w-full py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl font-bold text-xs shadow transition">Envoyer au Duo 🚀</button>
+                <button onclick="sendLiveCard()" class="w-full py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-indigo-500 rounded-xl font-bold text-xs shadow transition">Envoyer au Duo 🚀</button>
+            </div>
+
+            <!-- CONTRÔLE DU CHRONOMÈTRE POUR LE MAÎTRE DU JEU -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <h3 class="font-semibold text-pink-400 text-sm">⏱️ Contrôle du Chronomètre (Maître)</h3>
+                <div class="flex justify-center gap-2">
+                    <button onclick="requestStartTimer(60)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">1 min</button>
+                    <button onclick="requestStartTimer(120)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">2 min</button>
+                    <button onclick="requestStartTimer(300)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">5 min</button>
+                </div>
+
+                <div id="master-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-xl p-3 space-y-2">
+                    <div id="master-timer-display" class="text-3xl font-extrabold text-pink-400 tracking-wider">00:00</div>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="requestPauseTimer()" id="master-timer-pause-btn" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg text-white">Pause ⏸️</button>
+                        <button onclick="requestStopTimer()" class="px-3 py-1 bg-red-950/60 hover:bg-red-900 text-xs font-bold text-red-300 rounded-lg">Arrêter ⏹️</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Panneau Création de Cartes -->
@@ -218,24 +241,18 @@
                 <p class="text-xs text-slate-400">En attente d'une carte du Maître du Jeu ou pioche ci-dessus...</p>
             </div>
 
+            <!-- CARTE ACTIVE CÔTÉ PARTENAIRE (Chrono distant géré par le Maître) -->
             <div id="active-card-container" class="hidden bg-slate-900 p-6 rounded-3xl border border-pink-500/50 shadow-2xl space-y-5 text-left">
                 <div class="flex justify-between items-center">
                     <div id="card-type-badge" class="text-xs uppercase tracking-widest text-pink-400 font-bold">Défi</div>
-                    <div class="flex gap-1 text-[10px]">
-                        <button onclick="startTimer(60)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">1 min</button>
-                        <button onclick="startTimer(120)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">2 min</button>
-                        <button onclick="startTimer(300)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">5 min</button>
-                    </div>
                 </div>
 
                 <p id="card-prompt-text" class="text-lg font-semibold text-white"></p>
 
-                <div id="giant-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-2xl p-4 text-center space-y-2">
-                    <div id="giant-timer-display" class="text-4xl font-extrabold text-pink-400 tracking-wider">00:00</div>
-                    <div class="flex justify-center gap-2">
-                        <button onclick="pauseTimer()" id="timer-pause-btn" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-white">Pause ⏸️</button>
-                        <button onclick="stopTimer()" class="px-4 py-1.5 bg-red-950/60 hover:bg-red-900 text-xs font-bold text-red-300 rounded-xl">Arrêter ⏹️</button>
-                    </div>
+                <!-- CHRONOMÈTRE DISTANT (Piloté par le Maître) -->
+                <div id="partner-giant-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-2xl p-4 text-center space-y-2">
+                    <div id="partner-giant-timer-display" class="text-4xl font-extrabold text-pink-400 tracking-wider">00:00</div>
+                    <div class="text-[11px] text-pink-300 italic">Chronomètre piloté par le Maître du Jeu ⏱️</div>
                 </div>
                 
                 <div id="interaction-options" class="pt-2"></div>
@@ -258,7 +275,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • JSON & WebRTC
+        Osmose Hot • Chrono Maître WebRTC
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -284,6 +301,7 @@
         function saveDefaultDeck(deck) {
             localStorage.setItem('osmose_default_deck', JSON.stringify(deck));
             updateDeckCount();
+            populateMasterDeckSelect();
         }
 
         function resetDefaultDeckToOriginal() {
@@ -304,6 +322,7 @@
         function saveCustomDeck(deck) {
             localStorage.setItem('osmose_custom_deck', JSON.stringify(deck));
             updateDeckCount();
+            populateMasterDeckSelect();
         }
 
         function resetCustomDeck() {
@@ -325,19 +344,40 @@
             }
         }
 
+        function populateMasterDeckSelect() {
+            const selectElem = document.getElementById('master-deck-select');
+            if (!selectElem) return;
+            const combined = getCombinedDeck();
+            selectElem.innerHTML = '';
+            if (combined.length === 0) {
+                selectElem.innerHTML = `<option value="">Aucune carte disponible</option>`;
+                return;
+            }
+            combined.forEach((card, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.text = `[${card.type.toUpperCase()}] ${card.prompt.substring(0, 50)}${card.prompt.length > 50 ? '...' : ''}`;
+                selectElem.appendChild(opt);
+            });
+        }
+
+        function sendCardFromDeck() {
+            const selectElem = document.getElementById('master-deck-select');
+            const selectedIndex = selectElem.value;
+            if (selectedIndex === "") { alert("Veuillez sélectionner une carte !"); return; }
+            if (!conn || conn.open !== true) { alert("La partenaire n'est pas connectée !"); return; }
+            const selectedCard = getCombinedDeck()[selectedIndex];
+            conn.send(selectedCard);
+            document.getElementById('feedback-content').innerHTML = `<span class="text-indigo-400 font-bold">Carte de pioche envoyée :</span> ${selectedCard.prompt}`;
+        }
+
         function addNewCardToDeck() {
             const promptInput = document.getElementById('new-card-prompt');
             const typeSelect = document.getElementById('new-card-type');
             const targetSelect = document.getElementById('new-card-target');
             const text = promptInput.value.trim();
-
-            if (!text) {
-                alert("Veuillez entrer le texte de la carte !");
-                return;
-            }
-
+            if (!text) { alert("Veuillez entrer le texte de la carte !"); return; }
             const newCard = { type: typeSelect.value, prompt: text };
-
             if (targetSelect.value === 'default') {
                 const defaultDeck = getDefaultDeck();
                 defaultDeck.push(newCard);
@@ -349,16 +389,11 @@
                 saveCustomDeck(customDeck);
                 alert("Carte ajoutée à la Pioche Personnalisée ! ✨");
             }
-
             promptInput.value = '';
         }
 
-        // --- GESTION EXPORT / IMPORT JSON ---
         function exportJSON() {
-            const dataToExport = {
-                defaultDeck: getDefaultDeck(),
-                customDeck: getCustomDeck()
-            };
+            const dataToExport = { defaultDeck: getDefaultDeck(), customDeck: getCustomDeck() };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
@@ -368,110 +403,85 @@
             downloadAnchor.remove();
         }
 
-        function triggerImportJSON() {
-            document.getElementById('json-file-input').click();
-        }
+        function triggerImportJSON() { document.getElementById('json-file-input').click(); }
 
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    if (importedData.defaultDeck && Array.isArray(importedData.defaultDeck)) {
-                        saveDefaultDeck(importedData.defaultDeck);
-                    }
-                    if (importedData.customDeck && Array.isArray(importedData.customDeck)) {
-                        saveCustomDeck(importedData.customDeck);
-                    }
+                    if (importedData.defaultDeck && Array.isArray(importedData.defaultDeck)) saveDefaultDeck(importedData.defaultDeck);
+                    if (importedData.customDeck && Array.isArray(importedData.customDeck)) saveCustomDeck(importedData.customDeck);
                     alert("Cartes importées avec succès ! 🎉");
                     renderDeckManagerLists();
-                } catch(err) {
-                    alert("Erreur lors de l'importation du fichier JSON : " + err.message);
-                }
+                    populateMasterDeckSelect();
+                } catch(err) { alert("Erreur d'import : " + err.message); }
             };
             reader.readAsText(file);
             event.target.value = '';
         }
 
-        // --- GESTIONNAIRE DE TOUTES LES CARTES ---
         function toggleDeckManager() {
             const modal = document.getElementById('deck-manager-modal');
             modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                renderDeckManagerLists();
-            }
+            if (!modal.classList.contains('hidden')) renderDeckManagerLists();
         }
 
         function renderDeckManagerLists() {
             const customContainer = document.getElementById('custom-deck-list');
             const defaultContainer = document.getElementById('default-deck-list');
-            
             const customDeck = getCustomDeck();
             const defaultDeck = getDefaultDeck();
             
             document.getElementById('custom-count-badge').innerText = customDeck.length;
             document.getElementById('default-count-badge').innerText = defaultDeck.length;
 
-            // 1. Pioche perso
-            customContainer.innerHTML = '';
-            if (customDeck.length === 0) {
-                customContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Aucune carte personnalisée.</p>`;
-            } else {
-                customDeck.forEach((card, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-purple-500/30 space-y-2 text-left";
-                    itemDiv.innerHTML = `
-                        <div class="flex justify-between items-center gap-2">
-                            <select id="edit-custom-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
-                                <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
-                                <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
-                                <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
-                                <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
-                            </select>
-                            <button onclick="deleteCustomCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
-                        </div>
-                        <input type="text" id="edit-custom-prompt-${index}" value="${card.prompt.replace(/"/g, '&quot;')}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
-                        <button onclick="updateCustomCard(${index})" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
-                    `;
-                    customContainer.appendChild(itemDiv);
-                });
-            }
+            customContainer.innerHTML = customDeck.length === 0 ? `<p class="text-xs text-slate-500 italic py-2">Aucune carte personnalisée.</p>` : '';
+            customDeck.forEach((card, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-purple-500/30 space-y-2 text-left";
+                itemDiv.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <select id="edit-custom-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
+                            <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
+                            <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
+                            <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
+                            <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
+                        </select>
+                        <button onclick="deleteCustomCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
+                    </div>
+                    <input type="text" id="edit-custom-prompt-${index}" value="${card.prompt.replace(/"/g, '&quot;')}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="updateCustomCard(${index})" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
+                `;
+                customContainer.appendChild(itemDiv);
+            });
 
-            // 2. Cartes de base
-            defaultContainer.innerHTML = '';
-            if (defaultDeck.length === 0) {
-                defaultContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Aucune carte de base.</p>`;
-            } else {
-                defaultDeck.forEach((card, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-blue-500/30 space-y-2 text-left";
-                    itemDiv.innerHTML = `
-                        <div class="flex justify-between items-center gap-2">
-                            <select id="edit-default-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
-                                <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
-                                <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
-                                <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
-                                <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
-                            </select>
-                            <button onclick="deleteDefaultCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
-                        </div>
-                        <input type="text" id="edit-default-prompt-${index}" value="${card.prompt.replace(/"/g, '&quot;')}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
-                        <button onclick="updateDefaultCard(${index})" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
-                    `;
-                    defaultContainer.appendChild(itemDiv);
-                });
-            }
+            defaultContainer.innerHTML = defaultDeck.length === 0 ? `<p class="text-xs text-slate-500 italic py-2">Aucune carte de base.</p>` : '';
+            defaultDeck.forEach((card, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-blue-500/30 space-y-2 text-left";
+                itemDiv.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <select id="edit-default-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
+                            <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
+                            <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
+                            <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
+                            <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
+                        </select>
+                        <button onclick="deleteDefaultCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
+                    </div>
+                    <input type="text" id="edit-default-prompt-${index}" value="${card.prompt.replace(/"/g, '&quot;')}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="updateDefaultCard(${index})" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
+                `;
+                defaultContainer.appendChild(itemDiv);
+            });
         }
 
         function updateCustomCard(index) {
             const customDeck = getCustomDeck();
-            customDeck[index] = {
-                type: document.getElementById(`edit-custom-type-${index}`).value,
-                prompt: document.getElementById(`edit-custom-prompt-${index}`).value.trim()
-            };
+            customDeck[index] = { type: document.getElementById(`edit-custom-type-${index}`).value, prompt: document.getElementById(`edit-custom-prompt-${index}`).value.trim() };
             saveCustomDeck(customDeck);
             renderDeckManagerLists();
         }
@@ -487,10 +497,7 @@
 
         function updateDefaultCard(index) {
             const defaultDeck = getDefaultDeck();
-            defaultDeck[index] = {
-                type: document.getElementById(`edit-default-type-${index}`).value,
-                prompt: document.getElementById(`edit-default-prompt-${index}`).value.trim()
-            };
+            defaultDeck[index] = { type: document.getElementById(`edit-default-type-${index}`).value, prompt: document.getElementById(`edit-default-prompt-${index}`).value.trim() };
             saveDefaultDeck(defaultDeck);
             renderDeckManagerLists();
         }
@@ -508,58 +515,100 @@
             const promptInput = document.getElementById('live-card-prompt');
             const typeSelect = document.getElementById('live-card-type');
             const text = promptInput.value.trim();
-
             if (!text || !conn || conn.open !== true) return;
-
-            const cardData = { type: typeSelect.value, prompt: text };
-            conn.send(cardData);
+            conn.send({ type: typeSelect.value, prompt: text });
             document.getElementById('feedback-content').innerText = "Carte live envoyée, en attente...";
             promptInput.value = '';
         }
 
-        // --- CHRONOMÈTRE MANUEL ---
-        let timerInterval = null;
-        let timeLeft = 0;
-        let isTimerPaused = false;
+        // --- GESTION DU CHRONOMÈTRE MAÎTRE & SYNCHRO ---
+        let masterTimerInterval = null, masterTimeLeft = 0, isMasterTimerPaused = false;
 
-        function startTimer(seconds) {
-            stopTimer();
+        function requestStartTimer(seconds) {
+            if (!conn || conn.open !== true) { alert("Non connecté au partenaire !"); return; }
+            startMasterTimerLocally(seconds);
+            conn.send({ type: 'start_timer', seconds: seconds });
+        }
+
+        function startMasterTimerLocally(seconds) {
+            stopMasterTimerLocally();
             if (!seconds || seconds <= 0) return;
+            masterTimeLeft = seconds;
+            isMasterTimerPaused = false;
+            document.getElementById('master-timer-container').classList.remove('hidden');
+            updateMasterTimerDisplay();
 
-            timeLeft = seconds;
-            document.getElementById('giant-timer-container').classList.remove('hidden');
-            updateTimerDisplay();
-
-            timerInterval = setInterval(() => {
-                if (!isTimerPaused) {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        updateTimerDisplay();
+            masterTimerInterval = setInterval(() => {
+                if (!isMasterTimerPaused) {
+                    if (masterTimeLeft > 0) {
+                        masterTimeLeft--;
+                        updateMasterTimerDisplay();
                     } else {
-                        stopTimer();
-                        alert("⏱️ Temps écoulé !");
+                        stopMasterTimerLocally();
                     }
                 }
             }, 1000);
         }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            document.getElementById('giant-timer-display').innerText = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        function updateMasterTimerDisplay() {
+            const minutes = Math.floor(masterTimeLeft / 60), seconds = masterTimeLeft % 60;
+            document.getElementById('master-timer-display').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        function pauseTimer() {
-            isTimerPaused = !isTimerPaused;
-            document.getElementById('timer-pause-btn').innerText = isTimerPaused ? "Reprendre ▶️" : "Pause ⏸️";
+        function requestPauseTimer() {
+            if (!conn || conn.open !== true) return;
+            isMasterTimerPaused = !isMasterTimerPaused;
+            document.getElementById('master-timer-pause-btn').innerText = isMasterTimerPaused ? "Reprendre ▶️" : "Pause ⏸️";
+            conn.send({ type: 'pause_timer', isPaused: isMasterTimerPaused });
         }
 
-        function stopTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            isTimerPaused = false;
-            const container = document.getElementById('giant-timer-container');
+        function requestStopTimer() {
+            if (conn && conn.open === true) {
+                conn.send({ type: 'stop_timer' });
+            }
+            stopMasterTimerLocally();
+        }
+
+        function stopMasterTimerLocally() {
+            clearInterval(masterTimerInterval);
+            masterTimerInterval = null;
+            isMasterTimerPaused = false;
+            const container = document.getElementById('master-timer-container');
+            if (container) container.classList.add('hidden');
+        }
+
+        // Chrono du côté Partenaire (piloté automatiquement par les messages du Maître)
+        let partnerTimerInterval = null, partnerTimeLeft = 0, isPartnerTimerPaused = false;
+
+        function startPartnerTimer(seconds) {
+            stopPartnerTimer();
+            partnerTimeLeft = seconds;
+            isPartnerTimerPaused = false;
+            document.getElementById('partner-giant-timer-container').classList.remove('hidden');
+            updatePartnerTimerDisplay();
+
+            partnerTimerInterval = setInterval(() => {
+                if (!isPartnerTimerPaused) {
+                    if (partnerTimeLeft > 0) {
+                        partnerTimeLeft--;
+                        updatePartnerTimerDisplay();
+                    } else {
+                        stopPartnerTimer();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updatePartnerTimerDisplay() {
+            const minutes = Math.floor(partnerTimeLeft / 60), seconds = partnerTimeLeft % 60;
+            document.getElementById('partner-giant-timer-display').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function stopPartnerTimer() {
+            clearInterval(partnerTimerInterval);
+            partnerTimerInterval = null;
+            isPartnerTimerPaused = false;
+            const container = document.getElementById('partner-giant-timer-container');
             if (container) container.classList.add('hidden');
         }
 
@@ -598,6 +647,7 @@
 
         window.onload = () => {
             updateDeckCount();
+            populateMasterDeckSelect();
             const urlParams = new URLSearchParams(window.location.search);
             const roomParam = urlParams.get('room');
             if (roomParam && roomParam.length === 4) {
@@ -629,10 +679,7 @@
             peer.on('call', (call) => {
                 currentCall = call;
                 call.answer(localStream);
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                    document.getElementById('video-container').classList.remove('hidden');
-                });
+                setupCallEvents(call);
             });
         }
 
@@ -662,10 +709,29 @@
             peer.on('call', (call) => {
                 currentCall = call;
                 call.answer(localStream);
-                call.on('stream', (remoteStream) => {
-                    document.getElementById('partner-remote-video').srcObject = remoteStream;
-                    document.getElementById('partner-video-container').classList.remove('hidden');
-                });
+                setupCallEvents(call);
+            });
+        }
+
+        function setupCallEvents(call) {
+            call.on('stream', (remoteStream) => {
+                const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+                const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
+                
+                remoteElem.srcObject = remoteStream;
+                containerElem.classList.remove('hidden');
+
+                remoteStream.getVideoTracks()[0].onended = () => {
+                    remoteElem.srcObject = null;
+                    containerElem.classList.add('hidden');
+                };
+            });
+
+            call.on('close', () => {
+                const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+                const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
+                remoteElem.srcObject = null;
+                containerElem.classList.add('hidden');
             });
         }
 
@@ -677,6 +743,23 @@
                     if (isMaster) document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo reçue !</span>`;
                     return;
                 }
+                
+                // Réception des ordres de chronomètre côté partenaire
+                if (!isMaster) {
+                    if (data.type === 'start_timer') {
+                        startPartnerTimer(data.seconds);
+                        return;
+                    }
+                    if (data.type === 'pause_timer') {
+                        isPartnerTimerPaused = data.isPaused;
+                        return;
+                    }
+                    if (data.type === 'stop_timer') {
+                        stopPartnerTimer();
+                        return;
+                    }
+                }
+
                 if (isMaster) {
                     if (data.type === 'typing') {
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
@@ -706,7 +789,7 @@
             document.getElementById('card-type-badge').innerText = cardData.type.toUpperCase();
             document.getElementById('card-prompt-text').innerText = cardData.prompt;
 
-            stopTimer();
+            stopPartnerTimer();
 
             const optionsContainer = document.getElementById('interaction-options');
             optionsContainer.innerHTML = '';
@@ -763,6 +846,7 @@
 
         async function toggleVideo() {
             const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
+            const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
             const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
 
             if (!localStream) {
@@ -774,21 +858,24 @@
                     btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
 
                     if (conn && peer) {
-                        currentCall = peer.call(isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim(), localStream);
-                        currentCall.on('stream', (remoteStream) => {
-                            const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
-                            remoteElem.srcObject = remoteStream;
-                            document.getElementById(isMaster ? 'video-container' : 'partner-video-container').classList.remove('hidden');
-                        });
+                        const targetId = isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim();
+                        currentCall = peer.call(targetId, localStream);
+                        setupCallEvents(currentCall);
                     }
                 } catch (err) { alert("Erreur caméra : " + err.message); }
             } else {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
+                localVideoElem.srcObject = null;
                 localVideoElem.classList.add('hidden');
+                
                 btnElem.innerText = "🎥 Activer ma Caméra";
                 btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
-                if (currentCall) currentCall.close();
+                
+                if (currentCall) {
+                    currentCall.close();
+                    currentCall = null;
+                }
             }
         }
 
