@@ -270,7 +270,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Version Finale Sécurisée
+        Osmose Hot • Version Intégrale Corrigée
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -791,7 +791,7 @@
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
                     } else if (data.type && data.prompt) {
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Pioche (${data.type.toUpperCase()})</span> : ${data.prompt}`;
-                    } else {
+                    } else if (data.action && data.value) {
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${data.action}</span> : ${data.value}`;
                     }
                 } else {
