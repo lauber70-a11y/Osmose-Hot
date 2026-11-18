@@ -270,7 +270,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Version Finale
+        Osmose Hot • Version Finale Corrigée
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -827,10 +827,11 @@
                         <button onclick="sendResponse('Défi', '😈 Veto / Refusé')" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">😈 Veto</button>
                     </div>`;
             } else if (cardData.type === 'vote') {
+                // CORRECTION ICI : Utilisation de &apos; pour éviter de casser l'attribut HTML avec l'apostrophe
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
-                        <button onclick="sendResponse('Vote', '❤️ J\\'aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">❤️ J'aime</button>
-                        <button onclick="sendResponse('Vote', '👎 J\\'aime pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer">👎 J'aime pas</button>
+                        <button onclick="sendResponse('Vote', '❤️ J&apos;aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">❤️ J'aime</button>
+                        <button onclick="sendResponse('Vote', '👎 J&apos;aime pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer">👎 J'aime pas</button>
                     </div>`;
             } else if (cardData.type === 'yesno') {
                 optionsContainer.innerHTML = `
