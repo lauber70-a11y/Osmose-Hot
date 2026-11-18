@@ -222,6 +222,7 @@
 
             <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 p-4 rounded-3xl border border-pink-500/40 shadow-lg space-y-3">
                 <h3 class="text-sm font-bold text-pink-300 uppercase tracking-wider">Pioche ton propre défi</h3>
+                <!-- Modifié pour piocher uniquement dans getCustomDeck() -->
                 <button onclick="drawCustomCard()" class="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl font-bold shadow-md active:scale-95 transition flex items-center justify-center gap-2">
                     <span>🎲</span> Piocher une carte personnalisée
                 </button>
@@ -267,7 +268,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Version Photo Interactive Oui/Non
+        Osmose Hot • Pioche Personnalisée Isolée
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -614,9 +615,8 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Demande la question Oui/Non associée à la photo
             const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Tu en penses quoi ?");
-            if (!questionText) return; // Annulé si vide
+            if (!questionText) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -630,7 +630,6 @@
                     canvas.width = width; canvas.height = height;
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-                    // Envoi de la photo et de la question interactive
                     conn.send({ 
                         type: 'photo_interactive', 
                         image: canvas.toDataURL('image/jpeg', 0.7),
@@ -776,7 +775,6 @@
             });
 
             conn.on('data', (data) => {
-                // Réception d'une photo interactive (avec question Oui/Non)
                 if (data.type === 'photo_interactive') {
                     let modalContentHTML = `
                         <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
@@ -809,7 +807,6 @@
                     if (data.type === 'stop_timer') { stopPartnerTimer(); return; }
                 }
 
-                // --- RÉCEPTION UNIFIÉE CÔTÉ MAÎTRE ---
                 if (isMaster) {
                     if (data.type === 'typing') {
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
@@ -825,10 +822,14 @@
             conn.on('close', () => updateStatus('Déconnecté', 'text-red-300', 'bg-red-900/50', 'border-red-700'));
         }
 
+        // --- MODIFICATION ICI : Pioche uniquement dans les cartes personnalisées ---
         function drawCustomCard() {
-            const deck = getCombinedDeck();
-            if (deck.length === 0) return;
-            const selectedCard = deck[Math.floor(Math.random() * deck.length)];
+            const customDeck = getCustomDeck();
+            if (customDeck.length === 0) {
+                alert("Votre pioche personnalisée est vide ! Créez d'abord de nouvelles cartes depuis l'écran du Maître.");
+                return;
+            }
+            const selectedCard = customDeck[Math.floor(Math.random() * customDeck.length)];
             displayCardToPartner(selectedCard);
             if (conn && conn.open === true) conn.send(selectedCard);
         }
