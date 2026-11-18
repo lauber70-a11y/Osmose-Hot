@@ -49,14 +49,10 @@
         </div>
     </div>
 
-    <!-- MODALE PHOTO REÇUE -->
+    <!-- MODALE PHOTO REÇUE / INTERACTIVE -->
     <div id="photo-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
         <div id="photo-modal-content" class="bg-slate-900 border border-pink-500/50 rounded-3xl max-w-sm w-full p-4 space-y-4 shadow-2xl text-center">
-            <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Flash Photo Reçu !</h3>
-            <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black">
-                <img id="received-photo-img" src="" alt="Photo reçue" class="w-full object-cover">
-            </div>
-            <button onclick="closePhotoModal()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-white transition">Fermer 💖</button>
+            <!-- Rempli dynamiquement -->
         </div>
     </div>
 
@@ -102,7 +98,7 @@
         </div>
     </div>
 
-    <!-- Input file mis à jour pour ouvrir la galerie (sans capture forcée) -->
+    <!-- Input file pour la galerie -->
     <input type="file" id="camera-file-input" accept="image/*" class="hidden" onchange="handleImageSelection(event)">
 
     <!-- Contenu Principal -->
@@ -134,7 +130,7 @@
             </div>
 
             <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-                <span>📸</span> Envoyer une photo & un mot doux
+                <span>📸</span> Envoyer une photo & question Oui/Non
             </button>
 
             <!-- Choisir et envoyer depuis la pioche -->
@@ -221,7 +217,7 @@
         <div id="partner-screen" class="hidden w-full space-y-6 text-center">
             
             <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-                <span>📸</span> Envoyer une photo & un mot doux
+                <span>📸</span> Envoyer une photo & question Oui/Non
             </button>
 
             <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 p-4 rounded-3xl border border-pink-500/40 shadow-lg space-y-3">
@@ -271,7 +267,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Version Galerie & Texte
+        Osmose Hot • Version Photo Interactive Oui/Non
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -608,7 +604,7 @@
             if (container) container.classList.add('hidden');
         }
 
-        // --- PHOTOS & GALERIE FLASH ---
+        // --- PHOTOS & GALERIE INTERACTIVE ---
         function triggerPhotoCapture() {
             if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
             document.getElementById('camera-file-input').click();
@@ -618,8 +614,9 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Invite l'utilisateur à ajouter un petit message texte avec sa photo
-            const caption = prompt("Ajouter un petit mot avec la photo (optionnel) :", "");
+            // Demande la question Oui/Non associée à la photo
+            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Tu en penses quoi ?");
+            if (!questionText) return; // Annulé si vide
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -633,13 +630,13 @@
                     canvas.width = width; canvas.height = height;
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-                    // Envoi de l'image compressée et du texte optionnel
+                    // Envoi de la photo et de la question interactive
                     conn.send({ 
-                        type: 'photo_flash', 
+                        type: 'photo_interactive', 
                         image: canvas.toDataURL('image/jpeg', 0.7),
-                        text: caption ? caption : "" 
+                        prompt: questionText 
                     });
-                    alert("Photo et message envoyés ! 📸");
+                    alert("Photo interactive envoyée ! 📸");
                 };
                 img.src = e.target.result;
             };
@@ -779,23 +776,24 @@
             });
 
             conn.on('data', (data) => {
-                if (data.type === 'photo_flash') {
-                    // Construction dynamique de la modale avec la photo et le texte éventuel
-                    let modalContentHTML = `<h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Photo & Message Reçus !</h3>`;
-                    if (data.text) {
-                        modalContentHTML += `<p class="text-sm text-white italic bg-slate-800 p-2 rounded-xl">"${data.text}"</p>`;
-                    }
-                    modalContentHTML += `
-                        <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black">
+                // Réception d'une photo interactive (avec question Oui/Non)
+                if (data.type === 'photo_interactive') {
+                    let modalContentHTML = `
+                        <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
+                        <p class="text-sm text-white font-semibold">"${data.prompt}"</p>
+                        <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black max-h-48 flex items-center justify-center">
                             <img src="${data.image}" alt="Photo reçue" class="w-full object-cover">
                         </div>
-                        <button onclick="closePhotoModal()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-white transition">Fermer 💖</button>
+                        <div class="flex gap-3 pt-2">
+                            <button onclick="sendResponse('Photo Oui/Non', 'OUI (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold shadow text-white cursor-pointer text-sm">✅ OUI</button>
+                            <button onclick="sendResponse('Photo Oui/Non', 'NON (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold shadow text-white cursor-pointer text-sm">❌ NON</button>
+                        </div>
                     `;
                     document.getElementById('photo-modal-content').innerHTML = modalContentHTML;
                     document.getElementById('photo-modal').classList.remove('hidden');
 
                     if (isMaster) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo reçue !</span> ${data.text ? '"' + data.text + '"' : ''}`;
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo interactive envoyée !</span> En attente de réponse...`;
                     }
                     return;
                 }
