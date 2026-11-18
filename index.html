@@ -197,7 +197,7 @@
                 <p id="deck-count" class="text-xs text-slate-500 text-center pt-1"></p>
             </div>
 
-            <!-- Contrôle Vidéo avec masquage propre -->
+            <!-- Contrôle Vidéo -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-slate-300">Visio en Direct (Bidirectionnelle)</h3>
                 <button onclick="toggleVideo()" id="master-video-btn" class="w-full py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition">🎥 Activer ma Caméra</button>
@@ -270,7 +270,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • WebRTC Caméra Sync
+        Osmose Hot • Connexion Fiabilisée
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -689,18 +689,54 @@
             document.getElementById('partner-modal').classList.remove('hidden');
         }
 
+        // --- CORRECTION DE LA CONNEXION PARTENAIRE ---
         function connectAsPartner() {
-            const code = document.getElementById('room-code-input').value.trim();
-            if (code.length !== 4) return;
+            const codeInput = document.getElementById('room-code-input');
+            const code = codeInput.value.trim().toUpperCase();
+            
+            if (code.length !== 4) {
+                alert("Veuillez entrer un code salon valide à 4 chiffres.");
+                return;
+            }
+
             document.getElementById('partner-modal').classList.add('hidden');
             document.getElementById('partner-screen').classList.remove('hidden');
+            updateStatus('Connexion en cours...', 'text-amber-300', 'bg-amber-900/50', 'border-amber-700');
+
+            // Initialisation propre de PeerJS pour le partenaire
+            if (peer) {
+                try { peer.destroy(); } catch(e) {}
+            }
 
             peer = new Peer();
+
             peer.on('open', () => {
-                conn = peer.connect('osmose-' + code);
+                const targetId = 'osmose-' + code;
+                conn = peer.connect(targetId);
+
+                if (!conn) {
+                    alert("Impossible de joindre le salon.");
+                    location.reload();
+                    return;
+                }
+
                 setupConnectionEvents();
-                updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+
+                // Sécurité si la connexion échoue ou expire
+                setTimeout(() => {
+                    if (!conn || conn.open !== true) {
+                        alert("Impossible de se connecter au Maître du Jeu. Vérifiez que le code est correct et que le Maître a bien sa page ouverte.");
+                        location.reload();
+                    }
+                }, 8000);
             });
+
+            peer.on('error', (err) => {
+                console.error("Erreur PeerJS :", err);
+                alert("Erreur de connexion réseau : " + err.type);
+                location.reload();
+            });
+
             peer.on('call', (call) => {
                 currentCall = call;
                 call.answer(localStream);
@@ -730,6 +766,10 @@
         }
 
         function setupConnectionEvents() {
+            conn.on('open', () => {
+                updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+            });
+
             conn.on('data', (data) => {
                 if (data.type === 'photo_flash') {
                     document.getElementById('received-photo-img').src = data.image;
@@ -738,7 +778,6 @@
                     return;
                 }
 
-                // Ordre explicite d'arrêt vidéo reçu de l'autre poste
                 if (data.type === 'stop_video') {
                     hideRemoteVideo();
                     return;
@@ -830,7 +869,7 @@
             const val = document.getElementById('partner-text-input').value;
             if (val) {
                 sendResponse('Réponse Libre', val);
-                document.getElementById('partner-text-input.value' = '');
+                document.getElementById('partner-text-input').value = '';
             }
         }
 
@@ -847,13 +886,12 @@
                     btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
 
                     if (conn && peer) {
-                        const targetId = isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim();
+                        const targetId = isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim().toUpperCase();
                         currentCall = peer.call(targetId, localStream);
                         setupCallEvents(currentCall);
                     }
                 } catch (err) { alert("Erreur caméra : " + err.message); }
             } else {
-                // Arrêt propre du flux local
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
                 localVideoElem.srcObject = null;
@@ -862,7 +900,6 @@
                 btnElem.innerText = "🎥 Activer ma Caméra";
                 btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
                 
-                // Prévenir l'autre appareil de masquer l'écran distant instantanément
                 if (conn && conn.open === true) {
                     conn.send({ type: 'stop_video' });
                 }
