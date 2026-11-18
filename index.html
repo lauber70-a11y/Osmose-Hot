@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osmose Hot - Duo Interactif</title>
+    <!-- Tailwind CSS pour le design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PeerJS pour la connexion P2P & WebRTC -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative">
+
+    <!-- En-tête -->
+    <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Osmose Hot</h1>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleHelpModal()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Règles du jeu">❓ Aide</button>
+            <button onclick="toggleFullScreen()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Plein écran">⛶</button>
+            <div id="connection-status" class="text-xs px-3 py-1 rounded-full bg-red-900/50 text-red-300 border border-red-700">Déconnecté</div>
+        </div>
+    </header>
+
+    <!-- MODALE DES RÈGLES DU JEU -->
+    <div id="help-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl text-left my-8 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-xl font-bold text-pink-400">📜 Règles du Jeu : Osmose Hot</h2>
+                <button onclick="toggleHelpModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            
+            <div class="space-y-4 text-sm text-slate-300">
+                <div>
+                    <h3 class="font-bold text-white mb-1">🎯 Objectif</h3>
+                    <p>Partager un moment intime, complice et sur-mesure en duo, entre défis, votes, discussions et photos instantanées.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-white mb-1">💾 Import / Export JSON</h3>
+                    <p>Sauvegardez toutes vos cartes personnalisées en un clic dans un fichier, ou importez-en de nouvelles facilement.</p>
+                </div>
+
+                <div class="bg-pink-950/30 border border-pink-500/30 p-3 rounded-xl">
+                    <h3 class="font-bold text-pink-300 mb-1">🛡️ La Règle d'Or du Veto</h3>
+                    <p class="text-xs text-pink-200">Tout défi peut être refusé instantanément en cliquant sur <b>Veto</b>. Aucun jugement, aucune justification requise !</p>
+                </div>
+            </div>
+
+            <button onclick="toggleHelpModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition mt-2">J'ai compris !</button>
+        </div>
+    </div>
+
+    <!-- MODALE PHOTO REÇUE -->
+    <div id="photo-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-pink-500/50 rounded-3xl max-w-sm w-full p-4 space-y-4 shadow-2xl text-center">
+            <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Flash Photo Reçu !</h3>
+            <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black">
+                <img id="received-photo-img" src="" alt="Photo reçue" class="w-full object-cover">
+            </div>
+            <button onclick="closePhotoModal()" class="w-full py-3 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-white transition">Fermer 💖</button>
+        </div>
+    </div>
+
+    <!-- MODALE DE GESTION DES CARTES + IMPORT/EXPORT JSON -->
+    <div id="deck-manager-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl text-left my-8 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-xl font-bold text-pink-400">🗂️ Gestion & Sauvegarde JSON</h2>
+                <button onclick="toggleDeckManager()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+
+            <!-- Bloc Sauvegarde / Restauration JSON -->
+            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex gap-2">
+                <button onclick="exportJSON()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                    <span>📤</span> Exporter JSON
+                </button>
+                <button onclick="triggerImportJSON()" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                    <span>📥</span> Importer JSON
+                </button>
+                <!-- Input fichier invisible pour l'import -->
+                <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSON(event)">
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>✨</span> Pioche Personnalisée (<span id="custom-count-badge">0</span>)
+                    </h3>
+                    <button onclick="resetCustomDeck()" class="text-[10px] text-slate-400 hover:text-red-400 underline">Tout vider</button>
+                </div>
+                <div id="custom-deck-list" class="space-y-3 max-h-[25vh] overflow-y-auto pr-1"></div>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>📦</span> Cartes de Base (<span id="default-count-badge">0</span>)
+                    </h3>
+                    <button onclick="resetDefaultDeckToOriginal()" class="text-[10px] text-slate-400 hover:text-pink-400 underline">Réinitialiser par défaut</button>
+                </div>
+                <div id="default-deck-list" class="space-y-3 max-h-[25vh] overflow-y-auto pr-1"></div>
+            </div>
+
+            <button onclick="toggleDeckManager()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition mt-2">Fermer</button>
+        </div>
+    </div>
+
+    <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelection(event)">
+
+    <!-- Contenu Principal -->
+    <main class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col justify-center items-center">
+
+        <!-- ÉCRAN DE SÉLECTION DU RÔLE -->
+        <div id="role-selection" class="w-full space-y-4 text-center">
+            <h2 class="text-2xl font-semibold mb-6">Choisissez votre mode</h2>
+            <button onclick="setupMaster()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">👑 Je suis le Maître du Jeu</button>
+            <button onclick="setupPartnerModal()" class="w-full py-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">💫 Je suis la Partenaire</button>
+        </div>
+
+        <!-- MODAL CONNEXION PARTENAIRE -->
+        <div id="partner-modal" class="hidden w-full space-y-4 text-center">
+            <h2 class="text-xl font-semibold">Connexion au salon</h2>
+            <input type="text" id="room-code-input" placeholder="Entrez le code à 4 chiffres" maxlength="4" class="w-full p-4 text-center text-2xl tracking-widest bg-slate-900 border border-slate-700 rounded-2xl text-white uppercase focus:outline-none focus:border-pink-500">
+            <button onclick="connectAsPartner()" class="w-full py-3 bg-pink-600 rounded-2xl font-bold shadow-lg active:scale-95 transition">Rejoindre</button>
+            <button onclick="location.reload()" class="text-sm text-slate-400 underline">Retour</button>
+        </div>
+
+        <!-- ÉCRAN MAÎTRE DU JEU -->
+        <div id="master-screen" class="hidden w-full space-y-6">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <p class="text-xs text-slate-400 uppercase tracking-wider">Code de connexion salon</p>
+                <div id="display-room-code" class="text-4xl font-extrabold text-pink-500 tracking-widest">----</div>
+                <button onclick="copyInviteLink()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-pink-300 transition flex items-center justify-center gap-2">
+                    <span>📋</span> Copier le lien d'invitation direct
+                </button>
+            </div>
+
+            <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                <span>📸</span> Envoyer une photo flash instantanée
+            </button>
+
+            <!-- Envoyer une carte sur-mesure en direct -->
+            <div class="bg-gradient-to-r from-pink-950/40 to-purple-950/40 p-4 rounded-2xl border border-pink-500/30 space-y-3">
+                <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte en direct</h3>
+                <input type="text" id="live-card-prompt" placeholder="Ex: Dis-moi ton plus beau souvenir..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
+                <div class="flex gap-2">
+                    <select id="live-card-type" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
+                        <option value="defi">✨ Défi</option>
+                        <option value="vote">❤️ Vote</option>
+                        <option value="yesno">❓ Oui / Non</option>
+                        <option value="text">💬 Texte</option>
+                    </select>
+                </div>
+                <button onclick="sendLiveCard()" class="w-full py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl font-bold text-xs shadow transition">Envoyer au Duo 🚀</button>
+            </div>
+
+            <!-- Panneau Création de Cartes -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+                <h3 class="font-semibold text-slate-300 text-sm">✍️ Créer une nouvelle carte</h3>
+                <input type="text" id="new-card-prompt" placeholder="Ex: Fais-moi un massage..." class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
+                <div class="flex gap-2">
+                    <select id="new-card-type" class="flex-1 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
+                        <option value="defi">✨ Défi</option>
+                        <option value="vote">❤️ Vote</option>
+                        <option value="yesno">❓ Oui / Non</option>
+                        <option value="text">💬 Texte</option>
+                    </select>
+                    <select id="new-card-target" class="flex-1 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-pink-300 font-semibold focus:outline-none">
+                        <option value="custom">✨ Pioche Perso</option>
+                        <option value="default">📦 Cartes de Base</option>
+                    </select>
+                </div>
+                <button onclick="addNewCardToDeck()" class="w-full py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl font-bold text-xs shadow transition">Ajouter la carte ➕</button>
+                <button onclick="toggleDeckManager()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 rounded-xl text-xs font-semibold transition">🗂️ Gérer / Exporter les cartes</button>
+                <p id="deck-count" class="text-xs text-slate-500 text-center pt-1"></p>
+            </div>
+
+            <!-- Contrôle Vidéo -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <h3 class="font-semibold text-slate-300">Visio en Direct (Bidirectionnelle)</h3>
+                <button onclick="toggleVideo()" id="master-video-btn" class="w-full py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition">🎥 Activer ma Caméra</button>
+                
+                <video id="local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
+
+                <div id="video-container" class="hidden relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
+                    <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-pink-400">Partenaire en direct 🔴</div>
+                </div>
+            </div>
+
+            <div id="master-feedback" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-2">
+                <p class="text-xs text-slate-400 uppercase tracking-wider">Dernière interaction reçue</p>
+                <div id="feedback-content" class="text-lg font-medium text-slate-300">En attente d'une action...</div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN PARTENAIRE -->
+        <div id="partner-screen" class="hidden w-full space-y-6 text-center">
+            
+            <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                <span>📸</span> Envoyer une photo flash instantanée
+            </button>
+
+            <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 p-4 rounded-3xl border border-pink-500/40 shadow-lg space-y-3">
+                <h3 class="text-sm font-bold text-pink-300 uppercase tracking-wider">Pioche ton propre défi</h3>
+                <button onclick="drawCustomCard()" class="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl font-bold shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>🎲</span> Piocher une carte personnalisée
+                </button>
+            </div>
+
+            <div id="mystery-card" class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-3">
+                <div class="text-4xl animate-pulse">❓</div>
+                <h3 class="text-lg font-bold">Mode Mystère</h3>
+                <p class="text-xs text-slate-400">En attente d'une carte du Maître du Jeu ou pioche ci-dessus...</p>
+            </div>
+
+            <div id="active-card-container" class="hidden bg-slate-900 p-6 rounded-3xl border border-pink-500/50 shadow-2xl space-y-5 text-left">
+                <div class="flex justify-between items-center">
+                    <div id="card-type-badge" class="text-xs uppercase tracking-widest text-pink-400 font-bold">Défi</div>
+                    <div class="flex gap-1 text-[10px]">
+                        <button onclick="startTimer(60)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">1 min</button>
+                        <button onclick="startTimer(120)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">2 min</button>
+                        <button onclick="startTimer(300)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">5 min</button>
+                    </div>
+                </div>
+
+                <p id="card-prompt-text" class="text-lg font-semibold text-white"></p>
+
+                <div id="giant-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-2xl p-4 text-center space-y-2">
+                    <div id="giant-timer-display" class="text-4xl font-extrabold text-pink-400 tracking-wider">00:00</div>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="pauseTimer()" id="timer-pause-btn" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-white">Pause ⏸️</button>
+                        <button onclick="stopTimer()" class="px-4 py-1.5 bg-red-950/60 hover:bg-red-900 text-xs font-bold text-red-300 rounded-xl">Arrêter ⏹️</button>
+                    </div>
+                </div>
+                
+                <div id="interaction-options" class="pt-2"></div>
+            </div>
+
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <h3 class="font-semibold text-slate-300">Visio en Direct</h3>
+                <button onclick="toggleVideo()" id="partner-video-btn" class="w-full py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition">🎥 Activer ma Caméra</button>
+                
+                <video id="partner-local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
+
+                <div id="partner-video-container" class="hidden relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
+                    <video id="partner-remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-pink-400">Maître du Jeu en direct 🔴</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
+        Osmose Hot • JSON & WebRTC
+    </footer>
+
+    <!-- Script Logique de l'Application -->
+    <script>
+        const originalDefaultCards = [
+            { type: 'defi', prompt: "Fais-moi un massage des épaules pendant 2 minutes." },
+            { type: 'vote', prompt: "Préfères-tu un bisou dans le cou ou un câlin serré ?" },
+            { type: 'defi', prompt: "Chuchote-moi ton secret le plus coquin à l'oreille." },
+            { type: 'yesno', prompt: "Est-ce que tu veux qu'on commande un dessert surprise ?" },
+            { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." }
+        ];
+
+        let currentRoomCode = "";
+
+        function getDefaultDeck() {
+            const saved = localStorage.getItem('osmose_default_deck');
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e) { return originalDefaultCards; }
+            }
+            return originalDefaultCards;
+        }
+
+        function saveDefaultDeck(deck) {
+            localStorage.setItem('osmose_default_deck', JSON.stringify(deck));
+            updateDeckCount();
+        }
+
+        function resetDefaultDeckToOriginal() {
+            if (confirm("Réinitialiser les cartes de base ?")) {
+                saveDefaultDeck(originalDefaultCards);
+                renderDeckManagerLists();
+            }
+        }
+
+        function getCustomDeck() {
+            const saved = localStorage.getItem('osmose_custom_deck');
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e) { return []; }
+            }
+            return [];
+        }
+
+        function saveCustomDeck(deck) {
+            localStorage.setItem('osmose_custom_deck', JSON.stringify(deck));
+            updateDeckCount();
+        }
+
+        function resetCustomDeck() {
+            if (confirm("Vider toutes vos cartes personnalisées ?")) {
+                saveCustomDeck([]);
+                renderDeckManagerLists();
+            }
+        }
+
+        function getCombinedDeck() {
+            return [...getDefaultDeck(), ...getCustomDeck()];
+        }
+
+        function updateDeckCount() {
+            const countElem = document.getElementById('deck-count');
+            if (countElem) {
+                const total = getCombinedDeck().length;
+                countElem.innerText = `${total} carte(s) au total (${getDefaultDeck().length} base, ${getCustomDeck().length} perso)`;
+            }
+        }
+
+        function addNewCardToDeck() {
+            const promptInput = document.getElementById('new-card-prompt');
+            const typeSelect = document.getElementById('new-card-type');
+            const targetSelect = document.getElementById('new-card-target');
+            const text = promptInput.value.trim();
+
+            if (!text) {
+                alert("Veuillez entrer le texte de la carte !");
+                return;
+            }
+
+            const newCard = { type: typeSelect.value, prompt: text };
+
+            if (targetSelect.value === 'default') {
+                const defaultDeck = getDefaultDeck();
+                defaultDeck.push(newCard);
+                saveDefaultDeck(defaultDeck);
+                alert("Carte ajoutée aux Cartes de Base ! 📦");
+            } else {
+                const customDeck = getCustomDeck();
+                customDeck.push(newCard);
+                saveCustomDeck(customDeck);
+                alert("Carte ajoutée à la Pioche Personnalisée ! ✨");
+            }
+
+            promptInput.value = '';
+        }
+
+        // --- GESTION EXPORT / IMPORT JSON ---
+        function exportJSON() {
+            const dataToExport = {
+                defaultDeck: getDefaultDeck(),
+                customDeck: getCustomDeck()
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "osmose_hot_decks.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerImportJSON() {
+            document.getElementById('json-file-input').click();
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.defaultDeck && Array.isArray(importedData.defaultDeck)) {
+                        saveDefaultDeck(importedData.defaultDeck);
+                    }
+                    if (importedData.customDeck && Array.isArray(importedData.customDeck)) {
+                        saveCustomDeck(importedData.customDeck);
+                    }
+                    alert("Cartes importées avec succès ! 🎉");
+                    renderDeckManagerLists();
+                } catch(err) {
+                    alert("Erreur lors de l'importation du fichier JSON : " + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // --- GESTIONNAIRE DE TOUTES LES CARTES ---
+        function toggleDeckManager() {
+            const modal = document.getElementById('deck-manager-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                renderDeckManagerLists();
+            }
+        }
+
+        function renderDeckManagerLists() {
+            const customContainer = document.getElementById('custom-deck-list');
+            const defaultContainer = document.getElementById('default-deck-list');
+            
+            const customDeck = getCustomDeck();
+            const defaultDeck = getDefaultDeck();
+            
+            document.getElementById('custom-count-badge').innerText = customDeck.length;
+            document.getElementById('default-count-badge').innerText = defaultDeck.length;
+
+            // 1. Pioche perso
+            customContainer.innerHTML = '';
+            if (customDeck.length === 0) {
+                customContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Aucune carte personnalisée.</p>`;
+            } else {
+                customDeck.forEach((card, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-purple-500/30 space-y-2 text-left";
+                    itemDiv.innerHTML = `
+                        <div class="flex justify-between items-center gap-2">
+                            <select id="edit-custom-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
+                                <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
+                                <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
+                                <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
+                                <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
+                            </select>
+                            <button onclick="deleteCustomCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
+                        </div>
+                        <input type="text" id="edit-custom-prompt-${index}" value="${card.prompt.replace(/"/g, '&quot;')}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                        <button onclick="updateCustomCard(${index})" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
+                    `;
+                    customContainer.appendChild(itemDiv);
+                });
+            }
+
+            // 2. Cartes de base
+            defaultContainer.innerHTML = '';
+            if (defaultDeck.length === 0) {
+                defaultContainer.innerHTML = `<p class="text-xs text-slate-500 italic py-2">Aucune carte de base.</p>`;
+            } else {
+                defaultDeck.forEach((card, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-blue-500/30 space-y-2 text-left";
+                    itemDiv.innerHTML = `
+                        <div class="flex justify-between items-center gap-2">
+                            <select id="edit-default-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
+                                <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
+                                <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
+                                <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
+                                <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
+                            </select>
+                            <button onclick="deleteDefaultCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
+                        </div>
+                        <input type="text" id="edit-default-prompt-${index}" value="${card.prompt.replace(/"/g, '&quot;')}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                        <button onclick="updateDefaultCard(${index})" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
+                    `;
+                    defaultContainer.appendChild(itemDiv);
+                });
+            }
+        }
+
+        function updateCustomCard(index) {
+            const customDeck = getCustomDeck();
+            customDeck[index] = {
+                type: document.getElementById(`edit-custom-type-${index}`).value,
+                prompt: document.getElementById(`edit-custom-prompt-${index}`).value.trim()
+            };
+            saveCustomDeck(customDeck);
+            renderDeckManagerLists();
+        }
+
+        function deleteCustomCard(index) {
+            if (confirm("Supprimer cette carte ?")) {
+                const customDeck = getCustomDeck();
+                customDeck.splice(index, 1);
+                saveCustomDeck(customDeck);
+                renderDeckManagerLists();
+            }
+        }
+
+        function updateDefaultCard(index) {
+            const defaultDeck = getDefaultDeck();
+            defaultDeck[index] = {
+                type: document.getElementById(`edit-default-type-${index}`).value,
+                prompt: document.getElementById(`edit-default-prompt-${index}`).value.trim()
+            };
+            saveDefaultDeck(defaultDeck);
+            renderDeckManagerLists();
+        }
+
+        function deleteDefaultCard(index) {
+            if (confirm("Supprimer cette carte ?")) {
+                const defaultDeck = getDefaultDeck();
+                defaultDeck.splice(index, 1);
+                saveDefaultDeck(defaultDeck);
+                renderDeckManagerLists();
+            }
+        }
+
+        function sendLiveCard() {
+            const promptInput = document.getElementById('live-card-prompt');
+            const typeSelect = document.getElementById('live-card-type');
+            const text = promptInput.value.trim();
+
+            if (!text || !conn || conn.open !== true) return;
+
+            const cardData = { type: typeSelect.value, prompt: text };
+            conn.send(cardData);
+            document.getElementById('feedback-content').innerText = "Carte live envoyée, en attente...";
+            promptInput.value = '';
+        }
+
+        // --- CHRONOMÈTRE MANUEL ---
+        let timerInterval = null;
+        let timeLeft = 0;
+        let isTimerPaused = false;
+
+        function startTimer(seconds) {
+            stopTimer();
+            if (!seconds || seconds <= 0) return;
+
+            timeLeft = seconds;
+            document.getElementById('giant-timer-container').classList.remove('hidden');
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                if (!isTimerPaused) {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateTimerDisplay();
+                    } else {
+                        stopTimer();
+                        alert("⏱️ Temps écoulé !");
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('giant-timer-display').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function pauseTimer() {
+            isTimerPaused = !isTimerPaused;
+            document.getElementById('timer-pause-btn').innerText = isTimerPaused ? "Reprendre ▶️" : "Pause ⏸️";
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isTimerPaused = false;
+            const container = document.getElementById('giant-timer-container');
+            if (container) container.classList.add('hidden');
+        }
+
+        // --- PHOTOS FLASH ---
+        function triggerPhotoCapture() {
+            if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
+            document.getElementById('camera-file-input').click();
+        }
+
+        function handleImageSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600, MAX_HEIGHT = 600;
+                    let width = img.width, height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                    conn.send({ type: 'photo_flash', image: canvas.toDataURL('image/jpeg', 0.7) });
+                    alert("Photo flash envoyée ! 📸");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
+
+        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false;
+
+        window.onload = () => {
+            updateDeckCount();
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomParam = urlParams.get('room');
+            if (roomParam && roomParam.length === 4) {
+                setupPartnerModal();
+                document.getElementById('room-code-input').value = roomParam;
+                setTimeout(() => { connectAsPartner(); }, 500);
+            }
+        };
+
+        function toggleHelpModal() { document.getElementById('help-modal').classList.toggle('hidden'); }
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(() => {}); }
+            else { if (document.exitFullscreen) document.exitFullscreen(); }
+        }
+
+        function setupMaster() {
+            isMaster = true;
+            currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('display-room-code').innerText = currentRoomCode;
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('master-screen').classList.remove('hidden');
+
+            peer = new Peer('osmose-' + currentRoomCode);
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnectionEvents();
+                updateStatus('Connecté au Duo ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+            });
+            peer.on('call', (call) => {
+                currentCall = call;
+                call.answer(localStream);
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('remote-video').srcObject = remoteStream;
+                    document.getElementById('video-container').classList.remove('hidden');
+                });
+            });
+        }
+
+        function copyInviteLink() {
+            navigator.clipboard.writeText(`${window.location.href.split('?')[0]}?room=${currentRoomCode}`).then(() => {
+                alert("Lien d'invitation copié !");
+            });
+        }
+
+        function setupPartnerModal() {
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('partner-modal').classList.remove('hidden');
+        }
+
+        function connectAsPartner() {
+            const code = document.getElementById('room-code-input').value.trim();
+            if (code.length !== 4) return;
+            document.getElementById('partner-modal').classList.add('hidden');
+            document.getElementById('partner-screen').classList.remove('hidden');
+
+            peer = new Peer();
+            peer.on('open', () => {
+                conn = peer.connect('osmose-' + code);
+                setupConnectionEvents();
+                updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+            });
+            peer.on('call', (call) => {
+                currentCall = call;
+                call.answer(localStream);
+                call.on('stream', (remoteStream) => {
+                    document.getElementById('partner-remote-video').srcObject = remoteStream;
+                    document.getElementById('partner-video-container').classList.remove('hidden');
+                });
+            });
+        }
+
+        function setupConnectionEvents() {
+            conn.on('data', (data) => {
+                if (data.type === 'photo_flash') {
+                    document.getElementById('received-photo-img').src = data.image;
+                    document.getElementById('photo-modal').classList.remove('hidden');
+                    if (isMaster) document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo reçue !</span>`;
+                    return;
+                }
+                if (isMaster) {
+                    if (data.type === 'typing') {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
+                    } else if (data.type && data.prompt) {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Pioche (${data.type.toUpperCase()})</span> : ${data.prompt}`;
+                    } else {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${data.action}</span> : ${data.value}`;
+                    }
+                } else {
+                    displayCardToPartner(data);
+                }
+            });
+            conn.on('close', () => updateStatus('Déconnecté', 'text-red-300', 'bg-red-900/50', 'border-red-700'));
+        }
+
+        function drawCustomCard() {
+            const deck = getCombinedDeck();
+            if (deck.length === 0) return;
+            const selectedCard = deck[Math.floor(Math.random() * deck.length)];
+            displayCardToPartner(selectedCard);
+            if (conn && conn.open === true) conn.send(selectedCard);
+        }
+
+        function displayCardToPartner(cardData) {
+            document.getElementById('mystery-card').classList.add('hidden');
+            document.getElementById('active-card-container').classList.remove('hidden');
+            document.getElementById('card-type-badge').innerText = cardData.type.toUpperCase();
+            document.getElementById('card-prompt-text').innerText = cardData.prompt;
+
+            stopTimer();
+
+            const optionsContainer = document.getElementById('interaction-options');
+            optionsContainer.innerHTML = '';
+
+            if (cardData.type === 'defi') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Défi', '✨ Accepté !')" class="flex-1 py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95">✨ Accepter</button>
+                        <button onclick="sendResponse('Défi', '😈 Veto / Refusé')" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95">😈 Veto</button>
+                    </div>`;
+            } else if (cardData.type === 'vote') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Vote', '❤️ J\\'aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95">❤️ J'aime</button>
+                        <button onclick="sendResponse('Vote', '👎 J\\'aime pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95">👎 J'aime pas</button>
+                    </div>`;
+            } else if (cardData.type === 'yesno') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Oui/Non', '✅ OUI')" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95">✅ OUI</button>
+                        <button onclick="sendResponse('Oui/Non', '❌ NON')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95">❌ NON</button>
+                    </div>`;
+            } else if (cardData.type === 'text') {
+                optionsContainer.innerHTML = `
+                    <div class="space-y-3">
+                        <input type="text" id="partner-text-input" placeholder="Votre réponse..." oninput="notifyTyping()" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                        <button onclick="sendTextResponse()" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95">Envoyer 💌</button>
+                    </div>`;
+            }
+        }
+
+        let typingTimeout = null;
+        function notifyTyping() {
+            if (conn && conn.open === true && !typingTimeout) {
+                conn.send({ type: 'typing' });
+                typingTimeout = setTimeout(() => { typingTimeout = null; }, 2000);
+            }
+        }
+
+        function sendResponse(actionType, value) {
+            if (conn) {
+                conn.send({ action: actionType, value: value });
+                alert("Réponse envoyée !");
+            }
+        }
+
+        function sendTextResponse() {
+            const val = document.getElementById('partner-text-input').value;
+            if (val) {
+                sendResponse('Réponse Libre', val);
+                document.getElementById('partner-text-input').value = '';
+            }
+        }
+
+        async function toggleVideo() {
+            const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
+            const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
+
+            if (!localStream) {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    localVideoElem.srcObject = localStream;
+                    localVideoElem.classList.remove('hidden');
+                    btnElem.innerText = "🛑 Couper ma Caméra";
+                    btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
+
+                    if (conn && peer) {
+                        currentCall = peer.call(isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim(), localStream);
+                        currentCall.on('stream', (remoteStream) => {
+                            const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+                            remoteElem.srcObject = remoteStream;
+                            document.getElementById(isMaster ? 'video-container' : 'partner-video-container').classList.remove('hidden');
+                        });
+                    }
+                } catch (err) { alert("Erreur caméra : " + err.message); }
+            } else {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                localVideoElem.classList.add('hidden');
+                btnElem.innerText = "🎥 Activer ma Caméra";
+                btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
+                if (currentCall) currentCall.close();
+            }
+        }
+
+        function updateStatus(text, textColor, bgCol, borderCol) {
+            const statusDiv = document.getElementById('connection-status');
+            statusDiv.innerText = text;
+            statusDiv.className = `text-xs px-3 py-1 rounded-full ${textColor} ${bgCol} border ${borderCol}`;
+        }
+    </script>
+</body>
+</html>
