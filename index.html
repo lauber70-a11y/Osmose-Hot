@@ -270,7 +270,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Version Finale Corrigée
+        Osmose Hot • Version Ultra-Robuste
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -786,17 +786,14 @@
                     if (data.type === 'stop_timer') { stopPartnerTimer(); return; }
                 }
 
-                // --- CORRECTION MAÎTRE : Réception unifiée de toutes les réponses (Défis, Votes, Oui/Non, Texte) ---
+                // --- RÉCEPTION UNIFIÉE CÔTÉ MAÎTRE ---
                 if (isMaster) {
                     if (data.type === 'typing') {
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
                     } else if (data.type && data.prompt) {
                         document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Pioche (${data.type.toUpperCase()})</span> : ${data.prompt}`;
-                    } else {
-                        // Gère explicitement n'importe quel type d'action/réponse renvoyé par la partenaire
-                        const labelType = data.action || "Action";
-                        const labelValue = data.value || "Effectué";
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${labelType}</span> : ${labelValue}`;
+                    } else if (data.action && data.value) {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${data.action}</span> : ${data.value}`;
                     }
                 } else {
                     displayCardToPartner(data);
@@ -827,34 +824,27 @@
             if (cardData.type === 'defi') {
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
-                        <button id="btn-accept" class="flex-1 py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">✨</button>
-                        <button id="btn-veto" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">😈</button>
+                        <button onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">✨</button>
+                        <button onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">😈</button>
                     </div>`;
-                document.getElementById('btn-accept').onclick = () => sendResponse('Défi', '✨ Accepté !');
-                document.getElementById('btn-veto').onclick = () => sendResponse('Défi', '😈 Veto / Refusé');
             } else if (cardData.type === 'vote') {
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
-                        <button id="btn-like" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">❤️</button>
-                        <button id="btn-dislike" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer">👎</button>
+                        <button onclick="sendResponse('Vote', 'Aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">❤️</button>
+                        <button onclick="sendResponse('Vote', 'Aime pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
                     </div>`;
-                document.getElementById('btn-like').onclick = () => sendResponse('Vote', '❤️ J\'aime');
-                document.getElementById('btn-dislike').onclick = () => sendResponse('Vote', '👎 J\'aime pas');
             } else if (cardData.type === 'yesno') {
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
-                        <button id="btn-yes" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">✅ OUI</button>
-                        <button id="btn-no" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer">❌ NON</button>
+                        <button onclick="sendResponse('Oui/Non', 'OUI')" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">✅ OUI</button>
+                        <button onclick="sendResponse('Oui/Non', 'NON')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">❌ NON</button>
                     </div>`;
-                document.getElementById('btn-yes').onclick = () => sendResponse('Oui/Non', '✅ OUI');
-                document.getElementById('btn-no').onclick = () => sendResponse('Oui/Non', '❌ NON');
             } else if (cardData.type === 'text') {
                 optionsContainer.innerHTML = `
                     <div class="space-y-3">
                         <input type="text" id="partner-text-input" placeholder="Votre réponse..." oninput="notifyTyping()" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
-                        <button id="btn-send-text" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">Envoyer 💌</button>
+                        <button onclick="sendTextResponse()" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">Envoyer 💌</button>
                     </div>`;
-                document.getElementById('btn-send-text').onclick = sendTextResponse;
             }
         }
 
@@ -866,6 +856,7 @@
             }
         }
 
+        // --- FONCTION D'ENVOI SÉCURISÉE ---
         function sendResponse(actionType, value) {
             if (conn && conn.open === true) {
                 conn.send({ action: actionType, value: value });
@@ -877,8 +868,8 @@
 
         function sendTextResponse() {
             const inputElem = document.getElementById('partner-text-input');
-            if (inputElem && inputElem.value) {
-                sendResponse('Réponse Libre', inputElem.value);
+            if (inputElem && inputElem.value.trim()) {
+                sendResponse('Reponse Libre', inputElem.value.trim());
                 inputElem.value = '';
             }
         }
