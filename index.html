@@ -1,1 +1,2138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osmose Hot - Duo Interactif</title>
+    <!-- Tailwind CSS pour le design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PeerJS pour la connexion P2P & WebRTC -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative">
 
+    <!-- Bandeau d'alerte visuel non-bloquant (Mots doux côté Maître) -->
+    <div id="whisper-toast" onclick="focusMasterWhisperBox()" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 max-w-sm w-[92%] bg-gradient-to-r from-pink-600/95 to-purple-600/95 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-pink-300/40 flex items-center justify-between gap-3 cursor-pointer backdrop-blur-sm transition-all">
+        <span id="whisper-toast-text" class="text-xs font-semibold truncate">💌 Nouveau petit mot</span>
+        <span class="text-[11px] font-bold bg-black/25 px-2 py-0.5 rounded-lg shrink-0">Voir</span>
+    </div>
+
+    <!-- Bandeau de réaction émoji éclair côté Partenaire -->
+    <div id="partner-reaction-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 max-w-xs w-[88%] bg-slate-900/95 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-pink-500/50 flex items-center justify-center gap-2.5 backdrop-blur-sm transition-all duration-300">
+        <span id="partner-reaction-emoji" class="text-2xl leading-none">🔥</span>
+        <div class="text-left">
+            <p class="text-[10px] uppercase tracking-wider text-pink-300 font-bold">Réaction du Maître</p>
+            <p id="partner-reaction-time" class="text-[10px] text-slate-400"></p>
+        </div>
+    </div>
+
+    <!-- En-tête -->
+    <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Osmose Hot</h1>
+        <div class="flex items-center gap-2">
+            <button onclick="toggleHelpModal()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Règles du jeu">❓ Aide</button>
+            <button onclick="toggleFullScreen()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Plein écran">⛶</button>
+            <div id="connection-status" class="text-xs px-3 py-1 rounded-full bg-red-900/50 text-red-300 border border-red-700">Déconnecté</div>
+        </div>
+    </header>
+
+    <!-- MODALE DES RÈGLES DU JEU -->
+    <div id="help-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl text-left my-8 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-xl font-bold text-pink-400">📜 Règles du Jeu : Osmose Hot</h2>
+                <button onclick="toggleHelpModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            
+            <div class="space-y-4 text-sm text-slate-300">
+                <div>
+                    <h3 class="font-bold text-white mb-1">🎯 Objectif</h3>
+                    <p>Partager un moment intime, complice et sur-mesure en duo, entre défis, actions immédiates, votes, discussions, audios et photos instantanées.</p>
+                </div>
+
+                <div class="bg-amber-950/30 border border-amber-500/30 p-3 rounded-xl">
+                    <h3 class="font-bold text-amber-300 mb-1">⚡ Action Immédiate</h3>
+                    <p class="text-xs text-amber-200">Lorsqu'une carte Action Immédiate apparaît, elle doit être réalisée sur-le-champ sans possibilité de Veto !</p>
+                </div>
+
+                <div class="bg-pink-950/30 border border-pink-500/30 p-3 rounded-xl">
+                    <h3 class="font-bold text-pink-300 mb-1">🛡️ La Règle d'Or du Veto</h3>
+                    <p class="text-xs text-pink-200">Les défis classiques peuvent être refusés instantanément en cliquant sur <b>Veto</b>. Aucun jugement, aucune justification requise !</p>
+                </div>
+            </div>
+
+            <button onclick="toggleHelpModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition mt-2">J'ai compris !</button>
+        </div>
+    </div>
+
+    <!-- MODALE PHOTO / AUDIO REÇU -->
+    <div id="photo-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div id="photo-modal-content" class="bg-slate-900 border border-pink-500/50 rounded-3xl max-w-sm w-full p-4 space-y-4 shadow-2xl text-center">
+            <!-- Rempli dynamiquement -->
+        </div>
+    </div>
+
+    <!-- MODALE DE GESTION DES CARTES -->
+    <div id="deck-manager-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl text-left my-8 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h2 class="text-xl font-bold text-pink-400">🗂️ Gestion & Sauvegarde JSON</h2>
+                <button onclick="toggleDeckManager()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+
+            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex gap-2">
+                <button onclick="exportJSON()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                    <span>📤</span> Exporter JSON
+                </button>
+                <button onclick="triggerImportJSON()" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">
+                    <span>📥</span> Importer JSON
+                </button>
+                <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importJSON(event)">
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>✨</span> Pioche Personnalisée (<span id="custom-count-badge">0</span>)
+                    </h3>
+                    <button onclick="resetCustomDeck()" class="text-[10px] text-slate-400 hover:text-red-400 underline">Tout vider</button>
+                </div>
+                <div id="custom-deck-list" class="space-y-3 max-h-[25vh] overflow-y-auto pr-1"></div>
+            </div>
+
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>📦</span> Cartes de Base (<span id="default-count-badge">0</span>)
+                    </h3>
+                    <button onclick="resetDefaultDeckToOriginal()" class="text-[10px] text-slate-400 hover:text-pink-400 underline">Réinitialiser par défaut</button>
+                </div>
+                <div id="default-deck-list" class="space-y-3 max-h-[25vh] overflow-y-auto pr-1"></div>
+            </div>
+
+            <button onclick="toggleDeckManager()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition mt-2">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Inputs fichiers cachés -->
+    <input type="file" id="camera-file-input" accept="image/*" class="hidden" onchange="handleImageSelection(event)">
+    <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioSelection(event)">
+
+    <!-- Contenu Principal -->
+    <main class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col justify-center items-center">
+
+        <!-- ÉCRAN DE SÉLECTION DU RÔLE -->
+        <div id="role-selection" class="w-full space-y-4 text-center">
+            <h2 class="text-2xl font-semibold mb-6">Choisissez votre mode</h2>
+            <button onclick="setupMaster()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition cursor-pointer">👑 Je suis le Maître du Jeu</button>
+            <button onclick="setupPartnerModal('partner')" class="w-full py-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition cursor-pointer">💫 Je suis la Partenaire</button>
+            <button onclick="setupPartnerModal('camera')" class="w-full py-3.5 bg-slate-900 border border-pink-500/40 text-pink-200 hover:bg-slate-800 rounded-2xl font-bold text-base shadow-lg active:scale-95 transition cursor-pointer">📹 Caméra Dédiée (vers le Maître)</button>
+        </div>
+
+        <!-- MODAL CONNEXION PARTENAIRE / CAMÉRA DÉDIÉE -->
+        <div id="partner-modal" class="hidden w-full space-y-4 text-center">
+            <h2 id="connect-modal-title" class="text-xl font-semibold">Connexion au salon</h2>
+            <input type="text" id="room-code-input" placeholder="Entrez le code à 4 chiffres" maxlength="4" class="w-full p-4 text-center text-2xl tracking-widest bg-slate-900 border border-slate-700 rounded-2xl text-white uppercase focus:outline-none focus:border-pink-500">
+            <button onclick="connectAsPartner()" class="w-full py-3 bg-pink-600 rounded-2xl font-bold shadow-lg active:scale-95 transition cursor-pointer">Rejoindre</button>
+            <button onclick="location.reload()" class="text-sm text-slate-400 underline cursor-pointer">Retour</button>
+        </div>
+
+        <!-- ÉCRAN CAMÉRA DÉDIÉE (3E SMARTPHONE -> MAÎTRE UNIQUEMENT) -->
+        <div id="dedicated-camera-screen" class="hidden w-full space-y-5 text-center">
+            <div class="bg-slate-900 p-5 rounded-3xl border border-pink-500/40 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs uppercase tracking-widest text-pink-400 font-bold">📹 Caméra Dédiée</span>
+                    <span id="dedicated-stream-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">En attente</span>
+                </div>
+                <p class="text-xs text-slate-400">Flux vidéo envoyé uniquement vers l'écran du Maître du Jeu (micro coupé par défaut pour éviter l'écho).</p>
+
+                <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-slate-700">
+                    <video id="dedicated-local-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
+                </div>
+
+                <!-- Contrôle de Zoom Caméra Dédiée -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-300 font-semibold">🔍 Zoom Cadrage</span>
+                        <span id="dedicated-local-zoom-label" class="text-purple-300 font-bold">1x</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setDedicatedZoom(1)" id="cam-zoom-btn-1" class="py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition">1x</button>
+                        <button onclick="setDedicatedZoom(1.5)" id="cam-zoom-btn-1.5" class="py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">1.5x</button>
+                        <button onclick="setDedicatedZoom(2)" id="cam-zoom-btn-2" class="py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">2x</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="toggleDedicatedCamera()" id="dedicated-cam-toggle-btn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Démarrer le flux</button>
+                    <button onclick="switchCameraFacingMode()" id="dedicated-switch-cam-btn" class="px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
+                </div>
+
+                <button onclick="location.reload()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-xs text-slate-400 rounded-xl transition">Quitter le mode Caméra Dédiée</button>
+            </div>
+        </div>
+
+        <!-- ÉCRAN MAÎTRE DU JEU -->
+        <div id="master-screen" class="hidden w-full space-y-6">
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <p class="text-xs text-slate-400 uppercase tracking-wider">Code de connexion salon</p>
+                <div id="display-room-code" class="text-4xl font-extrabold text-pink-500 tracking-widest">----</div>
+                <button onclick="copyInviteLink()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-pink-300 transition flex items-center justify-center gap-2">
+                    <span>📋</span> Copier le lien d'invitation direct
+                </button>
+            </div>
+
+            <!-- ENCART DÉDIÉ : MOTS DOUX REÇUS + RÉPONSES RAPIDES -->
+            <div id="master-whisper-box" onclick="clearWhisperUnreadBadge()" class="bg-slate-900 p-4 rounded-2xl border border-pink-500/30 space-y-3 transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-xs font-bold text-pink-300 uppercase tracking-wider">🤫 Mots doux reçus</h3>
+                        <span id="whisper-unread-badge" class="hidden text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-pink-600 text-white animate-bounce">0</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); clearWhisperHistory();" class="text-[10px] text-slate-400 hover:text-pink-300 underline">Effacer</button>
+                </div>
+
+                <div id="whisper-messages-list" class="space-y-1.5 text-left max-h-36 overflow-y-auto">
+                    <p class="text-xs text-slate-500 italic">Aucun petit mot reçu pour l'instant.</p>
+                </div>
+
+                <!-- Boutons de réponse rapide côté Maître -->
+                <div class="pt-2 border-t border-slate-800/80 space-y-1.5 text-left" onclick="event.stopPropagation();">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">⚡ Réponse rapide</span>
+                        <span id="master-whisper-reply-status" class="hidden text-[10px] text-emerald-300 font-medium">Envoyé ✨</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="sendQuickMasterWhisperReply('J\'arrive')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">🏃 J'arrive</button>
+                        <button onclick="sendQuickMasterWhisperReply('Bien noté 😏')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">Bien noté 😏</button>
+                        <button onclick="sendQuickMasterWhisperReply('Montre-moi')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">👀 Montre-moi</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Médias rapides : Photo + Fichier Audio + Vocal Direct -->
+            <div class="space-y-2">
+                <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>📸</span> Envoyer une photo & question Oui/Non
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="triggerAudioCapture()" class="py-3 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-pink-200">
+                        <span>🎵</span> Fichier Audio
+                    </button>
+                    <button onclick="toggleVoiceRecording()" id="master-voice-btn" class="py-3 px-2 bg-rose-700 hover:bg-rose-600 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-white">
+                        <span>🎙️</span> Vocal Direct
+                    </button>
+                </div>
+                <p id="master-voice-status" class="hidden text-xs text-rose-300 text-center font-semibold animate-pulse">Enregistrement vocal en cours... (0s)</p>
+
+                <!-- Indicateur de progression audio (Maître) -->
+                <div id="master-audio-progress" class="hidden bg-slate-900 border border-pink-500/40 rounded-xl p-3 space-y-1.5">
+                    <div class="flex justify-between text-xs font-semibold text-pink-300">
+                        <span id="master-audio-progress-label">Envoi audio...</span>
+                        <span id="master-audio-progress-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="master-audio-progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-2 transition-all duration-100" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Choisir et envoyer depuis la pioche -->
+            <div class="bg-gradient-to-r from-indigo-950/40 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="font-bold text-indigo-300 text-sm">📤 Choisir et envoyer depuis la pioche</h3>
+                    <button type="button" onclick="sendRandomCloseUpCard()" class="text-[11px] px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 border border-indigo-500/40 rounded-xl font-semibold transition cursor-pointer">🔍 Plan rapproché</button>
+                </div>
+                <select id="master-deck-select" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
+                <p id="master-deck-preview" class="text-[11px] text-slate-400 bg-slate-900/70 border border-slate-800 rounded-xl px-3 py-2 break-words">Sélectionnez une carte pour voir son texte complet.</p>
+                <button onclick="sendCardFromDeck()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-xs shadow transition text-white">Envoyer cette carte au Duo 🚀</button>
+            </div>
+
+            <!-- Envoyer une carte sur-mesure à la volée -->
+            <div class="bg-gradient-to-r from-pink-950/40 to-purple-950/40 p-4 rounded-2xl border border-pink-500/30 space-y-3">
+                <div class="flex justify-between items-center gap-2">
+                    <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte libre (sur-mesure)</h3>
+                    <button type="button" onclick="fillCloseUpPrompt()" class="text-[11px] px-2.5 py-1 bg-pink-950/80 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-semibold transition cursor-pointer">🔍 Plan rapproché</button>
+                </div>
+                <input type="text" id="live-card-prompt" onkeydown="if(event.key==='Enter') sendLiveCard();" placeholder="Ex: Embrasse-moi tout de suite..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
+                <div class="flex gap-2">
+                    <select id="live-card-type" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
+                        <option value="immediate">⚡ Action Immédiate</option>
+                        <option value="defi">✨ Défi</option>
+                        <option value="vote">❤️ Vote</option>
+                        <option value="yesno">❓ Oui / Non</option>
+                        <option value="text">💬 Texte</option>
+                    </select>
+                </div>
+                <button onclick="sendLiveCard()" class="w-full py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-indigo-500 rounded-xl font-bold text-xs shadow transition">Envoyer au Duo 🚀</button>
+            </div>
+
+            <!-- CONTRÔLE DU CHRONOMÈTRE -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <h3 class="font-semibold text-pink-400 text-sm">⏱️ Contrôle du Chronomètre (Maître)</h3>
+                <div class="flex justify-center gap-2">
+                    <button onclick="requestStartTimer(60)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">1 min</button>
+                    <button onclick="requestStartTimer(120)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">2 min</button>
+                    <button onclick="requestStartTimer(300)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">5 min</button>
+                </div>
+
+                <div id="master-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-xl p-3 space-y-2">
+                    <div id="master-timer-display" class="text-3xl font-extrabold text-pink-400 tracking-wider">00:00</div>
+                    <div class="flex justify-center gap-2">
+                        <button onclick="requestPauseTimer()" id="master-timer-pause-btn" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg text-white">Pause ⏸️</button>
+                        <button onclick="requestStopTimer()" class="px-3 py-1 bg-red-950/60 hover:bg-red-900 text-xs font-bold text-red-300 rounded-lg">Arrêter ⏹️</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau Création de Cartes -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+                <h3 class="font-semibold text-slate-300 text-sm">✍️ Créer une nouvelle carte</h3>
+                <input type="text" id="new-card-prompt" placeholder="Ex: Fais-moi un massage..." class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
+                <div class="flex gap-2">
+                    <select id="new-card-type" class="flex-1 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
+                        <option value="immediate">⚡ Action Immédiate</option>
+                        <option value="defi">✨ Défi</option>
+                        <option value="vote">❤️ Vote</option>
+                        <option value="yesno">❓ Oui / Non</option>
+                        <option value="text">💬 Texte</option>
+                    </select>
+                    <select id="new-card-target" class="flex-1 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-pink-300 font-semibold focus:outline-none">
+                        <option value="custom">✨ Pioche Perso</option>
+                        <option value="default">📦 Cartes de Base</option>
+                    </select>
+                </div>
+                <button onclick="addNewCardToDeck()" class="w-full py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl font-bold text-xs shadow transition">Ajouter la carte ➕</button>
+                <button onclick="toggleDeckManager()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 rounded-xl text-xs font-semibold transition">🗂️ Gérer / Exporter les cartes</button>
+                <p id="deck-count" class="text-xs text-slate-500 text-center pt-1"></p>
+            </div>
+
+            <!-- Contrôle Vidéo Maître (Partenaire + Caméra Dédiée) -->
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <h3 class="font-semibold text-slate-300">Visio en Direct & Caméra Dédiée</h3>
+                <div class="flex gap-2">
+                    <button onclick="toggleVideo()" id="master-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
+                    <button onclick="switchCameraFacingMode()" id="master-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
+                </div>
+                
+                <video id="local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
+
+                <div id="video-container" class="hidden relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
+                    <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-pink-400">Partenaire en direct 🔴</div>
+                </div>
+
+                <div id="dedicated-cam-container" class="hidden space-y-2 pt-1">
+                    <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-purple-500/50">
+                        <video id="dedicated-remote-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
+                        <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-purple-300">📹 Caméra Dédiée (<span id="master-dedicated-zoom-badge">1x</span>) 🔴</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2">
+                        <span class="text-[11px] text-slate-300 font-semibold">🔍 Zoom Caméra</span>
+                        <div class="flex gap-1.5">
+                            <button onclick="requestDedicatedZoom(1)" id="master-zoom-btn-1" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white transition">1x</button>
+                            <button onclick="requestDedicatedZoom(1.5)" id="master-zoom-btn-1.5" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">1.5x</button>
+                            <button onclick="requestDedicatedZoom(2)" id="master-zoom-btn-2" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">2x</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="master-feedback" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-3">
+                <p class="text-xs text-slate-400 uppercase tracking-wider">Dernière interaction reçue</p>
+                <div id="feedback-content" class="text-lg font-medium text-slate-300">En attente d'une action...</div>
+
+                <!-- Réactions émoji éclairs côté Maître -->
+                <div class="pt-3 border-t border-slate-800/80 space-y-2">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">⚡ Réactions émoji éclairs</span>
+                        <span id="master-flash-reaction-status" class="hidden text-[10px] text-emerald-300 font-medium">Envoyé ✨</span>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button type="button" onclick="sendFlashReaction('🔥')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer 🔥">🔥</button>
+                        <button type="button" onclick="sendFlashReaction('😏')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer 😏">😏</button>
+                        <button type="button" onclick="sendFlashReaction('❤️')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer ❤️">❤️</button>
+                        <button type="button" onclick="sendFlashReaction('👏')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer 👏">👏</button>
+                        <button type="button" onclick="sendFlashReaction('⚡')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer ⚡">⚡</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉCRAN PARTENAIRE -->
+        <div id="partner-screen" class="hidden w-full space-y-6 text-center">
+            
+            <div class="space-y-2">
+                <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>📸</span> Envoyer une photo & question Oui/Non
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="triggerAudioCapture()" class="py-3 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-pink-200">
+                        <span>🎵</span> Fichier Audio
+                    </button>
+                    <button onclick="toggleVoiceRecording()" id="partner-voice-btn" class="py-3 px-2 bg-rose-700 hover:bg-rose-600 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-white">
+                        <span>🎙️</span> Vocal Direct
+                    </button>
+                </div>
+                <p id="partner-voice-status" class="hidden text-xs text-rose-300 text-center font-semibold animate-pulse">Enregistrement vocal en cours... (0s)</p>
+
+                <!-- Indicateur de progression audio (Partenaire) -->
+                <div id="partner-audio-progress" class="hidden bg-slate-900 border border-pink-500/40 rounded-xl p-3 space-y-1.5 text-left">
+                    <div class="flex justify-between text-xs font-semibold text-pink-300">
+                        <span id="partner-audio-progress-label">Envoi audio...</span>
+                        <span id="partner-audio-progress-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="partner-audio-progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-2 transition-all duration-100" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 p-4 rounded-3xl border border-pink-500/40 shadow-lg space-y-3">
+                <h3 class="text-sm font-bold text-pink-300 uppercase tracking-wider">Pioche ton propre défi</h3>
+                <button onclick="drawCustomCard()" class="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl font-bold shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>🎲</span> Piocher une carte personnalisée
+                </button>
+            </div>
+
+            <div id="mystery-card" class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-3">
+                <div class="text-4xl animate-pulse">❓</div>
+                <h3 class="text-lg font-bold">Mode Mystère</h3>
+                <p class="text-xs text-slate-400">En attente d'une carte du Maître du Jeu ou pioche ci-dessus...</p>
+            </div>
+
+            <!-- CARTE ACTIVE CÔTÉ PARTENAIRE -->
+            <div id="active-card-container" class="hidden bg-slate-900 p-6 rounded-3xl border border-pink-500/50 shadow-2xl space-y-5 text-left transition-all duration-300">
+                <div class="flex justify-between items-center">
+                    <div id="card-type-badge" class="text-xs uppercase tracking-widest text-pink-400 font-bold">Défi</div>
+                    <span id="card-new-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-600/30 text-pink-300 border border-pink-500/40">Nouvelle carte</span>
+                </div>
+
+                <!-- Bannière spéciale Action Immédiate (masquée par défaut) -->
+                <div id="immediate-action-banner" class="hidden bg-amber-500/20 border border-amber-500 text-amber-300 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 animate-pulse">
+                    <span>⚡</span>
+                    <span>ACTION IMMÉDIATE : À exécuter tout de suite !</span>
+                </div>
+
+                <p id="card-prompt-text" class="text-lg font-semibold text-white break-words"></p>
+
+                <!-- CHRONOMÈTRE DISTANT (Piloté par le Maître) -->
+                <div id="partner-giant-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-2xl p-4 text-center space-y-2">
+                    <div id="partner-giant-timer-display" class="text-4xl font-extrabold text-pink-400 tracking-wider">00:00</div>
+                    <div class="text-[11px] text-pink-300 italic">Chronomètre piloté par le Maître du Jeu ⏱️</div>
+                </div>
+                
+                <div id="interaction-options" class="pt-2"></div>
+            </div>
+
+            <!-- ENCART PETIT MOT LIBRE (INDÉPENDANT DE LA CARTE ACTIVE) -->
+            <div id="partner-whisper-box" class="bg-slate-900/95 p-4 rounded-2xl border border-pink-500/30 space-y-2.5 text-left shadow-lg overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-pink-300 uppercase tracking-wider">🤫 Glisser un petit mot</h3>
+                    <span class="text-[10px] text-slate-400">Hors défi</span>
+                </div>
+                <div id="partner-whisper-reply-banner" class="hidden bg-pink-950/50 border border-pink-500/40 rounded-xl px-3 py-2 text-xs text-pink-200 flex items-center justify-between gap-2">
+                    <span id="partner-whisper-reply-text" class="font-medium break-words">👑 Maître : ...</span>
+                    <span id="partner-whisper-reply-time" class="text-[10px] text-pink-300/70 shrink-0"></span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="sendQuickWhisper('J\'ai chaud...')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">🔥 J'ai chaud...</button>
+                    <button onclick="sendQuickWhisper('Encore ?')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">😏 Encore ?</button>
+                    <button onclick="sendQuickWhisper('Approche-toi')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">💋 Approche-toi</button>
+                </div>
+                <div class="flex items-center gap-2 w-full">
+                    <input type="text" id="partner-whisper-input" onkeydown="if(event.key==='Enter') sendWhisperMessage();" placeholder="Écrire un petit mot à tout moment..." class="min-w-0 flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="sendWhisperMessage()" class="shrink-0 px-3 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-xs text-white shadow transition">Envoyer</button>
+                </div>
+                <p id="partner-whisper-status" class="hidden text-[11px] text-emerald-300 font-medium">Petit mot envoyé ✨</p>
+            </div>
+
+            <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
+                <h3 class="font-semibold text-slate-300">Visio en Direct</h3>
+                <div class="flex gap-2">
+                    <button onclick="toggleVideo()" id="partner-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
+                    <button onclick="switchCameraFacingMode()" id="partner-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
+                </div>
+                
+                <video id="partner-local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
+
+                <div id="partner-video-container" class="hidden relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
+                    <video id="partner-remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
+                    <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-pink-400">Maître du Jeu en direct 🔴</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
+        Osmose Hot • Cartes & Plans Rapprochés Corrigés
+    </footer>
+
+    <!-- Script Logique de l'Application -->
+    <script>
+        const originalDefaultCards = [
+            { type: 'defi', prompt: "Fais-moi un massage des épaules pendant 2 minutes." },
+            { type: 'vote', prompt: "Préfères-tu un bisou dans le cou ou un câlin serré ?" },
+            { type: 'immediate', prompt: "Viens m'embrasser passionnément pendant 10 secondes !" },
+            { type: 'yesno', prompt: "Est-ce que tu veux qu'on commande un dessert surprise ?" },
+            { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." },
+            { type: 'defi', prompt: "🔍 Plan rapproché : cadre de très près un détail de ta tenue qui me fera craquer." },
+            { type: 'yesno', prompt: "🔍 Plan rapproché : montre-moi en gros plan la courbe de ton cou ou de ton épaule — ça te tente ?" }
+        ];
+
+        const closeUpCoquinPrompts = [
+            { type: 'defi', prompt: "🔍 Plan rapproché : cadre de très près un détail de ta tenue qui me fera craquer." },
+            { type: 'defi', prompt: "🔍 Plan rapproché : fais un gros plan sur tes lèvres ou ton cou, à quelques centimètres de l'objectif." },
+            { type: 'immediate', prompt: "🔍 Plan rapproché : montre-moi tout de suite en cadrage serré le bout de tes doigts ou un geste lent sur ta peau." },
+            { type: 'yesno', prompt: "🔍 Plan rapproché : cadre uniquement la partie de ton corps que tu as le plus envie de me montrer là tout de suite — tu joues ?" }
+        ];
+        let closeUpPromptIndex = 0;
+
+        function fillCloseUpPrompt() {
+            const promptInput = document.getElementById('live-card-prompt');
+            const typeSelect = document.getElementById('live-card-type');
+            if (!promptInput) return;
+
+            const preset = closeUpCoquinPrompts[closeUpPromptIndex % closeUpCoquinPrompts.length];
+            closeUpPromptIndex++;
+            promptInput.value = preset.prompt;
+            if (typeSelect) {
+                typeSelect.value = preset.type;
+            }
+            promptInput.focus();
+            promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function sendRandomCloseUpCard() {
+            if (!conn || conn.open !== true) {
+                alert("La partenaire n'est pas connectée !");
+                return;
+            }
+            const preset = closeUpCoquinPrompts[closeUpPromptIndex % closeUpCoquinPrompts.length];
+            closeUpPromptIndex++;
+            const cardToSend = { type: preset.type, prompt: preset.prompt };
+            conn.send(cardToSend);
+            document.getElementById('feedback-content').innerHTML = `<span class="text-indigo-400 font-bold">Plan rapproché envoyé (${escapeHtml(getCardTypeLabel(cardToSend.type))}) :</span> ${escapeHtml(cardToSend.prompt)}`;
+        }
+
+        // --- RÉACTIONS ÉMOJI ÉCLAIRS CÔTÉ MAÎTRE ---
+        let flashReactionStatusTimeout = null;
+        let partnerReactionToastTimeout = null;
+
+        function sendFlashReaction(emoji) {
+            const cleanEmoji = (emoji || '').trim();
+            if (!cleanEmoji) return;
+            if (!isMaster) return;
+            if (!conn || conn.open !== true) {
+                alert("La partenaire n'est pas connectée !");
+                return;
+            }
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            conn.send({
+                type: 'flash_reaction',
+                emoji: cleanEmoji,
+                time: nowTime
+            });
+
+            const statusElem = document.getElementById('master-flash-reaction-status');
+            if (statusElem) {
+                statusElem.innerText = `${cleanEmoji} envoyé (${nowTime})`;
+                statusElem.classList.remove('hidden');
+                clearTimeout(flashReactionStatusTimeout);
+                flashReactionStatusTimeout = setTimeout(() => {
+                    statusElem.classList.add('hidden');
+                }, 2000);
+            }
+        }
+
+        function handleIncomingFlashReaction(data) {
+            const emoji = (data && data.emoji) ? String(data.emoji) : '🔥';
+            const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const toast = document.getElementById('partner-reaction-toast');
+            const emojiElem = document.getElementById('partner-reaction-emoji');
+            const timeElem = document.getElementById('partner-reaction-time');
+
+            if (toast && emojiElem && timeElem) {
+                emojiElem.innerText = emoji;
+                timeElem.innerText = `À l'instant • ${time}`;
+                toast.classList.remove('hidden', 'scale-110');
+                void toast.offsetWidth;
+                toast.classList.add('scale-110');
+                setTimeout(() => {
+                    toast.classList.remove('scale-110');
+                }, 250);
+
+                clearTimeout(partnerReactionToastTimeout);
+                partnerReactionToastTimeout = setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 2800);
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate([40, 30, 40]); } catch (e) {}
+            }
+        }
+
+        // --- ZOOM SUR LA CAMÉRA DÉDIÉE ---
+        let currentDedicatedZoom = 1;
+        let dedicatedCameraConn = null;
+
+        function updateZoomButtonsUI(prefix, activeZoom) {
+            [1, 1.5, 2].forEach((z) => {
+                const btn = document.getElementById(`${prefix}-zoom-btn-${z}`);
+                if (!btn) return;
+                if (z === activeZoom) {
+                    btn.className = btn.className.includes('px-2.5')
+                        ? "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white transition"
+                        : "py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition";
+                } else {
+                    btn.className = btn.className.includes('px-2.5')
+                        ? "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                        : "py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
+                }
+            });
+        }
+
+        async function applyHardwareZoomIfSupported(zoomVal) {
+            if (!localStream) return;
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (!videoTrack || typeof videoTrack.getCapabilities !== 'function') return;
+            try {
+                const capabilities = videoTrack.getCapabilities();
+                if (capabilities && capabilities.zoom) {
+                    const clamped = Math.max(capabilities.zoom.min || 1, Math.min(capabilities.zoom.max || zoomVal, zoomVal));
+                    await videoTrack.applyConstraints({ advanced: [{ zoom: clamped }] });
+                }
+            } catch (e) {
+                // Fallback visuel CSS si le zoom matériel n'est pas exposé
+            }
+        }
+
+        async function setDedicatedZoom(zoomVal) {
+            currentDedicatedZoom = zoomVal;
+            const localVid = document.getElementById('dedicated-local-video');
+            const label = document.getElementById('dedicated-local-zoom-label');
+            if (localVid) {
+                localVid.style.transform = `scale(${zoomVal})`;
+            }
+            if (label) {
+                label.innerText = `${zoomVal}x`;
+            }
+            updateZoomButtonsUI('cam', zoomVal);
+            await applyHardwareZoomIfSupported(zoomVal);
+        }
+
+        function setMasterDedicatedZoomPreview(zoomVal) {
+            currentDedicatedZoom = zoomVal;
+            const remoteVid = document.getElementById('dedicated-remote-video');
+            const badge = document.getElementById('master-dedicated-zoom-badge');
+            if (remoteVid) {
+                remoteVid.style.transform = `scale(${zoomVal})`;
+            }
+            if (badge) {
+                badge.innerText = `${zoomVal}x`;
+            }
+            updateZoomButtonsUI('master', zoomVal);
+        }
+
+        function requestDedicatedZoom(zoomVal) {
+            setMasterDedicatedZoomPreview(zoomVal);
+            if (dedicatedCameraConn && dedicatedCameraConn.open === true) {
+                dedicatedCameraConn.send({ type: 'set_zoom', zoom: zoomVal });
+            }
+        }
+
+        // --- MOTS DOUX LIBRES, RÉPONSES RAPIDES & ALERTES VISUELLES ---
+        let receivedWhispers = [];
+        let unreadWhisperCount = 0;
+        let whisperAlertTimeout = null;
+        let whisperToastTimeout = null;
+        let whisperStatusTimeout = null;
+        let masterReplyStatusTimeout = null;
+
+        function dispatchWhisperText(text) {
+            const cleanText = (text || '').trim();
+            if (!cleanText) return;
+            if (!conn || conn.open !== true) {
+                alert("Non connecté au Maître du Jeu.");
+                return;
+            }
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            conn.send({
+                type: 'whisper_chat',
+                text: cleanText,
+                time: nowTime
+            });
+
+            const statusElem = document.getElementById('partner-whisper-status');
+            if (statusElem) {
+                statusElem.innerText = `Envoyé à ${nowTime} : "${cleanText}" ✨`;
+                statusElem.classList.remove('hidden');
+                clearTimeout(whisperStatusTimeout);
+                whisperStatusTimeout = setTimeout(() => {
+                    statusElem.classList.add('hidden');
+                }, 2500);
+            }
+        }
+
+        function sendWhisperMessage() {
+            const input = document.getElementById('partner-whisper-input');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            dispatchWhisperText(text);
+            input.value = '';
+        }
+
+        function sendQuickWhisper(presetText) {
+            dispatchWhisperText(presetText);
+        }
+
+        function sendQuickMasterWhisperReply(replyText) {
+            const cleanReply = (replyText || '').trim();
+            if (!cleanReply) return;
+            if (!conn || conn.open !== true) {
+                alert("La partenaire n'est pas connectée !");
+                return;
+            }
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            conn.send({
+                type: 'whisper_reply',
+                text: cleanReply,
+                time: nowTime
+            });
+
+            const replyStatus = document.getElementById('master-whisper-reply-status');
+            if (replyStatus) {
+                replyStatus.innerText = `Envoyé : "${cleanReply}" ✨`;
+                replyStatus.classList.remove('hidden');
+                clearTimeout(masterReplyStatusTimeout);
+                masterReplyStatusTimeout = setTimeout(() => {
+                    replyStatus.classList.add('hidden');
+                }, 2500);
+            }
+        }
+
+        function handleIncomingWhisperReply(data) {
+            const text = (data && data.text) ? String(data.text) : '';
+            if (!text) return;
+            const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const banner = document.getElementById('partner-whisper-reply-banner');
+            const textElem = document.getElementById('partner-whisper-reply-text');
+            const timeElem = document.getElementById('partner-whisper-reply-time');
+
+            if (banner && textElem && timeElem) {
+                textElem.innerText = `👑 ${text}`;
+                timeElem.innerText = time;
+                banner.classList.remove('hidden', 'ring-2', 'ring-pink-400');
+                void banner.offsetWidth;
+                banner.classList.add('ring-2', 'ring-pink-400');
+                setTimeout(() => {
+                    banner.classList.remove('ring-2', 'ring-pink-400');
+                }, 2500);
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(60); } catch (e) {}
+            }
+        }
+
+        function handleIncomingWhisper(data) {
+            const text = (data && data.text) ? String(data.text) : '';
+            if (!text) return;
+            const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            receivedWhispers.unshift({ text, time });
+            if (receivedWhispers.length > 6) {
+                receivedWhispers = receivedWhispers.slice(0, 6);
+            }
+            renderWhisperHistory();
+            triggerWhisperVisualAlert(text);
+        }
+
+        function renderWhisperHistory() {
+            const listElem = document.getElementById('whisper-messages-list');
+            if (!listElem) return;
+            if (receivedWhispers.length === 0) {
+                listElem.innerHTML = `<p class="text-xs text-slate-500 italic">Aucun petit mot reçu pour l'instant.</p>`;
+                return;
+            }
+            listElem.innerHTML = receivedWhispers.map((msg, idx) => `
+                <div class="flex items-start justify-between gap-2 px-3 py-2 rounded-xl ${idx === 0 ? 'bg-pink-950/50 border border-pink-500/40 text-white' : 'bg-slate-800/70 text-slate-300'} text-xs">
+                    <span class="break-words font-medium">${escapeHtml(msg.text)}</span>
+                    <span class="text-[10px] text-slate-400 shrink-0">${escapeHtml(msg.time)}</span>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function triggerWhisperVisualAlert(previewText) {
+            const box = document.getElementById('master-whisper-box');
+            const badge = document.getElementById('whisper-unread-badge');
+            const toast = document.getElementById('whisper-toast');
+            const toastText = document.getElementById('whisper-toast-text');
+
+            unreadWhisperCount++;
+            if (badge) {
+                badge.innerText = unreadWhisperCount;
+                badge.classList.remove('hidden');
+            }
+
+            if (box) {
+                box.classList.add('ring-2', 'ring-pink-500', 'bg-pink-950/30', 'animate-pulse');
+                clearTimeout(whisperAlertTimeout);
+                whisperAlertTimeout = setTimeout(() => {
+                    box.classList.remove('ring-2', 'ring-pink-500', 'bg-pink-950/30', 'animate-pulse');
+                }, 3000);
+            }
+
+            if (toast && toastText) {
+                toastText.innerText = `💌 ${previewText}`;
+                toast.classList.remove('hidden');
+                clearTimeout(whisperToastTimeout);
+                whisperToastTimeout = setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 4500);
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(80); } catch (e) {}
+            }
+        }
+
+        function clearWhisperUnreadBadge() {
+            unreadWhisperCount = 0;
+            const badge = document.getElementById('whisper-unread-badge');
+            if (badge) {
+                badge.innerText = '0';
+                badge.classList.add('hidden');
+            }
+        }
+
+        function focusMasterWhisperBox() {
+            const toast = document.getElementById('whisper-toast');
+            if (toast) toast.classList.add('hidden');
+            clearWhisperUnreadBadge();
+            const box = document.getElementById('master-whisper-box');
+            if (box) {
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function clearWhisperHistory() {
+            receivedWhispers = [];
+            clearWhisperUnreadBadge();
+            renderWhisperHistory();
+        }
+
+        let currentRoomCode = "";
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            try {
+                if (!wakeLock || wakeLock.released) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                // Ignorer si non autorisé ou en économie d'énergie
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                requestWakeLock();
+            }
+        });
+
+        function syncCustomDeckToPartner() {
+            if (isMaster && conn && conn.open === true) {
+                conn.send({ type: 'sync_custom_deck', deck: getCustomDeck() });
+            }
+        }
+
+        function sanitizeCardList(list) {
+            if (!Array.isArray(list)) return [];
+            const validTypes = ['immediate', 'defi', 'vote', 'yesno', 'text'];
+            return list
+                .filter(c => c && typeof c.prompt === 'string' && c.prompt.trim().length > 0)
+                .map(c => ({
+                    type: validTypes.includes(c.type) ? c.type : 'defi',
+                    prompt: c.prompt.trim()
+                }));
+        }
+
+        function getDefaultDeck() {
+            const saved = localStorage.getItem('osmose_default_deck');
+            if (saved) {
+                try {
+                    const parsed = sanitizeCardList(JSON.parse(saved));
+                    if (parsed.length > 0 || saved === '[]') return parsed;
+                } catch(e) {}
+            }
+            return [...originalDefaultCards];
+        }
+
+        function saveDefaultDeck(deck) {
+            const cleanDeck = sanitizeCardList(deck);
+            localStorage.setItem('osmose_default_deck', JSON.stringify(cleanDeck));
+            updateDeckCount();
+            populateMasterDeckSelect();
+        }
+
+        function resetDefaultDeckToOriginal() {
+            if (confirm("Réinitialiser les cartes de base ?")) {
+                saveDefaultDeck([...originalDefaultCards]);
+                renderDeckManagerLists();
+            }
+        }
+
+        function getCustomDeck() {
+            const saved = localStorage.getItem('osmose_custom_deck');
+            if (saved) {
+                try { return sanitizeCardList(JSON.parse(saved)); } catch(e) { return []; }
+            }
+            return [];
+        }
+
+        function saveCustomDeck(deck) {
+            const cleanDeck = sanitizeCardList(deck);
+            localStorage.setItem('osmose_custom_deck', JSON.stringify(cleanDeck));
+            updateDeckCount();
+            populateMasterDeckSelect();
+            syncCustomDeckToPartner();
+        }
+
+        function resetCustomDeck() {
+            if (confirm("Vider toutes vos cartes personnalisées ?")) {
+                saveCustomDeck([]);
+                renderDeckManagerLists();
+            }
+        }
+
+        function getCombinedDeck() {
+            return [...getDefaultDeck(), ...getCustomDeck()];
+        }
+
+        function updateDeckCount() {
+            const countElem = document.getElementById('deck-count');
+            if (countElem) {
+                const total = getCombinedDeck().length;
+                countElem.innerText = `${total} carte(s) au total (${getDefaultDeck().length} base, ${getCustomDeck().length} perso)`;
+            }
+        }
+
+        function getCardTypeLabel(type) {
+            if (type === 'immediate') return '⚡ ACTION IMMÉDIATE';
+            if (type === 'defi') return '✨ DÉFI';
+            if (type === 'vote') return '❤️ VOTE';
+            if (type === 'yesno') return '❓ OUI / NON';
+            if (type === 'text') return '💬 TEXTE';
+            return String(type || 'DEFI').toUpperCase();
+        }
+
+        function updateMasterDeckPreview() {
+            const selectElem = document.getElementById('master-deck-select');
+            const previewElem = document.getElementById('master-deck-preview');
+            if (!selectElem || !previewElem) return;
+            const combined = getCombinedDeck();
+            const idx = parseInt(selectElem.value, 10);
+            if (isNaN(idx) || !combined[idx]) {
+                previewElem.innerText = "Aucune carte sélectionnée.";
+                return;
+            }
+            previewElem.innerText = combined[idx].prompt;
+        }
+
+        function populateMasterDeckSelect() {
+            const selectElem = document.getElementById('master-deck-select');
+            if (!selectElem) return;
+            const prevIdx = parseInt(selectElem.value, 10);
+            const combined = getCombinedDeck();
+            selectElem.innerHTML = '';
+            if (combined.length === 0) {
+                selectElem.innerHTML = `<option value="">Aucune carte disponible</option>`;
+                updateMasterDeckPreview();
+                return;
+            }
+            combined.forEach((card, index) => {
+                const opt = document.createElement('option');
+                opt.value = String(index);
+                const shortText = card.prompt.length > 48 ? card.prompt.substring(0, 48) + '...' : card.prompt;
+                opt.text = `[${getCardTypeLabel(card.type)}] ${shortText}`;
+                selectElem.appendChild(opt);
+            });
+            if (!isNaN(prevIdx) && prevIdx >= 0 && prevIdx < combined.length) {
+                selectElem.value = String(prevIdx);
+            } else {
+                selectElem.value = "0";
+            }
+            selectElem.onchange = updateMasterDeckPreview;
+            updateMasterDeckPreview();
+        }
+
+        function sendCardFromDeck() {
+            const selectElem = document.getElementById('master-deck-select');
+            const idx = parseInt(selectElem.value, 10);
+            const combined = getCombinedDeck();
+            if (isNaN(idx) || !combined[idx]) { alert("Veuillez sélectionner une carte !"); return; }
+            if (!conn || conn.open !== true) { alert("La partenaire n'est pas connectée !"); return; }
+            const selectedCard = { type: combined[idx].type, prompt: combined[idx].prompt };
+            conn.send(selectedCard);
+            document.getElementById('feedback-content').innerHTML = `<span class="text-indigo-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(selectedCard.type))}) :</span> ${escapeHtml(selectedCard.prompt)}`;
+        }
+
+        function addNewCardToDeck() {
+            const promptInput = document.getElementById('new-card-prompt');
+            const typeSelect = document.getElementById('new-card-type');
+            const targetSelect = document.getElementById('new-card-target');
+            const text = promptInput.value.trim();
+            if (!text) { alert("Veuillez entrer le texte de la carte !"); return; }
+            const newCard = { type: typeSelect.value, prompt: text };
+            if (targetSelect.value === 'default') {
+                const defaultDeck = getDefaultDeck();
+                defaultDeck.push(newCard);
+                saveDefaultDeck(defaultDeck);
+                alert("Carte ajoutée aux Cartes de Base ! 📦");
+            } else {
+                const customDeck = getCustomDeck();
+                customDeck.push(newCard);
+                saveCustomDeck(customDeck);
+                alert("Carte ajoutée à la Pioche Personnalisée ! ✨");
+            }
+            promptInput.value = '';
+        }
+
+        function exportJSON() {
+            const dataToExport = { defaultDeck: getDefaultDeck(), customDeck: getCustomDeck() };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "osmose_hot_decks.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerImportJSON() { document.getElementById('json-file-input').click(); }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.defaultDeck && Array.isArray(importedData.defaultDeck)) saveDefaultDeck(importedData.defaultDeck);
+                    if (importedData.customDeck && Array.isArray(importedData.customDeck)) saveCustomDeck(importedData.customDeck);
+                    alert("Cartes importées avec succès ! 🎉");
+                    renderDeckManagerLists();
+                    populateMasterDeckSelect();
+                } catch(err) { alert("Erreur d'import : " + err.message); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function toggleDeckManager() {
+            const modal = document.getElementById('deck-manager-modal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) renderDeckManagerLists();
+        }
+
+        function renderDeckManagerLists() {
+            const customContainer = document.getElementById('custom-deck-list');
+            const defaultContainer = document.getElementById('default-deck-list');
+            const customDeck = getCustomDeck();
+            const defaultDeck = getDefaultDeck();
+            
+            document.getElementById('custom-count-badge').innerText = customDeck.length;
+            document.getElementById('default-count-badge').innerText = defaultDeck.length;
+
+            customContainer.innerHTML = customDeck.length === 0 ? `<p class="text-xs text-slate-500 italic py-2">Aucune carte personnalisée.</p>` : '';
+            customDeck.forEach((card, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-purple-500/30 space-y-2 text-left";
+                itemDiv.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <select id="edit-custom-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
+                            <option value="immediate" ${card.type === 'immediate' ? 'selected' : ''}>⚡ Action Immédiate</option>
+                            <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
+                            <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
+                            <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
+                            <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
+                        </select>
+                        <button onclick="deleteCustomCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
+                    </div>
+                    <input type="text" id="edit-custom-prompt-${index}" value="${escapeHtml(card.prompt)}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="updateCustomCard(${index})" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
+                `;
+                customContainer.appendChild(itemDiv);
+            });
+
+            defaultContainer.innerHTML = defaultDeck.length === 0 ? `<p class="text-xs text-slate-500 italic py-2">Aucune carte de base.</p>` : '';
+            defaultDeck.forEach((card, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-slate-800 p-3 rounded-2xl border border-blue-500/30 space-y-2 text-left";
+                itemDiv.innerHTML = `
+                    <div class="flex justify-between items-center gap-2">
+                        <select id="edit-default-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
+                            <option value="immediate" ${card.type === 'immediate' ? 'selected' : ''}>⚡ Action Immédiate</option>
+                            <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
+                            <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
+                            <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
+                            <option value="text" ${card.type === 'text' ? 'selected' : ''}>💬 Texte</option>
+                        </select>
+                        <button onclick="deleteDefaultCard(${index})" class="text-xs text-red-400 px-2 py-1 bg-red-950/40 border border-red-800/50 rounded-lg font-bold">🗑️ Supprimer</button>
+                    </div>
+                    <input type="text" id="edit-default-prompt-${index}" value="${escapeHtml(card.prompt)}" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="updateDefaultCard(${index})" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition">💾 Enregistrer</button>
+                `;
+                defaultContainer.appendChild(itemDiv);
+            });
+        }
+
+        function updateCustomCard(index) {
+            const customDeck = getCustomDeck();
+            const updatedPrompt = document.getElementById(`edit-custom-prompt-${index}`).value.trim();
+            if (!updatedPrompt) { alert("Le texte de la carte ne peut pas être vide."); return; }
+            customDeck[index] = { type: document.getElementById(`edit-custom-type-${index}`).value, prompt: updatedPrompt };
+            saveCustomDeck(customDeck);
+            renderDeckManagerLists();
+        }
+
+        function deleteCustomCard(index) {
+            if (confirm("Supprimer cette carte ?")) {
+                const customDeck = getCustomDeck();
+                customDeck.splice(index, 1);
+                saveCustomDeck(customDeck);
+                renderDeckManagerLists();
+            }
+        }
+
+        function updateDefaultCard(index) {
+            const defaultDeck = getDefaultDeck();
+            const updatedPrompt = document.getElementById(`edit-default-prompt-${index}`).value.trim();
+            if (!updatedPrompt) { alert("Le texte de la carte ne peut pas être vide."); return; }
+            defaultDeck[index] = { type: document.getElementById(`edit-default-type-${index}`).value, prompt: updatedPrompt };
+            saveDefaultDeck(defaultDeck);
+            renderDeckManagerLists();
+        }
+
+        function deleteDefaultCard(index) {
+            if (confirm("Supprimer cette carte ?")) {
+                const defaultDeck = getDefaultDeck();
+                defaultDeck.splice(index, 1);
+                saveDefaultDeck(defaultDeck);
+                renderDeckManagerLists();
+            }
+        }
+
+        function sendLiveCard() {
+            const promptInput = document.getElementById('live-card-prompt');
+            const typeSelect = document.getElementById('live-card-type');
+            const text = promptInput.value.trim();
+            if (!text) { alert("Veuillez écrire le texte de la carte."); return; }
+            if (!conn || conn.open !== true) { alert("Non connecté au partenaire !"); return; }
+            const payload = { type: typeSelect.value, prompt: text };
+            conn.send(payload);
+            document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(typeSelect.value))}) :</span> ${escapeHtml(text)}`;
+            promptInput.value = '';
+        }
+
+        // --- GESTION DU CHRONOMÈTRE MAÎTRE & SYNCHRO ---
+        let masterTimerInterval = null, masterTimeLeft = 0, isMasterTimerPaused = false;
+
+        function requestStartTimer(seconds) {
+            if (!conn || conn.open !== true) { alert("Non connecté au partenaire !"); return; }
+            startMasterTimerLocally(seconds);
+            conn.send({ type: 'start_timer', seconds: seconds });
+        }
+
+        function startMasterTimerLocally(seconds) {
+            stopMasterTimerLocally();
+            if (!seconds || seconds <= 0) return;
+            masterTimeLeft = seconds;
+            isMasterTimerPaused = false;
+            document.getElementById('master-timer-container').classList.remove('hidden');
+            updateMasterTimerDisplay();
+
+            masterTimerInterval = setInterval(() => {
+                if (!isMasterTimerPaused) {
+                    if (masterTimeLeft > 0) {
+                        masterTimeLeft--;
+                        updateMasterTimerDisplay();
+                    } else {
+                        stopMasterTimerLocally();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateMasterTimerDisplay() {
+            const minutes = Math.floor(masterTimeLeft / 60), seconds = masterTimeLeft % 60;
+            document.getElementById('master-timer-display').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function requestPauseTimer() {
+            if (!conn || conn.open !== true) return;
+            isMasterTimerPaused = !isMasterTimerPaused;
+            document.getElementById('master-timer-pause-btn').innerText = isMasterTimerPaused ? "Reprendre ▶️" : "Pause ⏸️";
+            conn.send({ type: 'pause_timer', isPaused: isMasterTimerPaused });
+        }
+
+        function requestStopTimer() {
+            if (conn && conn.open === true) {
+                conn.send({ type: 'stop_timer' });
+            }
+            stopMasterTimerLocally();
+        }
+
+        function stopMasterTimerLocally() {
+            clearInterval(masterTimerInterval);
+            masterTimerInterval = null;
+            isMasterTimerPaused = false;
+            const container = document.getElementById('master-timer-container');
+            if (container) container.classList.add('hidden');
+        }
+
+        // Chrono du côté Partenaire
+        let partnerTimerInterval = null, partnerTimeLeft = 0, isPartnerTimerPaused = false;
+
+        function startPartnerTimer(seconds) {
+            stopPartnerTimer();
+            partnerTimeLeft = seconds;
+            isPartnerTimerPaused = false;
+            document.getElementById('partner-giant-timer-container').classList.remove('hidden');
+            updatePartnerTimerDisplay();
+
+            partnerTimerInterval = setInterval(() => {
+                if (!isPartnerTimerPaused) {
+                    if (partnerTimeLeft > 0) {
+                        partnerTimeLeft--;
+                        updatePartnerTimerDisplay();
+                    } else {
+                        stopPartnerTimer();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updatePartnerTimerDisplay() {
+            const minutes = Math.floor(partnerTimeLeft / 60), seconds = partnerTimeLeft % 60;
+            document.getElementById('partner-giant-timer-display').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function stopPartnerTimer() {
+            clearInterval(partnerTimerInterval);
+            partnerTimerInterval = null;
+            isPartnerTimerPaused = false;
+            const container = document.getElementById('partner-giant-timer-container');
+            if (container) container.classList.add('hidden');
+        }
+
+        // --- PHOTOS & GALERIE INTERACTIVE ---
+        let incomingPhotoChunks = {};
+
+        function triggerPhotoCapture() {
+            if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
+            document.getElementById('camera-file-input').click();
+        }
+
+        function handleImageSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Ça te plaît en plan rapproché ?");
+            if (!questionText) {
+                event.target.value = '';
+                return;
+            }
+
+            const confirmSend = confirm(`Confirmer l'envoi de cette photo avec la question :\n"${questionText}" ?`);
+            if (!confirmSend) {
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onerror = function() {
+                    alert("Impossible de lire cette image depuis la galerie. Essayez avec une autre photo.");
+                };
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 250, MAX_HEIGHT = 250;
+                    let width = img.width, height = img.height;
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    canvas.width = width; canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.35);
+
+                    if (conn && conn.open === true) {
+                        const chunkSize = 8000;
+                        const totalChunks = Math.ceil(base64Data.length / chunkSize);
+                        const transferId = Date.now().toString();
+
+                        for (let i = 0; i < totalChunks; i++) {
+                            conn.send({
+                                type: 'photo_chunk',
+                                id: transferId,
+                                index: i,
+                                total: totalChunks,
+                                data: base64Data.slice(i * chunkSize, (i + 1) * chunkSize),
+                                prompt: questionText
+                            });
+                        }
+
+                        if (isMaster) {
+                            document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo envoyée !</span> En attente de réponse...`;
+                        }
+                        alert("Photo interactive envoyée ! 📸");
+                    } else {
+                        alert("Connexion interrompue : impossible d'envoyer la photo.");
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function showInteractivePhotoModal(imageSrc, promptText) {
+            let modalContentHTML = `
+                <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
+                <p class="text-sm text-white font-semibold">"${escapeHtml(promptText)}"</p>
+                <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black max-h-48 flex items-center justify-center">
+                    <img src="${imageSrc}" alt="Photo reçue" class="w-full object-cover">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="sendResponse('Photo Oui/Non', 'OUI (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold shadow text-white cursor-pointer text-sm">✅ OUI</button>
+                    <button onclick="sendResponse('Photo Oui/Non', 'NON (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold shadow text-white cursor-pointer text-sm">❌ NON</button>
+                </div>
+            `;
+            document.getElementById('photo-modal-content').innerHTML = modalContentHTML;
+            document.getElementById('photo-modal').classList.remove('hidden');
+        }
+
+        // --- ENVOI DE FICHIER AUDIO & VOCAL DIRECT (AVEC PROGRESSION) ---
+        let incomingAudioChunks = {};
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let voiceRecordInterval = null;
+        let voiceRecordSeconds = 0;
+
+        function setAudioProgress(pct, labelText) {
+            const box = isMaster ? document.getElementById('master-audio-progress') : document.getElementById('partner-audio-progress');
+            const bar = isMaster ? document.getElementById('master-audio-progress-bar') : document.getElementById('partner-audio-progress-bar');
+            const pctElem = isMaster ? document.getElementById('master-audio-progress-pct') : document.getElementById('partner-audio-progress-pct');
+            const labelElem = isMaster ? document.getElementById('master-audio-progress-label') : document.getElementById('partner-audio-progress-label');
+
+            if (!box || !bar || !pctElem || !labelElem) return;
+
+            if (pct === null) {
+                box.classList.add('hidden');
+                bar.style.width = '0%';
+                pctElem.innerText = '0%';
+                return;
+            }
+
+            box.classList.remove('hidden');
+            const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+            bar.style.width = clamped + '%';
+            pctElem.innerText = clamped + '%';
+            if (labelText) labelElem.innerText = labelText;
+        }
+
+        function sendBase64AudioInChunks(audioBase64, labelText) {
+            if (!conn || conn.open !== true) {
+                alert("Connexion interrompue : impossible d'envoyer l'audio.");
+                return;
+            }
+            const chunkSize = 16000;
+            const totalChunks = Math.ceil(audioBase64.length / chunkSize);
+            const transferId = 'aud_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+            setAudioProgress(0, `Envoi : ${labelText}`);
+
+            function sendStep(idx) {
+                if (idx >= totalChunks) {
+                    setAudioProgress(100, `Envoyé : ${labelText}`);
+                    setTimeout(() => setAudioProgress(null), 1200);
+                    if (isMaster) {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">🎵 Audio envoyé :</span> ${escapeHtml(labelText)}`;
+                    }
+                    return;
+                }
+                if (!conn || conn.open !== true) {
+                    setAudioProgress(null);
+                    alert("Connexion interrompue pendant l'envoi de l'audio.");
+                    return;
+                }
+                conn.send({
+                    type: 'audio_chunk',
+                    id: transferId,
+                    index: idx,
+                    total: totalChunks,
+                    label: labelText,
+                    data: audioBase64.slice(idx * chunkSize, (idx + 1) * chunkSize)
+                });
+                const currentPct = ((idx + 1) / totalChunks) * 100;
+                setAudioProgress(currentPct, `Envoi : ${labelText}`);
+                setTimeout(() => sendStep(idx + 1), 15);
+            }
+
+            sendStep(0);
+        }
+
+        function triggerAudioCapture() {
+            if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
+            document.getElementById('audio-file-input').click();
+        }
+
+        function handleAudioSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 6 * 1024 * 1024) {
+                alert("Fichier trop lourd (maximum 6 Mo pour un transfert fluide sur mobile).");
+                event.target.value = '';
+                return;
+            }
+
+            const confirmAudio = confirm(`Envoyer le fichier audio "${file.name}" ?`);
+            if (!confirmAudio) {
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                sendBase64AudioInChunks(e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        async function toggleVoiceRecording() {
+            const btnElem = isMaster ? document.getElementById('master-voice-btn') : document.getElementById('partner-voice-btn');
+            const statusElem = isMaster ? document.getElementById('master-voice-status') : document.getElementById('partner-voice-status');
+
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                return;
+            }
+
+            if (!conn || conn.open !== true) {
+                alert("Non connecté !");
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("L'enregistrement vocal n'est pas supporté sur ce navigateur.");
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                voiceRecordSeconds = 0;
+
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    clearInterval(voiceRecordInterval);
+                    voiceRecordInterval = null;
+                    stream.getTracks().forEach(track => track.stop());
+
+                    btnElem.innerText = "🎙️ Vocal Direct";
+                    btnElem.classList.replace('bg-amber-600', 'bg-rose-700');
+                    statusElem.classList.add('hidden');
+
+                    const durationLabel = `Vocal (${voiceRecordSeconds}s)`;
+                    const mimeType = mediaRecorder.mimeType || 'audio/webm';
+                    const blob = new Blob(audioChunks, { type: mimeType });
+                    mediaRecorder = null;
+
+                    if (blob.size > 0 && conn && conn.open === true) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            sendBase64AudioInChunks(e.target.result, durationLabel);
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                };
+
+                mediaRecorder.start();
+                btnElem.innerText = "⏹️ Stop & Envoyer";
+                btnElem.classList.replace('bg-rose-700', 'bg-amber-600');
+                statusElem.innerText = "Enregistrement vocal en cours... (0s)";
+                statusElem.classList.remove('hidden');
+
+                voiceRecordInterval = setInterval(() => {
+                    voiceRecordSeconds++;
+                    statusElem.innerText = `Enregistrement vocal en cours... (${voiceRecordSeconds}s)`;
+                    if (voiceRecordSeconds >= 30 && mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, 1000);
+            } catch (err) {
+                alert("Erreur micro : " + err.message);
+            }
+        }
+
+        function showAudioModal(audioSrc, labelText) {
+            document.getElementById('photo-modal-content').innerHTML = `
+                <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">🎵 Message Audio Reçu</h3>
+                <p class="text-xs text-slate-300 font-medium">${escapeHtml(labelText || 'Audio')}</p>
+                <audio src="${audioSrc}" controls autoplay class="w-full mt-2"></audio>
+                <button onclick="closePhotoModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition mt-3">Fermer</button>
+            `;
+            document.getElementById('photo-modal').classList.remove('hidden');
+        }
+
+        function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
+
+        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false, isDedicatedCamera = false, currentFacingMode = 'user';
+
+        window.onload = () => {
+            try {
+                updateDeckCount();
+                populateMasterDeckSelect();
+                const urlParams = new URLSearchParams(window.location.search);
+                const roomParam = urlParams.get('room');
+                if (roomParam && roomParam.length === 4) {
+                    setupPartnerModal('partner');
+                    const codeInput = document.getElementById('room-code-input');
+                    if (codeInput) codeInput.value = roomParam;
+                    setTimeout(() => { connectAsPartner(); }, 500);
+                }
+            } catch (err) {
+                console.error("Erreur d'initialisation :", err);
+            }
+        };
+
+        function toggleHelpModal() { document.getElementById('help-modal').classList.toggle('hidden'); }
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(() => {}); }
+            else { if (document.exitFullscreen) document.exitFullscreen(); }
+        }
+
+        function setupMaster() {
+            isMaster = true;
+            isDedicatedCamera = false;
+            requestWakeLock();
+            currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('display-room-code').innerText = currentRoomCode;
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('master-screen').classList.remove('hidden');
+            populateMasterDeckSelect();
+
+            peer = new Peer('osmose-' + currentRoomCode);
+            peer.on('connection', (connection) => {
+                if (connection.metadata && connection.metadata.role === 'camera') {
+                    dedicatedCameraConn = connection;
+                    connection.on('data', (d) => {
+                        if (d && d.type === 'zoom_synced' && typeof d.zoom === 'number') {
+                            setMasterDedicatedZoomPreview(d.zoom);
+                        }
+                    });
+                    return;
+                }
+                conn = connection;
+                setupConnectionEvents();
+                updateStatus('Connecté au Duo ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+            });
+            peer.on('call', (call) => {
+                if (call.metadata && call.metadata.role === 'camera') {
+                    call.answer();
+                    call.on('stream', (camStream) => {
+                        const camVideo = document.getElementById('dedicated-remote-video');
+                        const camBox = document.getElementById('dedicated-cam-container');
+                        if (camVideo && camBox) {
+                            camVideo.srcObject = camStream;
+                            camBox.classList.remove('hidden');
+                        }
+                    });
+                    call.on('close', () => {
+                        hideDedicatedCameraStream();
+                    });
+                    return;
+                }
+                currentCall = call;
+                call.answer(localStream);
+                setupCallEvents(call);
+            });
+        }
+
+        function hideDedicatedCameraStream() {
+            const camVideo = document.getElementById('dedicated-remote-video');
+            const camBox = document.getElementById('dedicated-cam-container');
+            if (camVideo) {
+                camVideo.srcObject = null;
+                camVideo.style.transform = 'scale(1)';
+            }
+            if (camBox) camBox.classList.add('hidden');
+        }
+
+        function copyInviteLink() {
+            navigator.clipboard.writeText(`${window.location.href.split('?')[0]}?room=${currentRoomCode}`).then(() => {
+                alert("Lien d'invitation copié !");
+            });
+        }
+
+        function setupPartnerModal(mode = 'partner') {
+            isDedicatedCamera = (mode === 'camera');
+            const titleElem = document.getElementById('connect-modal-title');
+            if (titleElem) {
+                titleElem.innerText = isDedicatedCamera ? "Connexion Caméra Dédiée" : "Connexion au salon";
+            }
+            document.getElementById('role-selection').classList.add('hidden');
+            document.getElementById('partner-modal').classList.remove('hidden');
+        }
+
+        function connectAsPartner() {
+            const codeInput = document.getElementById('room-code-input');
+            const code = codeInput.value.trim().toUpperCase();
+            
+            if (code.length !== 4) {
+                alert("Veuillez entrer un code salon valide à 4 chiffres.");
+                return;
+            }
+
+            requestWakeLock();
+            document.getElementById('partner-modal').classList.add('hidden');
+
+            if (isDedicatedCamera) {
+                document.getElementById('dedicated-camera-screen').classList.remove('hidden');
+                updateStatus('Caméra Dédiée prête', 'text-purple-300', 'bg-purple-900/50', 'border-purple-700');
+                currentFacingMode = 'environment';
+                const switchBtn = document.getElementById('dedicated-switch-cam-btn');
+                if (switchBtn) switchBtn.innerText = "🔄 Mode Selfie";
+
+                if (peer) {
+                    try { peer.destroy(); } catch(e) {}
+                }
+                peer = new Peer();
+                peer.on('open', () => {
+                    const masterId = 'osmose-' + code;
+                    dedicatedCameraConn = peer.connect(masterId, { metadata: { role: 'camera' } });
+                    dedicatedCameraConn.on('data', (d) => {
+                        if (d && d.type === 'set_zoom' && typeof d.zoom === 'number') {
+                            setDedicatedZoom(d.zoom);
+                        }
+                    });
+                    startDedicatedCameraStream(masterId).catch((err) => {
+                        alert("Erreur caméra dédiée : " + err.message);
+                    });
+                });
+                peer.on('error', (err) => {
+                    console.error("Erreur PeerJS Caméra Dédiée :", err);
+                });
+                return;
+            }
+
+            document.getElementById('partner-screen').classList.remove('hidden');
+            updateStatus('Connexion en cours...', 'text-amber-300', 'bg-amber-900/50', 'border-amber-700');
+
+            if (peer) {
+                try { peer.destroy(); } catch(e) {}
+            }
+
+            peer = new Peer();
+
+            peer.on('open', () => {
+                const targetId = 'osmose-' + code;
+                conn = peer.connect(targetId);
+
+                if (!conn) {
+                    alert("Impossible de joindre le salon.");
+                    location.reload();
+                    return;
+                }
+
+                setupConnectionEvents();
+
+                setTimeout(() => {
+                    if (!conn || conn.open !== true) {
+                        alert("Impossible de se connecter au Maître du Jeu. Vérifiez que le code est correct et que le Maître a bien sa page ouverte.");
+                        location.reload();
+                    }
+                }, 8000);
+            });
+
+            peer.on('error', (err) => {
+                console.error("Erreur PeerJS :", err);
+                alert("Erreur de connexion réseau : " + err.type);
+                location.reload();
+            });
+
+            peer.on('call', (call) => {
+                currentCall = call;
+                call.answer(localStream);
+                setupCallEvents(call);
+            });
+        }
+
+        async function startDedicatedCameraStream(masterPeerId) {
+            const localVideoElem = document.getElementById('dedicated-local-video');
+            const toggleBtn = document.getElementById('dedicated-cam-toggle-btn');
+            const badge = document.getElementById('dedicated-stream-badge');
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: currentFacingMode } },
+                audio: false
+            });
+
+            if (localVideoElem) {
+                localVideoElem.srcObject = localStream;
+                localVideoElem.style.transform = `scale(${currentDedicatedZoom})`;
+                localVideoElem.classList.remove('hidden');
+            }
+            if (toggleBtn) {
+                toggleBtn.innerText = "🛑 Arrêter le flux";
+                toggleBtn.classList.replace('bg-indigo-600', 'bg-red-600');
+                toggleBtn.classList.replace('hover:bg-indigo-500', 'hover:bg-red-500');
+            }
+            if (badge) {
+                badge.innerText = "Envoi vers le Maître 🔴";
+                badge.className = "text-xs px-2.5 py-0.5 rounded-full bg-purple-900/60 text-purple-200 border border-purple-500/50";
+            }
+
+            await applyHardwareZoomIfSupported(currentDedicatedZoom);
+
+            const newVideoTrack = localStream.getVideoTracks()[0];
+            if (currentCall && currentCall.peerConnection) {
+                const videoSender = currentCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (videoSender && newVideoTrack) {
+                    await videoSender.replaceTrack(newVideoTrack);
+                }
+            } else if (peer && masterPeerId) {
+                currentCall = peer.call(masterPeerId, localStream, { metadata: { role: 'camera' } });
+            }
+        }
+
+        async function toggleDedicatedCamera() {
+            const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
+            const masterPeerId = code.length === 4 ? 'osmose-' + code : null;
+            const localVideoElem = document.getElementById('dedicated-local-video');
+            const toggleBtn = document.getElementById('dedicated-cam-toggle-btn');
+            const badge = document.getElementById('dedicated-stream-badge');
+
+            if (!localStream) {
+                try {
+                    await startDedicatedCameraStream(masterPeerId);
+                } catch (err) {
+                    alert("Erreur caméra dédiée : " + err.message);
+                }
+            } else {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                if (localVideoElem) {
+                    localVideoElem.srcObject = null;
+                    localVideoElem.style.transform = 'scale(1)';
+                }
+                if (currentCall) {
+                    try { currentCall.close(); } catch(e) {}
+                    currentCall = null;
+                }
+                if (toggleBtn) {
+                    toggleBtn.innerText = "🎥 Démarrer le flux";
+                    toggleBtn.classList.replace('bg-red-600', 'bg-indigo-600');
+                    toggleBtn.classList.replace('hover:bg-red-500', 'hover:bg-indigo-500');
+                }
+                if (badge) {
+                    badge.innerText = "Flux coupé";
+                    badge.className = "text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+                }
+            }
+        }
+
+        function setupCallEvents(call) {
+            call.on('stream', (remoteStream) => {
+                const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+                const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
+                
+                remoteElem.srcObject = remoteStream;
+                containerElem.classList.remove('hidden');
+            });
+
+            call.on('close', () => {
+                hideRemoteVideo();
+            });
+        }
+
+        function hideRemoteVideo() {
+            const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+            const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
+            remoteElem.srcObject = null;
+            containerElem.classList.add('hidden');
+        }
+
+        function setupConnectionEvents() {
+            conn.on('open', () => {
+                updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+                syncCustomDeckToPartner();
+            });
+
+            conn.on('data', (data) => {
+                if (!data || typeof data !== 'object') return;
+
+                if (data.type === 'flash_reaction') {
+                    if (!isMaster) {
+                        handleIncomingFlashReaction(data);
+                    }
+                    return;
+                }
+
+                if (data.type === 'whisper_chat') {
+                    if (isMaster) {
+                        handleIncomingWhisper(data);
+                    }
+                    return;
+                }
+
+                if (data.type === 'whisper_reply') {
+                    if (!isMaster) {
+                        handleIncomingWhisperReply(data);
+                    }
+                    return;
+                }
+
+                if (data.type === 'photo_chunk') {
+                    if (!incomingPhotoChunks[data.id]) {
+                        incomingPhotoChunks[data.id] = {
+                            chunks: new Array(data.total),
+                            received: 0,
+                            total: data.total,
+                            prompt: data.prompt
+                        };
+                    }
+                    const transfer = incomingPhotoChunks[data.id];
+                    if (!transfer.chunks[data.index]) {
+                        transfer.chunks[data.index] = data.data;
+                        transfer.received++;
+                    }
+                    if (transfer.received === transfer.total) {
+                        const fullImage = transfer.chunks.join('');
+                        const promptText = transfer.prompt;
+                        delete incomingPhotoChunks[data.id];
+                        showInteractivePhotoModal(fullImage, promptText);
+                    }
+                    return;
+                }
+
+                if (data.type === 'audio_chunk') {
+                    if (!incomingAudioChunks[data.id]) {
+                        incomingAudioChunks[data.id] = {
+                            chunks: new Array(data.total),
+                            received: 0,
+                            total: data.total,
+                            label: data.label
+                        };
+                    }
+                    const transfer = incomingAudioChunks[data.id];
+                    if (!transfer.chunks[data.index]) {
+                        transfer.chunks[data.index] = data.data;
+                        transfer.received++;
+                    }
+                    if (transfer.received === transfer.total) {
+                        const fullAudio = transfer.chunks.join('');
+                        const labelText = transfer.label;
+                        delete incomingAudioChunks[data.id];
+                        showAudioModal(fullAudio, labelText);
+                    }
+                    return;
+                }
+
+                if (data.type === 'photo_interactive') {
+                    showInteractivePhotoModal(data.image, data.prompt);
+                    return;
+                }
+
+                if (data.type === 'sync_custom_deck' && Array.isArray(data.deck)) {
+                    localStorage.setItem('osmose_custom_deck', JSON.stringify(sanitizeCardList(data.deck)));
+                    return;
+                }
+
+                if (data.type === 'stop_video') {
+                    hideRemoteVideo();
+                    return;
+                }
+                
+                if (!isMaster) {
+                    if (data.type === 'start_timer') { startPartnerTimer(data.seconds); return; }
+                    if (data.type === 'pause_timer') { isPartnerTimerPaused = data.isPaused; return; }
+                    if (data.type === 'stop_timer') { stopPartnerTimer(); return; }
+                }
+
+                if (isMaster) {
+                    if (data.type === 'typing') {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
+                    } else if (data.type && data.prompt) {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Pioche (${escapeHtml(getCardTypeLabel(data.type))})</span> : ${escapeHtml(data.prompt)}`;
+                    } else if (data.action && data.value) {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`;
+                    }
+                } else if (data.type && data.prompt) {
+                    displayCardToPartner(data);
+                }
+            });
+            conn.on('close', () => updateStatus('Déconnecté', 'text-red-300', 'bg-red-900/50', 'border-red-700'));
+        }
+
+        function drawCustomCard() {
+            const customDeck = getCustomDeck();
+            if (customDeck.length === 0) {
+                alert("Votre pioche personnalisée est vide ! Créez d'abord de nouvelles cartes depuis l'écran du Maître.");
+                return;
+            }
+            const rawCard = customDeck[Math.floor(Math.random() * customDeck.length)];
+            const selectedCard = { type: rawCard.type, prompt: rawCard.prompt };
+            displayCardToPartner(selectedCard);
+            if (conn && conn.open === true) conn.send(selectedCard);
+        }
+
+        let newCardBadgeTimeout = null;
+
+        function displayCardToPartner(cardData) {
+            if (!cardData || !cardData.prompt) return;
+            document.getElementById('mystery-card').classList.add('hidden');
+            const cardContainer = document.getElementById('active-card-container');
+            const badgeElem = document.getElementById('card-type-badge');
+            const newBadge = document.getElementById('card-new-badge');
+            const immediateBanner = document.getElementById('immediate-action-banner');
+
+            cardContainer.classList.remove('hidden', 'ring-2', 'ring-pink-400');
+            void cardContainer.offsetWidth;
+            cardContainer.classList.add('ring-2', 'ring-pink-400');
+            setTimeout(() => {
+                cardContainer.classList.remove('ring-2', 'ring-pink-400');
+            }, 900);
+
+            if (newBadge) {
+                newBadge.classList.remove('hidden');
+                clearTimeout(newCardBadgeTimeout);
+                newCardBadgeTimeout = setTimeout(() => {
+                    newBadge.classList.add('hidden');
+                }, 2500);
+            }
+
+            document.getElementById('card-prompt-text').innerText = cardData.prompt;
+
+            stopPartnerTimer();
+
+            if (cardData.type === 'immediate') {
+                cardContainer.classList.remove('border-pink-500/50');
+                cardContainer.classList.add('border-amber-500', 'bg-amber-950/20');
+                badgeElem.className = "text-xs uppercase tracking-widest text-amber-400 font-extrabold";
+                badgeElem.innerText = "⚡ ACTION IMMÉDIATE";
+                immediateBanner.classList.remove('hidden');
+            } else {
+                cardContainer.classList.remove('border-amber-500', 'bg-amber-950/20');
+                cardContainer.classList.add('border-pink-500/50');
+                badgeElem.className = "text-xs uppercase tracking-widest text-pink-400 font-bold";
+                badgeElem.innerText = getCardTypeLabel(cardData.type);
+                immediateBanner.classList.add('hidden');
+            }
+
+            const optionsContainer = document.getElementById('interaction-options');
+            optionsContainer.innerHTML = '';
+
+            if (cardData.type === 'immediate') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
+                    </div>`;
+            } else if (cardData.type === 'defi') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">✨</button>
+                        <button onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">😈</button>
+                    </div>`;
+            } else if (cardData.type === 'vote') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Vote', 'Aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">❤️</button>
+                        <button onclick="sendResponse('Vote', 'Refus_Aime_Pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
+                    </div>`;
+            } else if (cardData.type === 'yesno') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Oui/Non', 'OUI')" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">✅ OUI</button>
+                        <button onclick="sendResponse('Oui/Non', 'NON')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">❌ NON</button>
+                    </div>`;
+            } else if (cardData.type === 'text') {
+                optionsContainer.innerHTML = `
+                    <div class="space-y-3">
+                        <input type="text" id="partner-text-input" placeholder="Votre réponse..." oninput="notifyTyping()" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
+                        <button onclick="sendTextResponse()" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">Envoyer 💌</button>
+                    </div>`;
+            }
+        }
+
+        let typingTimeout = null;
+        function notifyTyping() {
+            if (conn && conn.open === true && !typingTimeout) {
+                conn.send({ type: 'typing' });
+                typingTimeout = setTimeout(() => { typingTimeout = null; }, 2000);
+            }
+        }
+
+        function sendResponse(actionType, value) {
+            if (conn && conn.open === true) {
+                let displayValue = value;
+                if (value === 'Veto') displayValue = 'Veto / Refuse';
+                if (value === 'Refus_Aime_Pas') displayValue = 'J aime pas';
+                if (value === 'Executee') displayValue = 'Action executee ! ⚡';
+
+                conn.send({ action: actionType, value: displayValue });
+                alert("Réponse envoyée !");
+            } else {
+                alert("Erreur : Non connecté au Maître du Jeu.");
+            }
+        }
+
+        function sendTextResponse() {
+            const inputElem = document.getElementById('partner-text-input');
+            if (inputElem && inputElem.value.trim()) {
+                sendResponse('Reponse Libre', inputElem.value.trim());
+                inputElem.value = '';
+            }
+        }
+
+        async function startCameraStream(targetIdForCall = null) {
+            const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
+            const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
+            const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: currentFacingMode } },
+                audio: true
+            });
+
+            localVideoElem.srcObject = localStream;
+            localVideoElem.classList.remove('hidden');
+            btnElem.innerText = "🛑 Couper ma Caméra";
+            btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
+
+            if (switchBtn) {
+                switchBtn.classList.remove('hidden');
+                switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
+            }
+
+            const newVideoTrack = localStream.getVideoTracks()[0];
+            const newAudioTrack = localStream.getAudioTracks()[0];
+
+            if (currentCall && currentCall.peerConnection) {
+                const senders = currentCall.peerConnection.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                if (videoSender && newVideoTrack) {
+                    await videoSender.replaceTrack(newVideoTrack);
+                }
+                if (audioSender && newAudioTrack) {
+                    await audioSender.replaceTrack(newAudioTrack);
+                }
+            } else if (conn && peer && targetIdForCall) {
+                currentCall = peer.call(targetIdForCall, localStream);
+                setupCallEvents(currentCall);
+            }
+        }
+
+        async function switchCameraFacingMode() {
+            if (!localStream) return;
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+            if (isDedicatedCamera) {
+                const switchBtn = document.getElementById('dedicated-switch-cam-btn');
+                if (switchBtn) {
+                    switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
+                }
+                const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
+                try {
+                    await startDedicatedCameraStream(code.length === 4 ? 'osmose-' + code : null);
+                } catch (err) {
+                    alert("Impossible de basculer de caméra : " + err.message);
+                }
+                return;
+            }
+
+            try {
+                await startCameraStream();
+            } catch (err) {
+                alert("Impossible de basculer de caméra : " + err.message);
+            }
+        }
+
+        async function toggleVideo() {
+            const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
+            const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
+            const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
+
+            if (!localStream) {
+                try {
+                    const targetId = conn && peer ? (isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim().toUpperCase()) : null;
+                    await startCameraStream(targetId);
+                } catch (err) { alert("Erreur caméra : " + err.message); }
+            } else {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                localVideoElem.srcObject = null;
+                localVideoElem.classList.add('hidden');
+                if (switchBtn) switchBtn.classList.add('hidden');
+                
+                btnElem.innerText = "🎥 Activer ma Caméra";
+                btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
+                
+                if (conn && conn.open === true) {
+                    conn.send({ type: 'stop_video' });
+                }
+
+                if (currentCall) {
+                    currentCall.close();
+                    currentCall = null;
+                }
+            }
+        }
+
+        function updateStatus(text, textColor, bgCol, borderCol) {
+            const statusDiv = document.getElementById('connection-status');
+            statusDiv.innerText = text;
+            statusDiv.className = `text-xs px-3 py-1 rounded-full ${textColor} ${bgCol} border ${borderCol}`;
+        }
+    </script>
+</body>
+</html>
