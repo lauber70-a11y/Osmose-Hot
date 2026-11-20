@@ -198,7 +198,7 @@
                         <span id="master-whisper-reply-status" class="hidden text-[10px] text-emerald-300 font-medium">Envoyé ✨</span>
                     </div>
                     <div class="flex flex-wrap gap-1.5">
-                        <button onclick="sendQuickMasterWhisperReply(\"J'arrive\")" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">🏃 J'arrive</button>
+                        <button onclick="sendQuickMasterWhisperReply('J\'arrive')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">🏃 J'arrive</button>
                         <button onclick="sendQuickMasterWhisperReply('Bien noté 😏')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">Bien noté 😏</button>
                         <button onclick="sendQuickMasterWhisperReply('Montre-moi')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">👀 Montre-moi</button>
                     </div>
@@ -401,7 +401,7 @@
             </div>
 
             <!-- ENCART PETIT MOT LIBRE (INDÉPENDANT DE LA CARTE ACTIVE) -->
-            <div id="partner-whisper-box" class="bg-slate-900/95 p-4 rounded-2xl border border-pink-500/30 space-y-2.5 text-left shadow-lg">
+            <div id="partner-whisper-box" class="bg-slate-900/95 p-4 rounded-2xl border border-pink-500/30 space-y-2.5 text-left shadow-lg overflow-hidden">
                 <div class="flex items-center justify-between">
                     <h3 class="text-xs font-bold text-pink-300 uppercase tracking-wider">🤫 Glisser un petit mot</h3>
                     <span class="text-[10px] text-slate-400">Hors défi</span>
@@ -415,9 +415,9 @@
                     <button onclick="sendQuickWhisper('Encore ?')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">😏 Encore ?</button>
                     <button onclick="sendQuickWhisper('Approche-toi')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">💋 Approche-toi</button>
                 </div>
-                <div class="flex gap-2">
-                    <input type="text" id="partner-whisper-input" onkeydown="if(event.key==='Enter') sendWhisperMessage();" placeholder="Écrire un petit mot à tout moment..." class="flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
-                    <button onclick="sendWhisperMessage()" class="px-3.5 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-xs text-white shadow transition">Envoyer</button>
+                <div class="flex items-center gap-2 w-full">
+                    <input type="text" id="partner-whisper-input" onkeydown="if(event.key==='Enter') sendWhisperMessage();" placeholder="Écrire un petit mot à tout moment..." class="min-w-0 flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="sendWhisperMessage()" class="shrink-0 px-3 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-xs text-white shadow transition">Envoyer</button>
                 </div>
                 <p id="partner-whisper-status" class="hidden text-[11px] text-emerald-300 font-medium">Petit mot envoyé ✨</p>
             </div>
@@ -1961,3 +1961,4 @@
     </script>
 </body>
 </html>
+```[cite: 1]
