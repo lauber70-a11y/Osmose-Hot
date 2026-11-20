@@ -36,7 +36,7 @@
             <div class="space-y-4 text-sm text-slate-300">
                 <div>
                     <h3 class="font-bold text-white mb-1">🎯 Objectif</h3>
-                    <p>Partager un moment intime, complice et sur-mesure en duo, entre défis, actions immédiates, votes, discussions et photos instantanées.</p>
+                    <p>Partager un moment intime, complice et sur-mesure en duo, entre défis, actions immédiates, votes, discussions, audios et photos instantanées.</p>
                 </div>
 
                 <div class="bg-amber-950/30 border border-amber-500/30 p-3 rounded-xl">
@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <!-- MODALE PHOTO REÇUE / INTERACTIVE -->
+    <!-- MODALE PHOTO / AUDIO REÇU -->
     <div id="photo-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
         <div id="photo-modal-content" class="bg-slate-900 border border-pink-500/50 rounded-3xl max-w-sm w-full p-4 space-y-4 shadow-2xl text-center">
             <!-- Rempli dynamiquement -->
@@ -103,8 +103,9 @@
         </div>
     </div>
 
-    <!-- Input file pour la galerie -->
+    <!-- Inputs fichiers cachés -->
     <input type="file" id="camera-file-input" accept="image/*" class="hidden" onchange="handleImageSelection(event)">
+    <input type="file" id="audio-file-input" accept="audio/*" class="hidden" onchange="handleAudioSelection(event)">
 
     <!-- Contenu Principal -->
     <main class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col justify-center items-center">
@@ -134,9 +135,21 @@
                 </button>
             </div>
 
-            <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-                <span>📸</span> Envoyer une photo & question Oui/Non
-            </button>
+            <!-- Médias rapides : Photo + Fichier Audio + Vocal Direct -->
+            <div class="space-y-2">
+                <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>📸</span> Envoyer une photo & question Oui/Non
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="triggerAudioCapture()" class="py-3 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-pink-200">
+                        <span>🎵</span> Fichier Audio
+                    </button>
+                    <button onclick="toggleVoiceRecording()" id="master-voice-btn" class="py-3 px-2 bg-rose-700 hover:bg-rose-600 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-white">
+                        <span>🎙️</span> Vocal Direct
+                    </button>
+                </div>
+                <p id="master-voice-status" class="hidden text-xs text-rose-300 text-center font-semibold animate-pulse">Enregistrement vocal en cours... (0s)</p>
+            </div>
 
             <!-- Choisir et envoyer depuis la pioche -->
             <div class="bg-gradient-to-r from-indigo-950/40 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 space-y-3">
@@ -223,9 +236,20 @@
         <!-- ÉCRAN PARTENAIRE -->
         <div id="partner-screen" class="hidden w-full space-y-6 text-center">
             
-            <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
-                <span>📸</span> Envoyer une photo & question Oui/Non
-            </button>
+            <div class="space-y-2">
+                <button onclick="triggerPhotoCapture()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-2xl font-bold text-sm shadow-md active:scale-95 transition flex items-center justify-center gap-2">
+                    <span>📸</span> Envoyer une photo & question Oui/Non
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="triggerAudioCapture()" class="py-3 px-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-pink-200">
+                        <span>🎵</span> Fichier Audio
+                    </button>
+                    <button onclick="toggleVoiceRecording()" id="partner-voice-btn" class="py-3 px-2 bg-rose-700 hover:bg-rose-600 rounded-2xl font-bold text-xs shadow active:scale-95 transition flex items-center justify-center gap-1.5 text-white">
+                        <span>🎙️</span> Vocal Direct
+                    </button>
+                </div>
+                <p id="partner-voice-status" class="hidden text-xs text-rose-300 text-center font-semibold animate-pulse">Enregistrement vocal en cours... (0s)</p>
+            </div>
 
             <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 p-4 rounded-3xl border border-pink-500/40 shadow-lg space-y-3">
                 <h3 class="text-sm font-bold text-pink-300 uppercase tracking-wider">Pioche ton propre défi</h3>
@@ -280,7 +304,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Pioche Personnalisée Synchronisée
+        Osmose Hot • Fichier Audio & Vocal Direct
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -637,6 +661,8 @@
         }
 
         // --- PHOTOS & GALERIE INTERACTIVE ---
+        let incomingPhotoChunks = {};
+
         function triggerPhotoCapture() {
             if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
             document.getElementById('camera-file-input').click();
@@ -647,7 +673,16 @@
             if (!file) return;
 
             const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Tu en penses quoi ?");
-            if (!questionText) return;
+            if (!questionText) {
+                event.target.value = '';
+                return;
+            }
+
+            const confirmSend = confirm(`Confirmer l'envoi de cette photo avec la question :\n"${questionText}" ?`);
+            if (!confirmSend) {
+                event.target.value = '';
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -657,19 +692,34 @@
                 };
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 300, MAX_HEIGHT = 300;
+                    const MAX_WIDTH = 250, MAX_HEIGHT = 250;
                     let width = img.width, height = img.height;
                     if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
                     else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
                     canvas.width = width; canvas.height = height;
                     canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.35);
+
                     if (conn && conn.open === true) {
-                        conn.send({
-                            type: 'photo_interactive',
-                            image: canvas.toDataURL('image/jpeg', 0.4),
-                            prompt: questionText
-                        });
+                        const chunkSize = 8000;
+                        const totalChunks = Math.ceil(base64Data.length / chunkSize);
+                        const transferId = Date.now().toString();
+
+                        for (let i = 0; i < totalChunks; i++) {
+                            conn.send({
+                                type: 'photo_chunk',
+                                id: transferId,
+                                index: i,
+                                total: totalChunks,
+                                data: base64Data.slice(i * chunkSize, (i + 1) * chunkSize),
+                                prompt: questionText
+                            });
+                        }
+
+                        if (isMaster) {
+                            document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo envoyée !</span> En attente de réponse...`;
+                        }
                         alert("Photo interactive envoyée ! 📸");
                     } else {
                         alert("Connexion interrompue : impossible d'envoyer la photo.");
@@ -679,6 +729,174 @@
             };
             reader.readAsDataURL(file);
             event.target.value = '';
+        }
+
+        function showInteractivePhotoModal(imageSrc, promptText) {
+            let modalContentHTML = `
+                <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
+                <p class="text-sm text-white font-semibold">"${promptText}"</p>
+                <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black max-h-48 flex items-center justify-center">
+                    <img src="${imageSrc}" alt="Photo reçue" class="w-full object-cover">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="sendResponse('Photo Oui/Non', 'OUI (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold shadow text-white cursor-pointer text-sm">✅ OUI</button>
+                    <button onclick="sendResponse('Photo Oui/Non', 'NON (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold shadow text-white cursor-pointer text-sm">❌ NON</button>
+                </div>
+            `;
+            document.getElementById('photo-modal-content').innerHTML = modalContentHTML;
+            document.getElementById('photo-modal').classList.remove('hidden');
+        }
+
+        // --- ENVOI DE FICHIER AUDIO & VOCAL DIRECT ---
+        let incomingAudioChunks = {};
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let voiceRecordInterval = null;
+        let voiceRecordSeconds = 0;
+
+        function sendBase64AudioInChunks(audioBase64, labelText) {
+            if (!conn || conn.open !== true) {
+                alert("Connexion interrompue : impossible d'envoyer l'audio.");
+                return;
+            }
+            const chunkSize = 16000;
+            const totalChunks = Math.ceil(audioBase64.length / chunkSize);
+            const transferId = 'aud_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+            function sendStep(idx) {
+                if (idx >= totalChunks) return;
+                if (!conn || conn.open !== true) {
+                    alert("Connexion interrompue pendant l'envoi de l'audio.");
+                    return;
+                }
+                conn.send({
+                    type: 'audio_chunk',
+                    id: transferId,
+                    index: idx,
+                    total: totalChunks,
+                    label: labelText,
+                    data: audioBase64.slice(idx * chunkSize, (idx + 1) * chunkSize)
+                });
+                setTimeout(() => sendStep(idx + 1), 15);
+            }
+
+            sendStep(0);
+            if (isMaster) {
+                document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">🎵 Audio envoyé :</span> ${labelText}`;
+            }
+            alert(`Audio envoyé (${labelText}) ! 🎵`);
+        }
+
+        function triggerAudioCapture() {
+            if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
+            document.getElementById('audio-file-input').click();
+        }
+
+        function handleAudioSelection(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 6 * 1024 * 1024) {
+                alert("Fichier trop lourd (maximum 6 Mo pour un transfert fluide sur mobile).");
+                event.target.value = '';
+                return;
+            }
+
+            const confirmAudio = confirm(`Envoyer le fichier audio "${file.name}" ?`);
+            if (!confirmAudio) {
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                sendBase64AudioInChunks(e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        async function toggleVoiceRecording() {
+            const btnElem = isMaster ? document.getElementById('master-voice-btn') : document.getElementById('partner-voice-btn');
+            const statusElem = isMaster ? document.getElementById('master-voice-status') : document.getElementById('partner-voice-status');
+
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                return;
+            }
+
+            if (!conn || conn.open !== true) {
+                alert("Non connecté !");
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("L'enregistrement vocal n'est pas supporté sur ce navigateur.");
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                voiceRecordSeconds = 0;
+
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        audioChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    clearInterval(voiceRecordInterval);
+                    voiceRecordInterval = null;
+                    stream.getTracks().forEach(track => track.stop());
+
+                    btnElem.innerText = "🎙️ Vocal Direct";
+                    btnElem.classList.replace('bg-amber-600', 'bg-rose-700');
+                    statusElem.classList.add('hidden');
+
+                    const durationLabel = `Vocal (${voiceRecordSeconds}s)`;
+                    const mimeType = mediaRecorder.mimeType || 'audio/webm';
+                    const blob = new Blob(audioChunks, { type: mimeType });
+                    mediaRecorder = null;
+
+                    if (blob.size > 0 && conn && conn.open === true) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            sendBase64AudioInChunks(e.target.result, durationLabel);
+                        };
+                        reader.readAsDataURL(blob);
+                    }
+                };
+
+                mediaRecorder.start();
+                btnElem.innerText = "⏹️ Stop & Envoyer";
+                btnElem.classList.replace('bg-rose-700', 'bg-amber-600');
+                statusElem.innerText = "Enregistrement vocal en cours... (0s)";
+                statusElem.classList.remove('hidden');
+
+                voiceRecordInterval = setInterval(() => {
+                    voiceRecordSeconds++;
+                    statusElem.innerText = `Enregistrement vocal en cours... (${voiceRecordSeconds}s)`;
+                    if (voiceRecordSeconds >= 30 && mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, 1000);
+            } catch (err) {
+                alert("Erreur micro : " + err.message);
+            }
+        }
+
+        function showAudioModal(audioSrc, labelText) {
+            document.getElementById('photo-modal-content').innerHTML = `
+                <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">🎵 Message Audio Reçu</h3>
+                <p class="text-xs text-slate-300 font-medium">${labelText || 'Audio'}</p>
+                <audio src="${audioSrc}" controls autoplay class="w-full mt-2"></audio>
+                <button onclick="closePhotoModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-white transition mt-3">Fermer</button>
+            `;
+            document.getElementById('photo-modal').classList.remove('hidden');
         }
 
         function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
@@ -814,29 +1032,59 @@
             });
 
             conn.on('data', (data) => {
-                if (data.type === 'sync_custom_deck' && Array.isArray(data.deck)) {
-                    localStorage.setItem('osmose_custom_deck', JSON.stringify(data.deck));
+                if (data.type === 'photo_chunk') {
+                    if (!incomingPhotoChunks[data.id]) {
+                        incomingPhotoChunks[data.id] = {
+                            chunks: new Array(data.total),
+                            received: 0,
+                            total: data.total,
+                            prompt: data.prompt
+                        };
+                    }
+                    const transfer = incomingPhotoChunks[data.id];
+                    if (!transfer.chunks[data.index]) {
+                        transfer.chunks[data.index] = data.data;
+                        transfer.received++;
+                    }
+                    if (transfer.received === transfer.total) {
+                        const fullImage = transfer.chunks.join('');
+                        const promptText = transfer.prompt;
+                        delete incomingPhotoChunks[data.id];
+                        showInteractivePhotoModal(fullImage, promptText);
+                    }
+                    return;
+                }
+
+                if (data.type === 'audio_chunk') {
+                    if (!incomingAudioChunks[data.id]) {
+                        incomingAudioChunks[data.id] = {
+                            chunks: new Array(data.total),
+                            received: 0,
+                            total: data.total,
+                            label: data.label
+                        };
+                    }
+                    const transfer = incomingAudioChunks[data.id];
+                    if (!transfer.chunks[data.index]) {
+                        transfer.chunks[data.index] = data.data;
+                        transfer.received++;
+                    }
+                    if (transfer.received === transfer.total) {
+                        const fullAudio = transfer.chunks.join('');
+                        const labelText = transfer.label;
+                        delete incomingAudioChunks[data.id];
+                        showAudioModal(fullAudio, labelText);
+                    }
                     return;
                 }
 
                 if (data.type === 'photo_interactive') {
-                    let modalContentHTML = `
-                        <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
-                        <p class="text-sm text-white font-semibold">"${data.prompt}"</p>
-                        <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black max-h-48 flex items-center justify-center">
-                            <img src="${data.image}" alt="Photo reçue" class="w-full object-cover">
-                        </div>
-                        <div class="flex gap-3 pt-2">
-                            <button onclick="sendResponse('Photo Oui/Non', 'OUI (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold shadow text-white cursor-pointer text-sm">✅ OUI</button>
-                            <button onclick="sendResponse('Photo Oui/Non', 'NON (Photo)'); closePhotoModal();" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold shadow text-white cursor-pointer text-sm">❌ NON</button>
-                        </div>
-                    `;
-                    document.getElementById('photo-modal-content').innerHTML = modalContentHTML;
-                    document.getElementById('photo-modal').classList.remove('hidden');
+                    showInteractivePhotoModal(data.image, data.prompt);
+                    return;
+                }
 
-                    if (isMaster) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">📸 Photo interactive envoyée !</span> En attente de réponse...`;
-                    }
+                if (data.type === 'sync_custom_deck' && Array.isArray(data.deck)) {
+                    localStorage.setItem('osmose_custom_deck', JSON.stringify(data.deck));
                     return;
                 }
 
