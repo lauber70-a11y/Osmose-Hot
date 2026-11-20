@@ -1751,7 +1751,7 @@
 
             peer.on('call', (call) => {
                 currentCall = call;
-                call.answer(localStream);
+                call.answer(localStream || undefined);
                 setupCallEvents(call);
             });
         }
@@ -1859,6 +1859,9 @@
             conn.on('open', () => {
                 updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
                 syncCustomDeckToPartner();
+                if (localStream) {
+                    ensureOutboundMediaCall(conn.peer).catch(() => {});
+                }
             });
 
             conn.on('data', (data) => {
@@ -2074,102 +2077,182 @@
             }
         }
 
+        let isTogglingVideo = false;
+
+        async function acquireMediaStreamWithFallback(facingMode) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Caméra non prise en charge sur ce navigateur.");
+            }
+
+            const attemptConfigs = [
+                { video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true },
+                { video: { facingMode: { ideal: facingMode } }, audio: true },
+                { video: true, audio: true },
+                { video: true, audio: false }
+            ];
+
+            let lastErr = null;
+            for (let i = 0; i < attemptConfigs.length; i++) {
+                try {
+                    return await navigator.mediaDevices.getUserMedia(attemptConfigs[i]);
+                } catch (err) {
+                    lastErr = err;
+                    // Pause courte avant un nouvel essai (utile quand un capteur mobile se réveille)
+                    await new Promise((r) => setTimeout(r, 180));
+                }
+            }
+            throw lastErr || new Error("Impossible d'accéder à la caméra.");
+        }
+
+        function resolveCallTargetPeerId(explicitTargetId = null) {
+            if (explicitTargetId) return explicitTargetId;
+            if (conn && conn.peer) return conn.peer;
+            const codeVal = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
+            if (codeVal.length === 4 && !isMaster) return 'osmose-' + codeVal;
+            return null;
+        }
+
+        async function ensureOutboundMediaCall(targetIdForCall = null) {
+            if (!localStream || !peer) return;
+            const targetId = resolveCallTargetPeerId(targetIdForCall);
+
+            if (currentCall && currentCall.peerConnection) {
+                const senders = currentCall.peerConnection.getSenders();
+                const newVideoTrack = localStream.getVideoTracks()[0] || null;
+                const newAudioTrack = localStream.getAudioTracks()[0] || null;
+
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video') || senders.find(s => !s.track);
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+
+                if (videoSender && newVideoTrack && typeof videoSender.replaceTrack === 'function') {
+                    try { await videoSender.replaceTrack(newVideoTrack); } catch (e) {}
+                }
+                if (audioSender && newAudioTrack && typeof audioSender.replaceTrack === 'function') {
+                    try { await audioSender.replaceTrack(newAudioTrack); } catch (e) {}
+                }
+            } else if (targetId) {
+                currentCall = peer.call(targetId, localStream);
+                setupCallEvents(currentCall);
+            }
+        }
+
         async function startCameraStream(targetIdForCall = null) {
             const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
             const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
             const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
 
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
+            const freshStream = await acquireMediaStreamWithFallback(currentFacingMode);
+
+            if (localStream && localStream !== freshStream) {
+                localStream.getTracks().forEach(track => {
+                    try { track.stop(); } catch (e) {}
+                });
+            }
+            localStream = freshStream;
+
+            if (localVideoElem) {
+                localVideoElem.srcObject = localStream;
+                localVideoElem.classList.remove('hidden');
+                try {
+                    const playPromise = localVideoElem.play();
+                    if (playPromise && typeof playPromise.catch === 'function') {
+                        playPromise.catch(() => {});
+                    }
+                } catch (e) {}
             }
 
-            localStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: currentFacingMode } },
-                audio: true
-            });
-
-            localVideoElem.srcObject = localStream;
-            localVideoElem.classList.remove('hidden');
-            btnElem.innerText = "🛑 Couper ma Caméra";
-            btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
+            if (btnElem) {
+                btnElem.innerText = "🛑 Couper ma Caméra";
+                btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
+            }
 
             if (switchBtn) {
                 switchBtn.classList.remove('hidden');
                 switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
             }
 
-            const newVideoTrack = localStream.getVideoTracks()[0];
-            const newAudioTrack = localStream.getAudioTracks()[0];
-
-            if (currentCall && currentCall.peerConnection) {
-                const senders = currentCall.peerConnection.getSenders();
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                if (videoSender && newVideoTrack) {
-                    await videoSender.replaceTrack(newVideoTrack);
-                }
-                if (audioSender && newAudioTrack) {
-                    await audioSender.replaceTrack(newAudioTrack);
-                }
-            } else if (conn && peer && targetIdForCall) {
-                currentCall = peer.call(targetIdForCall, localStream);
-                setupCallEvents(currentCall);
-            }
+            await ensureOutboundMediaCall(targetIdForCall);
         }
 
         async function switchCameraFacingMode() {
-            if (!localStream) return;
+            if (!localStream || isTogglingVideo) return;
+            isTogglingVideo = true;
             currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
 
-            if (isDedicatedCamera) {
-                const switchBtn = document.getElementById('dedicated-switch-cam-btn');
-                if (switchBtn) {
-                    switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
-                }
-                const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
-                try {
-                    await startDedicatedCameraStream(code.length === 4 ? 'osmose-' + code : null);
-                } catch (err) {
-                    alert("Impossible de basculer de caméra : " + err.message);
-                }
-                return;
-            }
-
             try {
+                if (isDedicatedCamera) {
+                    const switchBtn = document.getElementById('dedicated-switch-cam-btn');
+                    if (switchBtn) {
+                        switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
+                    }
+                    const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
+                    await startDedicatedCameraStream(code.length === 4 ? 'osmose-' + code : null);
+                    return;
+                }
+
                 await startCameraStream();
             } catch (err) {
-                alert("Impossible de basculer de caméra : " + err.message);
+                alert("Impossible de basculer de caméra : " + (err && err.message ? err.message : err));
+            } finally {
+                isTogglingVideo = false;
             }
         }
 
         async function toggleVideo() {
+            if (isTogglingVideo) return;
+            isTogglingVideo = true;
+
             const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
             const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
             const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
 
-            if (!localStream) {
-                try {
-                    const targetId = conn && peer ? (isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim().toUpperCase()) : null;
+            try {
+                if (!localStream) {
+                    if (btnElem) btnElem.innerText = "⏳ Activation caméra...";
+                    const targetId = resolveCallTargetPeerId();
                     await startCameraStream(targetId);
-                } catch (err) { alert("Erreur caméra : " + err.message); }
-            } else {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-                localVideoElem.srcObject = null;
-                localVideoElem.classList.add('hidden');
-                if (switchBtn) switchBtn.classList.add('hidden');
-                
-                btnElem.innerText = "🎥 Activer ma Caméra";
-                btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
-                
-                if (conn && conn.open === true) {
-                    conn.send({ type: 'stop_video' });
-                }
 
-                if (currentCall) {
-                    currentCall.close();
-                    currentCall = null;
+                    // Deuxième passe rapide si l'appel WebRTC n'était pas encore attaché au premier clic
+                    if (!currentCall && peer && resolveCallTargetPeerId()) {
+                        setTimeout(() => {
+                            if (localStream && !currentCall) {
+                                ensureOutboundMediaCall().catch(() => {});
+                            }
+                        }, 350);
+                    }
+                } else {
+                    localStream.getTracks().forEach(track => {
+                        try { track.stop(); } catch (e) {}
+                    });
+                    localStream = null;
+                    if (localVideoElem) {
+                        localVideoElem.srcObject = null;
+                        localVideoElem.classList.add('hidden');
+                    }
+                    if (switchBtn) switchBtn.classList.add('hidden');
+
+                    if (btnElem) {
+                        btnElem.innerText = "🎥 Activer ma Caméra";
+                        btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
+                    }
+
+                    if (conn && conn.open === true) {
+                        conn.send({ type: 'stop_video' });
+                    }
+
+                    if (currentCall) {
+                        try { currentCall.close(); } catch (e) {}
+                        currentCall = null;
+                    }
                 }
+            } catch (err) {
+                if (btnElem) {
+                    btnElem.innerText = "🎥 Activer ma Caméra";
+                    btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
+                }
+                alert("Erreur caméra : " + (err && err.message ? err.message : err));
+            } finally {
+                isTogglingVideo = false;
             }
         }
 
