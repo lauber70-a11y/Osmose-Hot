@@ -243,10 +243,7 @@
 
             <!-- Choisir et envoyer depuis la pioche -->
             <div class="bg-gradient-to-r from-indigo-950/40 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/30 space-y-3">
-                <div class="flex items-center justify-between gap-2">
-                    <h3 class="font-bold text-indigo-300 text-sm">📤 Choisir et envoyer depuis la pioche</h3>
-                    <button type="button" onclick="sendRandomCloseUpCard()" class="text-[11px] px-2.5 py-1 bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 border border-indigo-500/40 rounded-xl font-semibold transition cursor-pointer">🔍 Plan rapproché</button>
-                </div>
+                <h3 class="font-bold text-indigo-300 text-sm">📤 Choisir et envoyer depuis la pioche</h3>
                 <select id="master-deck-select" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></select>
                 <p id="master-deck-preview" class="text-[11px] text-slate-400 bg-slate-900/70 border border-slate-800 rounded-xl px-3 py-2 break-words">Sélectionnez une carte pour voir son texte complet.</p>
                 <button onclick="sendCardFromDeck()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-xs shadow transition text-white">Envoyer cette carte au Duo 🚀</button>
@@ -254,10 +251,7 @@
 
             <!-- Envoyer une carte sur-mesure à la volée -->
             <div class="bg-gradient-to-r from-pink-950/40 to-purple-950/40 p-4 rounded-2xl border border-pink-500/30 space-y-3">
-                <div class="flex justify-between items-center gap-2">
-                    <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte libre (sur-mesure)</h3>
-                    <button type="button" onclick="fillCloseUpPrompt()" class="text-[11px] px-2.5 py-1 bg-pink-950/80 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-semibold transition cursor-pointer">🔍 Plan rapproché</button>
-                </div>
+                <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte libre (sur-mesure)</h3>
                 <input type="text" id="live-card-prompt" onkeydown="if(event.key==='Enter') sendLiveCard();" placeholder="Ex: Embrasse-moi tout de suite..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
                 <div class="flex gap-2">
                     <select id="live-card-type" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
@@ -471,7 +465,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Cartes & Plans Rapprochés Corrigés
+        Osmose Hot • Duo Interactif
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -481,45 +475,8 @@
             { type: 'vote', prompt: "Préfères-tu un bisou dans le cou ou un câlin serré ?" },
             { type: 'immediate', prompt: "Viens m'embrasser passionnément pendant 10 secondes !" },
             { type: 'yesno', prompt: "Est-ce que tu veux qu'on commande un dessert surprise ?" },
-            { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." },
-            { type: 'defi', prompt: "🔍 Plan rapproché : cadre de très près un détail de ta tenue qui me fera craquer." },
-            { type: 'yesno', prompt: "🔍 Plan rapproché : montre-moi en gros plan la courbe de ton cou ou de ton épaule — ça te tente ?" }
+            { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." }
         ];
-
-        const closeUpCoquinPrompts = [
-            { type: 'defi', prompt: "🔍 Plan rapproché : cadre de très près un détail de ta tenue qui me fera craquer." },
-            { type: 'defi', prompt: "🔍 Plan rapproché : fais un gros plan sur tes lèvres ou ton cou, à quelques centimètres de l'objectif." },
-            { type: 'immediate', prompt: "🔍 Plan rapproché : montre-moi tout de suite en cadrage serré le bout de tes doigts ou un geste lent sur ta peau." },
-            { type: 'yesno', prompt: "🔍 Plan rapproché : cadre uniquement la partie de ton corps que tu as le plus envie de me montrer là tout de suite — tu joues ?" }
-        ];
-        let closeUpPromptIndex = 0;
-
-        function fillCloseUpPrompt() {
-            const promptInput = document.getElementById('live-card-prompt');
-            const typeSelect = document.getElementById('live-card-type');
-            if (!promptInput) return;
-
-            const preset = closeUpCoquinPrompts[closeUpPromptIndex % closeUpCoquinPrompts.length];
-            closeUpPromptIndex++;
-            promptInput.value = preset.prompt;
-            if (typeSelect) {
-                typeSelect.value = preset.type;
-            }
-            promptInput.focus();
-            promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function sendRandomCloseUpCard() {
-            if (!conn || conn.open !== true) {
-                alert("La partenaire n'est pas connectée !");
-                return;
-            }
-            const preset = closeUpCoquinPrompts[closeUpPromptIndex % closeUpCoquinPrompts.length];
-            closeUpPromptIndex++;
-            const cardToSend = { type: preset.type, prompt: preset.prompt };
-            conn.send(cardToSend);
-            document.getElementById('feedback-content').innerHTML = `<span class="text-indigo-400 font-bold">Plan rapproché envoyé (${escapeHtml(getCardTypeLabel(cardToSend.type))}) :</span> ${escapeHtml(cardToSend.prompt)}`;
-        }
 
         // --- RÉACTIONS ÉMOJI ÉCLAIRS CÔTÉ MAÎTRE ---
         let flashReactionStatusTimeout = null;
@@ -1258,7 +1215,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Ça te plaît en plan rapproché ?");
+            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Ça te plaît ?");
             if (!questionText) {
                 event.target.value = '';
                 return;
