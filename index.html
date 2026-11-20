@@ -69,6 +69,27 @@
         </div>
     </div>
 
+    <!-- MODALE PRÉPARATION ENVOI PHOTO (SANS PROMPT/CONFIRM BLOQUANT) -->
+    <div id="photo-composer-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-indigo-500/50 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider">📸 Préparer l'envoi photo</h3>
+                <button onclick="closePhotoComposer()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+            </div>
+            <div class="rounded-2xl overflow-hidden border border-slate-700 bg-black max-h-48 flex items-center justify-center">
+                <img id="photo-composer-preview" src="" alt="Aperçu" class="w-full max-h-48 object-contain">
+            </div>
+            <div class="text-left space-y-1">
+                <label for="photo-composer-question" class="text-xs text-slate-300 font-semibold">Question Oui/Non accompagnant la photo :</label>
+                <input type="text" id="photo-composer-question" value="Ça te plaît ?" onkeydown="if(event.key==='Enter') confirmAndSendPreparedPhoto();" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closePhotoComposer()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-xs text-slate-300 transition">Annuler</button>
+                <button onclick="confirmAndSendPreparedPhoto()" class="flex-1 py-3 bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 rounded-xl font-bold text-xs text-white shadow transition">Envoyer 🚀</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALE PHOTO / AUDIO REÇU -->
     <div id="photo-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
         <div id="photo-modal-content" class="bg-slate-900 border border-pink-500/50 rounded-3xl max-w-sm w-full p-4 space-y-4 shadow-2xl text-center">
@@ -1203,88 +1224,122 @@
             if (container) container.classList.add('hidden');
         }
 
-        // --- PHOTOS & GALERIE INTERACTIVE (ENVOI EN UN SEUL BLOC) ---
-        let incomingPhotoChunks = {};
+        // --- PHOTOS & GALERIE INTERACTIVE (COMPOSEUR VISUEL + PAQUET < 12 KO) ---
+        let preparedPhotoBase64 = "";
 
         function triggerPhotoCapture() {
             if (!conn || conn.open !== true) {
                 alert("Non connecté !");
                 return;
             }
-            document.getElementById('camera-file-input').click();
+            const fileInput = document.getElementById('camera-file-input');
+            fileInput.value = '';
+            fileInput.click();
+        }
+
+        function compressImageToCompactJpeg(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let maxDim = 200;
+            let quality = 0.45;
+            let result = '';
+
+            for (let attempt = 0; attempt < 5; attempt++) {
+                let width = img.width;
+                let height = img.height;
+                if (width > height) {
+                    if (width > maxDim) {
+                        height = Math.round(height * (maxDim / width));
+                        width = maxDim;
+                    }
+                } else {
+                    if (height > maxDim) {
+                        width = Math.round(width * (maxDim / height));
+                        height = maxDim;
+                    }
+                }
+                canvas.width = Math.max(1, width);
+                canvas.height = Math.max(1, height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                result = canvas.toDataURL('image/jpeg', quality);
+
+                // Garantie sous 12 000 caractères pour passer en 1 seul paquet DataChannel WebRTC
+                if (result.length <= 12000) {
+                    break;
+                }
+                maxDim = Math.round(maxDim * 0.78);
+                quality = Math.max(0.2, quality - 0.08);
+            }
+            return result;
         }
 
         function handleImageSelection(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
 
-            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Ça te plaît ?");
-            if (!questionText) {
-                event.target.value = '';
-                return;
-            }
+            const objectUrl = URL.createObjectURL(file);
+            const img = new Image();
 
-            const confirmSend = confirm(`Confirmer l'envoi de cette photo avec la question :\n"${questionText}" ?`);
-            if (!confirmSend) {
-                event.target.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onerror = function() {
-                    alert("Impossible de lire cette image depuis la galerie. Essayez avec une autre photo.");
-                };
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 220, MAX_HEIGHT = 220;
-                    let width = img.width, height = img.height;
-
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width *= MAX_HEIGHT / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    canvas.width = Math.max(1, Math.round(width));
-                    canvas.height = Math.max(1, Math.round(height));
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.35);
-
-                    if (!conn || conn.open !== true) {
-                        alert("Connexion interrompue : impossible d'envoyer la photo.");
-                        return;
-                    }
-
-                    try {
-                        conn.send({
-                            type: 'photo_interactive',
-                            image: base64Data,
-                            prompt: questionText
-                        });
-
-                        if (isMaster) {
-                            document.getElementById('feedback-content').innerHTML =
-                                `<span class="text-pink-400 font-bold">📸 Photo envoyée :</span> "${escapeHtml(questionText)}" — En attente de réponse...`;
-                        }
-                        alert("Photo interactive envoyée ! 📸");
-                    } catch (err) {
-                        alert("Échec de l'envoi de la photo : " + err.message);
-                    }
-                };
-                img.src = e.target.result;
+            img.onerror = function() {
+                URL.revokeObjectURL(objectUrl);
+                alert("Impossible de lire cette image depuis la galerie. Essayez avec une autre photo.");
             };
-            reader.readAsDataURL(file);
+
+            img.onload = function() {
+                URL.revokeObjectURL(objectUrl);
+                preparedPhotoBase64 = compressImageToCompactJpeg(img);
+
+                const previewImg = document.getElementById('photo-composer-preview');
+                const questionInput = document.getElementById('photo-composer-question');
+                const composerModal = document.getElementById('photo-composer-modal');
+
+                if (previewImg) previewImg.src = preparedPhotoBase64;
+                if (questionInput && !questionInput.value.trim()) {
+                    questionInput.value = "Ça te plaît ?";
+                }
+                if (composerModal) {
+                    composerModal.classList.remove('hidden');
+                }
+            };
+
+            img.src = objectUrl;
             event.target.value = '';
+        }
+
+        function closePhotoComposer() {
+            preparedPhotoBase64 = "";
+            const modal = document.getElementById('photo-composer-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function confirmAndSendPreparedPhoto() {
+            if (!preparedPhotoBase64) return;
+            if (!conn || conn.open !== true) {
+                alert("Connexion interrompue : impossible d'envoyer la photo.");
+                return;
+            }
+
+            const questionInput = document.getElementById('photo-composer-question');
+            const questionText = (questionInput && questionInput.value.trim()) ? questionInput.value.trim() : "Ça te plaît ?";
+            const photoId = 'p_' + Date.now();
+
+            try {
+                conn.send({
+                    type: 'photo_interactive',
+                    id: photoId,
+                    image: preparedPhotoBase64,
+                    prompt: questionText
+                });
+
+                if (isMaster) {
+                    document.getElementById('feedback-content').innerHTML =
+                        `<span class="text-amber-300 font-bold">📸 Photo envoyée :</span> "${escapeHtml(questionText)}" — En attente d'accusé de réception...`;
+                }
+                closePhotoComposer();
+            } catch (err) {
+                alert("Échec de l'envoi de la photo : " + err.message);
+            }
         }
 
         function showInteractivePhotoModal(imageSrc, promptText) {
@@ -1302,6 +1357,10 @@
             `;
             document.getElementById('photo-modal-content').innerHTML = modalContentHTML;
             document.getElementById('photo-modal').classList.remove('hidden');
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate([80, 40, 80]); } catch (e) {}
+            }
         }
 
         // --- ENVOI DE FICHIER AUDIO & VOCAL DIRECT (AVEC PROGRESSION) ---
@@ -1338,7 +1397,7 @@
                 alert("Connexion interrompue : impossible d'envoyer l'audio.");
                 return;
             }
-            const chunkSize = 16000;
+            const chunkSize = 10000;
             const totalChunks = Math.ceil(audioBase64.length / chunkSize);
             const transferId = 'aud_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
 
@@ -1368,7 +1427,7 @@
                 });
                 const currentPct = ((idx + 1) / totalChunks) * 100;
                 setAudioProgress(currentPct, `Envoi : ${labelText}`);
-                setTimeout(() => sendStep(idx + 1), 15);
+                setTimeout(() => sendStep(idx + 1), 20);
             }
 
             sendStep(0);
@@ -1798,25 +1857,18 @@
                     return;
                 }
 
-                if (data.type === 'photo_chunk') {
-                    if (!incomingPhotoChunks[data.id]) {
-                        incomingPhotoChunks[data.id] = {
-                            chunks: new Array(data.total),
-                            received: 0,
-                            total: data.total,
-                            prompt: data.prompt
-                        };
+                if (data.type === 'photo_interactive') {
+                    showInteractivePhotoModal(data.image, data.prompt);
+                    if (conn && conn.open === true) {
+                        conn.send({ type: 'photo_ack', prompt: data.prompt || '' });
                     }
-                    const transfer = incomingPhotoChunks[data.id];
-                    if (typeof data.index === 'number' && !transfer.chunks[data.index]) {
-                        transfer.chunks[data.index] = data.data;
-                        transfer.received++;
-                    }
-                    if (transfer.received === transfer.total) {
-                        const fullImage = transfer.chunks.join('');
-                        const promptText = transfer.prompt;
-                        delete incomingPhotoChunks[data.id];
-                        showInteractivePhotoModal(fullImage, promptText);
+                    return;
+                }
+
+                if (data.type === 'photo_ack') {
+                    if (isMaster) {
+                        document.getElementById('feedback-content').innerHTML =
+                            `<span class="text-emerald-400 font-bold">✅ Photo bien reçue par la partenaire !</span> ("${escapeHtml(data.prompt || '')}")`;
                     }
                     return;
                 }
@@ -1841,11 +1893,6 @@
                         delete incomingAudioChunks[data.id];
                         showAudioModal(fullAudio, labelText);
                     }
-                    return;
-                }
-
-                if (data.type === 'photo_interactive') {
-                    showInteractivePhotoModal(data.image, data.prompt);
                     return;
                 }
 
