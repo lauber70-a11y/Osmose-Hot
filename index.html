@@ -231,7 +231,10 @@
             <!-- Contrôle Vidéo Maître -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-slate-300">Visio en Direct (Bidirectionnelle)</h3>
-                <button onclick="toggleVideo()" id="master-video-btn" class="w-full py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition">🎥 Activer ma Caméra</button>
+                <div class="flex gap-2">
+                    <button onclick="toggleVideo()" id="master-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
+                    <button onclick="switchCameraFacingMode()" id="master-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
+                </div>
                 
                 <video id="local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
 
@@ -314,7 +317,10 @@
 
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-slate-300">Visio en Direct</h3>
-                <button onclick="toggleVideo()" id="partner-video-btn" class="w-full py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition">🎥 Activer ma Caméra</button>
+                <div class="flex gap-2">
+                    <button onclick="toggleVideo()" id="partner-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
+                    <button onclick="switchCameraFacingMode()" id="partner-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
+                </div>
                 
                 <video id="partner-local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
 
@@ -329,7 +335,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Initialisation Sécurisée & Duo Interactif
+        Osmose Hot • Selfie & Caméra Arrière
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -998,7 +1004,7 @@
 
         function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
 
-        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false;
+        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false, currentFacingMode = 'user';
 
         window.onload = () => {
             try {
@@ -1319,29 +1325,75 @@
             }
         }
 
+        async function startCameraStream(targetIdForCall = null) {
+            const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
+            const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
+            const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: currentFacingMode } },
+                audio: true
+            });
+
+            localVideoElem.srcObject = localStream;
+            localVideoElem.classList.remove('hidden');
+            btnElem.innerText = "🛑 Couper ma Caméra";
+            btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
+
+            if (switchBtn) {
+                switchBtn.classList.remove('hidden');
+                switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
+            }
+
+            const newVideoTrack = localStream.getVideoTracks()[0];
+            const newAudioTrack = localStream.getAudioTracks()[0];
+
+            if (currentCall && currentCall.peerConnection) {
+                const senders = currentCall.peerConnection.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                if (videoSender && newVideoTrack) {
+                    await videoSender.replaceTrack(newVideoTrack);
+                }
+                if (audioSender && newAudioTrack) {
+                    await audioSender.replaceTrack(newAudioTrack);
+                }
+            } else if (conn && peer && targetIdForCall) {
+                currentCall = peer.call(targetIdForCall, localStream);
+                setupCallEvents(currentCall);
+            }
+        }
+
+        async function switchCameraFacingMode() {
+            if (!localStream) return;
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            try {
+                await startCameraStream();
+            } catch (err) {
+                alert("Impossible de basculer de caméra : " + err.message);
+            }
+        }
+
         async function toggleVideo() {
             const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
             const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
+            const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
 
             if (!localStream) {
                 try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    localVideoElem.srcObject = localStream;
-                    localVideoElem.classList.remove('hidden');
-                    btnElem.innerText = "🛑 Couper ma Caméra";
-                    btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
-
-                    if (conn && peer) {
-                        const targetId = isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim().toUpperCase();
-                        currentCall = peer.call(targetId, localStream);
-                        setupCallEvents(currentCall);
-                    }
+                    const targetId = conn && peer ? (isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim().toUpperCase()) : null;
+                    await startCameraStream(targetId);
                 } catch (err) { alert("Erreur caméra : " + err.message); }
             } else {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
                 localVideoElem.srcObject = null;
                 localVideoElem.classList.add('hidden');
+                if (switchBtn) switchBtn.classList.add('hidden');
                 
                 btnElem.innerText = "🎥 Activer ma Caméra";
                 btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
