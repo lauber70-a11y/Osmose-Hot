@@ -1624,6 +1624,9 @@
                 conn = connection;
                 setupConnectionEvents();
                 updateStatus('Connecté au Duo ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+                if (localStream) {
+                    syncMediaCallWithPeer(connection.peer).catch(() => {});
+                }
             });
             peer.on('call', (call) => {
                 if (call.metadata && call.metadata.role === 'camera') {
@@ -1648,7 +1651,7 @@
                     return;
                 }
                 currentCall = call;
-                call.answer(localStream);
+                call.answer(localStream || undefined);
                 setupCallEvents(call);
             });
         }
@@ -1942,7 +1945,7 @@
                 updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
                 syncCustomDeckToPartner();
                 if (localStream) {
-                    ensureOutboundMediaCall(conn.peer).catch(() => {});
+                    syncMediaCallWithPeer(conn.peer).catch(() => {});
                 }
             });
 
@@ -2179,8 +2182,7 @@
                     return await navigator.mediaDevices.getUserMedia(attemptConfigs[i]);
                 } catch (err) {
                     lastErr = err;
-                    // Pause courte avant un nouvel essai (utile quand un capteur mobile se réveille)
-                    await new Promise((r) => setTimeout(r, 180));
+                    await new Promise((r) => setTimeout(r, 150));
                 }
             }
             throw lastErr || new Error("Impossible d'accéder à la caméra.");
@@ -2194,27 +2196,40 @@
             return null;
         }
 
-        async function ensureOutboundMediaCall(targetIdForCall = null) {
-            if (!localStream || !peer) return;
-            const targetId = resolveCallTargetPeerId(targetIdForCall);
+        async function syncMediaCallWithPeer(explicitTargetId = null) {
+            if (!localStream || !peer || peer.destroyed) return;
+            const targetId = resolveCallTargetPeerId(explicitTargetId);
 
-            if (currentCall && currentCall.peerConnection) {
+            if (currentCall && currentCall.peerConnection && currentCall.peerConnection.connectionState !== 'closed') {
                 const senders = currentCall.peerConnection.getSenders();
                 const newVideoTrack = localStream.getVideoTracks()[0] || null;
                 const newAudioTrack = localStream.getAudioTracks()[0] || null;
 
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video') || senders.find(s => !s.track);
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                let replacedAny = false;
+                if (newVideoTrack) {
+                    const vSender = senders.find(s => s.track && s.track.kind === 'video');
+                    if (vSender && typeof vSender.replaceTrack === 'function') {
+                        try { await vSender.replaceTrack(newVideoTrack); replacedAny = true; } catch (e) {}
+                    }
+                }
+                if (newAudioTrack) {
+                    const aSender = senders.find(s => s.track && s.track.kind === 'audio');
+                    if (aSender && typeof aSender.replaceTrack === 'function') {
+                        try { await aSender.replaceTrack(newAudioTrack); replacedAny = true; } catch (e) {}
+                    }
+                }
+                if (replacedAny) return;
+            }
 
-                if (videoSender && newVideoTrack && typeof videoSender.replaceTrack === 'function') {
-                    try { await videoSender.replaceTrack(newVideoTrack); } catch (e) {}
+            if (targetId) {
+                if (currentCall) {
+                    try { currentCall.close(); } catch (e) {}
                 }
-                if (audioSender && newAudioTrack && typeof audioSender.replaceTrack === 'function') {
-                    try { await audioSender.replaceTrack(newAudioTrack); } catch (e) {}
+                const nextCall = peer.call(targetId, localStream);
+                if (nextCall) {
+                    currentCall = nextCall;
+                    setupCallEvents(nextCall);
                 }
-            } else if (targetId) {
-                currentCall = peer.call(targetId, localStream);
-                setupCallEvents(currentCall);
             }
         }
 
@@ -2246,7 +2261,7 @@
                 switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
             }
 
-            await ensureOutboundMediaCall(targetIdForCall);
+            await syncMediaCallWithPeer(targetIdForCall);
         }
 
         async function switchCameraFacingMode() {
@@ -2287,13 +2302,13 @@
                     const targetId = resolveCallTargetPeerId();
                     await startCameraStream(targetId);
 
-                    // Deuxième passe rapide si l'appel WebRTC n'était pas encore attaché au premier clic
-                    if (!currentCall && peer && resolveCallTargetPeerId()) {
+                    if (localStream && peer && resolveCallTargetPeerId()) {
                         setTimeout(() => {
-                            if (localStream && !currentCall) {
-                                ensureOutboundMediaCall().catch(() => {});
+                            const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+                            if (localStream && (!remoteElem || !remoteElem.srcObject)) {
+                                syncMediaCallWithPeer().catch(() => {});
                             }
-                        }, 350);
+                        }, 500);
                     }
                 } else {
                     localStream.getTracks().forEach(track => {
