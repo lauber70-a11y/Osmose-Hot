@@ -149,6 +149,17 @@
                     </button>
                 </div>
                 <p id="master-voice-status" class="hidden text-xs text-rose-300 text-center font-semibold animate-pulse">Enregistrement vocal en cours... (0s)</p>
+
+                <!-- Indicateur de progression audio (Maître) -->
+                <div id="master-audio-progress" class="hidden bg-slate-900 border border-pink-500/40 rounded-xl p-3 space-y-1.5">
+                    <div class="flex justify-between text-xs font-semibold text-pink-300">
+                        <span id="master-audio-progress-label">Envoi audio...</span>
+                        <span id="master-audio-progress-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="master-audio-progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-2 transition-all duration-100" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Choisir et envoyer depuis la pioche -->
@@ -160,7 +171,10 @@
 
             <!-- Envoyer une carte sur-mesure à la volée -->
             <div class="bg-gradient-to-r from-pink-950/40 to-purple-950/40 p-4 rounded-2xl border border-pink-500/30 space-y-3">
-                <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte libre (sur-mesure)</h3>
+                <div class="flex justify-between items-center gap-2">
+                    <h3 class="font-bold text-pink-300 text-sm">⚡ Envoyer une carte libre (sur-mesure)</h3>
+                    <button onclick="fillCloseUpPrompt()" class="text-[11px] px-2.5 py-1 bg-pink-950/80 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-semibold transition">🔍 Plan rapproché</button>
+                </div>
                 <input type="text" id="live-card-prompt" placeholder="Ex: Embrasse-moi tout de suite..." class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
                 <div class="flex gap-2">
                     <select id="live-card-type" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
@@ -249,6 +263,17 @@
                     </button>
                 </div>
                 <p id="partner-voice-status" class="hidden text-xs text-rose-300 text-center font-semibold animate-pulse">Enregistrement vocal en cours... (0s)</p>
+
+                <!-- Indicateur de progression audio (Partenaire) -->
+                <div id="partner-audio-progress" class="hidden bg-slate-900 border border-pink-500/40 rounded-xl p-3 space-y-1.5 text-left">
+                    <div class="flex justify-between text-xs font-semibold text-pink-300">
+                        <span id="partner-audio-progress-label">Envoi audio...</span>
+                        <span id="partner-audio-progress-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                        <div id="partner-audio-progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-2 transition-all duration-100" style="width: 0%"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 p-4 rounded-3xl border border-pink-500/40 shadow-lg space-y-3">
@@ -304,7 +329,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Fichier Audio & Vocal Direct
+        Osmose Hot • Plan Rapproché & Duo Interactif
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -314,10 +339,52 @@
             { type: 'vote', prompt: "Préfères-tu un bisou dans le cou ou un câlin serré ?" },
             { type: 'immediate', prompt: "Viens m'embrasser passionnément pendant 10 secondes !" },
             { type: 'yesno', prompt: "Est-ce que tu veux qu'on commande un dessert surprise ?" },
-            { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." }
+            { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." },
+            { type: 'defi', prompt: "🔍 Plan rapproché : cadre de très près un détail de ta tenue qui me fera craquer." },
+            { type: 'yesno', prompt: "🔍 Plan rapproché : montre-moi en gros plan la courbe de ton cou ou de ton épaule — ça te tente ?" }
         ];
 
+        const closeUpCoquinPrompts = [
+            "🔍 Plan rapproché : cadre de très près un détail de ta tenue qui me fera craquer.",
+            "🔍 Plan rapproché : fais un gros plan sur tes lèvres ou ton cou, à quelques centimètres de l'objectif.",
+            "🔍 Plan rapproché : montre-moi en cadrage serré le bout de tes doigts ou un geste lent sur ta peau.",
+            "🔍 Plan rapproché : cadre uniquement la partie de ton corps que tu as le plus envie de me montrer là tout de suite."
+        ];
+        let closeUpPromptIndex = 0;
+
+        function fillCloseUpPrompt() {
+            const promptInput = document.getElementById('live-card-prompt');
+            const typeSelect = document.getElementById('live-card-type');
+            if (!promptInput) return;
+
+            promptInput.value = closeUpCoquinPrompts[closeUpPromptIndex % closeUpCoquinPrompts.length];
+            closeUpPromptIndex++;
+            if (typeSelect) {
+                typeSelect.value = 'defi';
+            }
+            promptInput.focus();
+            promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
         let currentRoomCode = "";
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            try {
+                if (!wakeLock || wakeLock.released) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                // Ignorer si non autorisé ou en économie d'énergie
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                requestWakeLock();
+            }
+        });
 
         function syncCustomDeckToPartner() {
             if (isMaster && conn && conn.open === true) {
@@ -672,7 +739,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Tu en penses quoi ?");
+            const questionText = prompt("Pose ta question Oui/Non avec cette photo :", "Ça te plaît en plan rapproché ?");
             if (!questionText) {
                 event.target.value = '';
                 return;
@@ -747,12 +814,34 @@
             document.getElementById('photo-modal').classList.remove('hidden');
         }
 
-        // --- ENVOI DE FICHIER AUDIO & VOCAL DIRECT ---
+        // --- ENVOI DE FICHIER AUDIO & VOCAL DIRECT (AVEC PROGRESSION) ---
         let incomingAudioChunks = {};
         let mediaRecorder = null;
         let audioChunks = [];
         let voiceRecordInterval = null;
         let voiceRecordSeconds = 0;
+
+        function setAudioProgress(pct, labelText) {
+            const box = isMaster ? document.getElementById('master-audio-progress') : document.getElementById('partner-audio-progress');
+            const bar = isMaster ? document.getElementById('master-audio-progress-bar') : document.getElementById('partner-audio-progress-bar');
+            const pctElem = isMaster ? document.getElementById('master-audio-progress-pct') : document.getElementById('partner-audio-progress-pct');
+            const labelElem = isMaster ? document.getElementById('master-audio-progress-label') : document.getElementById('partner-audio-progress-label');
+
+            if (!box || !bar || !pctElem || !labelElem) return;
+
+            if (pct === null) {
+                box.classList.add('hidden');
+                bar.style.width = '0%';
+                pctElem.innerText = '0%';
+                return;
+            }
+
+            box.classList.remove('hidden');
+            const clamped = Math.max(0, Math.min(100, Math.round(pct)));
+            bar.style.width = clamped + '%';
+            pctElem.innerText = clamped + '%';
+            if (labelText) labelElem.innerText = labelText;
+        }
 
         function sendBase64AudioInChunks(audioBase64, labelText) {
             if (!conn || conn.open !== true) {
@@ -763,9 +852,19 @@
             const totalChunks = Math.ceil(audioBase64.length / chunkSize);
             const transferId = 'aud_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
 
+            setAudioProgress(0, `Envoi : ${labelText}`);
+
             function sendStep(idx) {
-                if (idx >= totalChunks) return;
+                if (idx >= totalChunks) {
+                    setAudioProgress(100, `Envoyé : ${labelText}`);
+                    setTimeout(() => setAudioProgress(null), 1200);
+                    if (isMaster) {
+                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">🎵 Audio envoyé :</span> ${labelText}`;
+                    }
+                    return;
+                }
                 if (!conn || conn.open !== true) {
+                    setAudioProgress(null);
                     alert("Connexion interrompue pendant l'envoi de l'audio.");
                     return;
                 }
@@ -777,14 +876,12 @@
                     label: labelText,
                     data: audioBase64.slice(idx * chunkSize, (idx + 1) * chunkSize)
                 });
+                const currentPct = ((idx + 1) / totalChunks) * 100;
+                setAudioProgress(currentPct, `Envoi : ${labelText}`);
                 setTimeout(() => sendStep(idx + 1), 15);
             }
 
             sendStep(0);
-            if (isMaster) {
-                document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">🎵 Audio envoyé :</span> ${labelText}`;
-            }
-            alert(`Audio envoyé (${labelText}) ! 🎵`);
         }
 
         function triggerAudioCapture() {
@@ -910,354 +1007,4 @@
             const roomParam = urlParams.get('room');
             if (roomParam && roomParam.length === 4) {
                 setupPartnerModal();
-                document.getElementById('room-code-input').value = roomParam;
-                setTimeout(() => { connectAsPartner(); }, 500);
-            }
-        };
-
-        function toggleHelpModal() { document.getElementById('help-modal').classList.toggle('hidden'); }
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(() => {}); }
-            else { if (document.exitFullscreen) document.exitFullscreen(); }
-        }
-
-        function setupMaster() {
-            isMaster = true;
-            currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-            document.getElementById('display-room-code').innerText = currentRoomCode;
-            document.getElementById('role-selection').classList.add('hidden');
-            document.getElementById('master-screen').classList.remove('hidden');
-
-            peer = new Peer('osmose-' + currentRoomCode);
-            peer.on('connection', (connection) => {
-                conn = connection;
-                setupConnectionEvents();
-                updateStatus('Connecté au Duo ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
-            });
-            peer.on('call', (call) => {
-                currentCall = call;
-                call.answer(localStream);
-                setupCallEvents(call);
-            });
-        }
-
-        function copyInviteLink() {
-            navigator.clipboard.writeText(`${window.location.href.split('?')[0]}?room=${currentRoomCode}`).then(() => {
-                alert("Lien d'invitation copié !");
-            });
-        }
-
-        function setupPartnerModal() {
-            document.getElementById('role-selection').classList.add('hidden');
-            document.getElementById('partner-modal').classList.remove('hidden');
-        }
-
-        function connectAsPartner() {
-            const codeInput = document.getElementById('room-code-input');
-            const code = codeInput.value.trim().toUpperCase();
-            
-            if (code.length !== 4) {
-                alert("Veuillez entrer un code salon valide à 4 chiffres.");
-                return;
-            }
-
-            document.getElementById('partner-modal').classList.add('hidden');
-            document.getElementById('partner-screen').classList.remove('hidden');
-            updateStatus('Connexion en cours...', 'text-amber-300', 'bg-amber-900/50', 'border-amber-700');
-
-            if (peer) {
-                try { peer.destroy(); } catch(e) {}
-            }
-
-            peer = new Peer();
-
-            peer.on('open', () => {
-                const targetId = 'osmose-' + code;
-                conn = peer.connect(targetId);
-
-                if (!conn) {
-                    alert("Impossible de joindre le salon.");
-                    location.reload();
-                    return;
-                }
-
-                setupConnectionEvents();
-
-                setTimeout(() => {
-                    if (!conn || conn.open !== true) {
-                        alert("Impossible de se connecter au Maître du Jeu. Vérifiez que le code est correct et que le Maître a bien sa page ouverte.");
-                        location.reload();
-                    }
-                }, 8000);
-            });
-
-            peer.on('error', (err) => {
-                console.error("Erreur PeerJS :", err);
-                alert("Erreur de connexion réseau : " + err.type);
-                location.reload();
-            });
-
-            peer.on('call', (call) => {
-                currentCall = call;
-                call.answer(localStream);
-                setupCallEvents(call);
-            });
-        }
-
-        function setupCallEvents(call) {
-            call.on('stream', (remoteStream) => {
-                const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
-                const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
                 
-                remoteElem.srcObject = remoteStream;
-                containerElem.classList.remove('hidden');
-            });
-
-            call.on('close', () => {
-                hideRemoteVideo();
-            });
-        }
-
-        function hideRemoteVideo() {
-            const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
-            const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
-            remoteElem.srcObject = null;
-            containerElem.classList.add('hidden');
-        }
-
-        function setupConnectionEvents() {
-            conn.on('open', () => {
-                updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
-                syncCustomDeckToPartner();
-            });
-
-            conn.on('data', (data) => {
-                if (data.type === 'photo_chunk') {
-                    if (!incomingPhotoChunks[data.id]) {
-                        incomingPhotoChunks[data.id] = {
-                            chunks: new Array(data.total),
-                            received: 0,
-                            total: data.total,
-                            prompt: data.prompt
-                        };
-                    }
-                    const transfer = incomingPhotoChunks[data.id];
-                    if (!transfer.chunks[data.index]) {
-                        transfer.chunks[data.index] = data.data;
-                        transfer.received++;
-                    }
-                    if (transfer.received === transfer.total) {
-                        const fullImage = transfer.chunks.join('');
-                        const promptText = transfer.prompt;
-                        delete incomingPhotoChunks[data.id];
-                        showInteractivePhotoModal(fullImage, promptText);
-                    }
-                    return;
-                }
-
-                if (data.type === 'audio_chunk') {
-                    if (!incomingAudioChunks[data.id]) {
-                        incomingAudioChunks[data.id] = {
-                            chunks: new Array(data.total),
-                            received: 0,
-                            total: data.total,
-                            label: data.label
-                        };
-                    }
-                    const transfer = incomingAudioChunks[data.id];
-                    if (!transfer.chunks[data.index]) {
-                        transfer.chunks[data.index] = data.data;
-                        transfer.received++;
-                    }
-                    if (transfer.received === transfer.total) {
-                        const fullAudio = transfer.chunks.join('');
-                        const labelText = transfer.label;
-                        delete incomingAudioChunks[data.id];
-                        showAudioModal(fullAudio, labelText);
-                    }
-                    return;
-                }
-
-                if (data.type === 'photo_interactive') {
-                    showInteractivePhotoModal(data.image, data.prompt);
-                    return;
-                }
-
-                if (data.type === 'sync_custom_deck' && Array.isArray(data.deck)) {
-                    localStorage.setItem('osmose_custom_deck', JSON.stringify(data.deck));
-                    return;
-                }
-
-                if (data.type === 'stop_video') {
-                    hideRemoteVideo();
-                    return;
-                }
-                
-                if (!isMaster) {
-                    if (data.type === 'start_timer') { startPartnerTimer(data.seconds); return; }
-                    if (data.type === 'pause_timer') { isPartnerTimerPaused = data.isPaused; return; }
-                    if (data.type === 'stop_timer') { stopPartnerTimer(); return; }
-                }
-
-                if (isMaster) {
-                    if (data.type === 'typing') {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
-                    } else if (data.type && data.prompt) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Pioche (${getCardTypeLabel(data.type)})</span> : ${data.prompt}`;
-                    } else if (data.action && data.value) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${data.action}</span> : ${data.value}`;
-                    }
-                } else {
-                    displayCardToPartner(data);
-                }
-            });
-            conn.on('close', () => updateStatus('Déconnecté', 'text-red-300', 'bg-red-900/50', 'border-red-700'));
-        }
-
-        function drawCustomCard() {
-            const customDeck = getCustomDeck();
-            if (customDeck.length === 0) {
-                alert("Votre pioche personnalisée est vide ! Créez d'abord de nouvelles cartes depuis l'écran du Maître.");
-                return;
-            }
-            const selectedCard = customDeck[Math.floor(Math.random() * customDeck.length)];
-            displayCardToPartner(selectedCard);
-            if (conn && conn.open === true) conn.send(selectedCard);
-        }
-
-        function displayCardToPartner(cardData) {
-            document.getElementById('mystery-card').classList.add('hidden');
-            const cardContainer = document.getElementById('active-card-container');
-            const badgeElem = document.getElementById('card-type-badge');
-            const immediateBanner = document.getElementById('immediate-action-banner');
-
-            cardContainer.classList.remove('hidden');
-            document.getElementById('card-prompt-text').innerText = cardData.prompt;
-
-            stopPartnerTimer();
-
-            if (cardData.type === 'immediate') {
-                cardContainer.classList.remove('border-pink-500/50');
-                cardContainer.classList.add('border-amber-500', 'bg-amber-950/20');
-                badgeElem.className = "text-xs uppercase tracking-widest text-amber-400 font-extrabold";
-                badgeElem.innerText = "⚡ ACTION IMMÉDIATE";
-                immediateBanner.classList.remove('hidden');
-            } else {
-                cardContainer.classList.remove('border-amber-500', 'bg-amber-950/20');
-                cardContainer.classList.add('border-pink-500/50');
-                badgeElem.className = "text-xs uppercase tracking-widest text-pink-400 font-bold";
-                badgeElem.innerText = getCardTypeLabel(cardData.type);
-                immediateBanner.classList.add('hidden');
-            }
-
-            const optionsContainer = document.getElementById('interaction-options');
-            optionsContainer.innerHTML = '';
-
-            if (cardData.type === 'immediate') {
-                optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
-                    </div>`;
-            } else if (cardData.type === 'defi') {
-                optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">✨</button>
-                        <button onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">😈</button>
-                    </div>`;
-            } else if (cardData.type === 'vote') {
-                optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Vote', 'Aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">❤️</button>
-                        <button onclick="sendResponse('Vote', 'Refus_Aime_Pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
-                    </div>`;
-            } else if (cardData.type === 'yesno') {
-                optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Oui/Non', 'OUI')" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">✅ OUI</button>
-                        <button onclick="sendResponse('Oui/Non', 'NON')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">❌ NON</button>
-                    </div>`;
-            } else if (cardData.type === 'text') {
-                optionsContainer.innerHTML = `
-                    <div class="space-y-3">
-                        <input type="text" id="partner-text-input" placeholder="Votre réponse..." oninput="notifyTyping()" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
-                        <button onclick="sendTextResponse()" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">Envoyer 💌</button>
-                    </div>`;
-            }
-        }
-
-        let typingTimeout = null;
-        function notifyTyping() {
-            if (conn && conn.open === true && !typingTimeout) {
-                conn.send({ type: 'typing' });
-                typingTimeout = setTimeout(() => { typingTimeout = null; }, 2000);
-            }
-        }
-
-        function sendResponse(actionType, value) {
-            if (conn && conn.open === true) {
-                let displayValue = value;
-                if (value === 'Veto') displayValue = 'Veto / Refuse';
-                if (value === 'Refus_Aime_Pas') displayValue = 'J aime pas';
-                if (value === 'Executee') displayValue = 'Action executee ! ⚡';
-
-                conn.send({ action: actionType, value: displayValue });
-                alert("Réponse envoyée !");
-            } else {
-                alert("Erreur : Non connecté au Maître du Jeu.");
-            }
-        }
-
-        function sendTextResponse() {
-            const inputElem = document.getElementById('partner-text-input');
-            if (inputElem && inputElem.value.trim()) {
-                sendResponse('Reponse Libre', inputElem.value.trim());
-                inputElem.value = '';
-            }
-        }
-
-        async function toggleVideo() {
-            const localVideoElem = isMaster ? document.getElementById('local-video') : document.getElementById('partner-local-video');
-            const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
-
-            if (!localStream) {
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    localVideoElem.srcObject = localStream;
-                    localVideoElem.classList.remove('hidden');
-                    btnElem.innerText = "🛑 Couper ma Caméra";
-                    btnElem.classList.replace('bg-indigo-600', 'bg-red-600');
-
-                    if (conn && peer) {
-                        const targetId = isMaster ? conn.peer : 'osmose-' + document.getElementById('room-code-input').value.trim().toUpperCase();
-                        currentCall = peer.call(targetId, localStream);
-                        setupCallEvents(currentCall);
-                    }
-                } catch (err) { alert("Erreur caméra : " + err.message); }
-            } else {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-                localVideoElem.srcObject = null;
-                localVideoElem.classList.add('hidden');
-                
-                btnElem.innerText = "🎥 Activer ma Caméra";
-                btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
-                
-                if (conn && conn.open === true) {
-                    conn.send({ type: 'stop_video' });
-                }
-
-                if (currentCall) {
-                    currentCall.close();
-                    currentCall = null;
-                }
-            }
-        }
-
-        function updateStatus(text, textColor, bgCol, borderCol) {
-            const statusDiv = document.getElementById('connection-status');
-            statusDiv.innerText = text;
-            statusDiv.className = `text-xs px-3 py-1 rounded-full ${textColor} ${bgCol} border ${borderCol}`;
-        }
-    </script>
-</body>
-</html>
