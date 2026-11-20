@@ -15,6 +15,12 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between relative">
 
+    <!-- Bandeau d'alerte visuel non-bloquant (Mots doux côté Maître) -->
+    <div id="whisper-toast" onclick="focusMasterWhisperBox()" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 max-w-sm w-[92%] bg-gradient-to-r from-pink-600/95 to-purple-600/95 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-pink-300/40 flex items-center justify-between gap-3 cursor-pointer backdrop-blur-sm transition-all">
+        <span id="whisper-toast-text" class="text-xs font-semibold truncate">💌 Nouveau petit mot</span>
+        <span class="text-[11px] font-bold bg-black/25 px-2 py-0.5 rounded-lg shrink-0">Voir</span>
+    </div>
+
     <!-- En-tête -->
     <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center shadow-md">
         <h1 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Osmose Hot</h1>
@@ -114,15 +120,51 @@
         <div id="role-selection" class="w-full space-y-4 text-center">
             <h2 class="text-2xl font-semibold mb-6">Choisissez votre mode</h2>
             <button onclick="setupMaster()" class="w-full py-4 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition cursor-pointer">👑 Je suis le Maître du Jeu</button>
-            <button onclick="setupPartnerModal()" class="w-full py-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition cursor-pointer">💫 Je suis la Partenaire</button>
+            <button onclick="setupPartnerModal('partner')" class="w-full py-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition cursor-pointer">💫 Je suis la Partenaire</button>
+            <button onclick="setupPartnerModal('camera')" class="w-full py-3.5 bg-slate-900 border border-pink-500/40 text-pink-200 hover:bg-slate-800 rounded-2xl font-bold text-base shadow-lg active:scale-95 transition cursor-pointer">📹 Caméra Dédiée (vers le Maître)</button>
         </div>
 
-        <!-- MODAL CONNEXION PARTENAIRE -->
+        <!-- MODAL CONNEXION PARTENAIRE / CAMÉRA DÉDIÉE -->
         <div id="partner-modal" class="hidden w-full space-y-4 text-center">
-            <h2 class="text-xl font-semibold">Connexion au salon</h2>
+            <h2 id="connect-modal-title" class="text-xl font-semibold">Connexion au salon</h2>
             <input type="text" id="room-code-input" placeholder="Entrez le code à 4 chiffres" maxlength="4" class="w-full p-4 text-center text-2xl tracking-widest bg-slate-900 border border-slate-700 rounded-2xl text-white uppercase focus:outline-none focus:border-pink-500">
             <button onclick="connectAsPartner()" class="w-full py-3 bg-pink-600 rounded-2xl font-bold shadow-lg active:scale-95 transition cursor-pointer">Rejoindre</button>
             <button onclick="location.reload()" class="text-sm text-slate-400 underline cursor-pointer">Retour</button>
+        </div>
+
+        <!-- ÉCRAN CAMÉRA DÉDIÉE (3E SMARTPHONE -> MAÎTRE UNIQUEMENT) -->
+        <div id="dedicated-camera-screen" class="hidden w-full space-y-5 text-center">
+            <div class="bg-slate-900 p-5 rounded-3xl border border-pink-500/40 shadow-2xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs uppercase tracking-widest text-pink-400 font-bold">📹 Caméra Dédiée</span>
+                    <span id="dedicated-stream-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">En attente</span>
+                </div>
+                <p class="text-xs text-slate-400">Flux vidéo envoyé uniquement vers l'écran du Maître du Jeu (micro coupé par défaut pour éviter l'écho).</p>
+
+                <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-slate-700">
+                    <video id="dedicated-local-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
+                </div>
+
+                <!-- Contrôle de Zoom Caméra Dédiée -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-300 font-semibold">🔍 Zoom Cadrage</span>
+                        <span id="dedicated-local-zoom-label" class="text-purple-300 font-bold">1x</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="setDedicatedZoom(1)" id="cam-zoom-btn-1" class="py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition">1x</button>
+                        <button onclick="setDedicatedZoom(1.5)" id="cam-zoom-btn-1.5" class="py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">1.5x</button>
+                        <button onclick="setDedicatedZoom(2)" id="cam-zoom-btn-2" class="py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">2x</button>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="toggleDedicatedCamera()" id="dedicated-cam-toggle-btn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Démarrer le flux</button>
+                    <button onclick="switchCameraFacingMode()" id="dedicated-switch-cam-btn" class="px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
+                </div>
+
+                <button onclick="location.reload()" class="w-full py-2 bg-slate-800/80 hover:bg-slate-800 text-xs text-slate-400 rounded-xl transition">Quitter le mode Caméra Dédiée</button>
+            </div>
         </div>
 
         <!-- ÉCRAN MAÎTRE DU JEU -->
@@ -133,6 +175,34 @@
                 <button onclick="copyInviteLink()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-semibold text-pink-300 transition flex items-center justify-center gap-2">
                     <span>📋</span> Copier le lien d'invitation direct
                 </button>
+            </div>
+
+            <!-- ENCART DÉDIÉ : MOTS DOUX REÇUS + RÉPONSES RAPIDES -->
+            <div id="master-whisper-box" onclick="clearWhisperUnreadBadge()" class="bg-slate-900 p-4 rounded-2xl border border-pink-500/30 space-y-3 transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-xs font-bold text-pink-300 uppercase tracking-wider">🤫 Mots doux reçus</h3>
+                        <span id="whisper-unread-badge" class="hidden text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-pink-600 text-white animate-bounce">0</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); clearWhisperHistory();" class="text-[10px] text-slate-400 hover:text-pink-300 underline">Effacer</button>
+                </div>
+
+                <div id="whisper-messages-list" class="space-y-1.5 text-left max-h-36 overflow-y-auto">
+                    <p class="text-xs text-slate-500 italic">Aucun petit mot reçu pour l'instant.</p>
+                </div>
+
+                <!-- Boutons de réponse rapide côté Maître -->
+                <div class="pt-2 border-t border-slate-800/80 space-y-1.5 text-left" onclick="event.stopPropagation();">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">⚡ Réponse rapide</span>
+                        <span id="master-whisper-reply-status" class="hidden text-[10px] text-emerald-300 font-medium">Envoyé ✨</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button onclick="sendQuickMasterWhisperReply(\"J'arrive\")" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">🏃 J'arrive</button>
+                        <button onclick="sendQuickMasterWhisperReply('Bien noté 😏')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">Bien noté 😏</button>
+                        <button onclick="sendQuickMasterWhisperReply('Montre-moi')" class="text-[11px] px-2.5 py-1 bg-pink-950/60 hover:bg-pink-900 text-pink-200 border border-pink-500/40 rounded-xl font-medium transition">👀 Montre-moi</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Médias rapides : Photo + Fichier Audio + Vocal Direct -->
@@ -228,9 +298,9 @@
                 <p id="deck-count" class="text-xs text-slate-500 text-center pt-1"></p>
             </div>
 
-            <!-- Contrôle Vidéo Maître -->
+            <!-- Contrôle Vidéo Maître (Partenaire + Caméra Dédiée) -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
-                <h3 class="font-semibold text-slate-300">Visio en Direct (Bidirectionnelle)</h3>
+                <h3 class="font-semibold text-slate-300">Visio en Direct & Caméra Dédiée</h3>
                 <div class="flex gap-2">
                     <button onclick="toggleVideo()" id="master-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
                     <button onclick="switchCameraFacingMode()" id="master-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
@@ -241,6 +311,21 @@
                 <div id="video-container" class="hidden relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-slate-700">
                     <video id="remote-video" autoplay playsinline class="w-full h-full object-cover"></video>
                     <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-pink-400">Partenaire en direct 🔴</div>
+                </div>
+
+                <div id="dedicated-cam-container" class="hidden space-y-2 pt-1">
+                    <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-purple-500/50">
+                        <video id="dedicated-remote-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
+                        <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-purple-300">📹 Caméra Dédiée (<span id="master-dedicated-zoom-badge">1x</span>) 🔴</div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2">
+                        <span class="text-[11px] text-slate-300 font-semibold">🔍 Zoom Caméra</span>
+                        <div class="flex gap-1.5">
+                            <button onclick="requestDedicatedZoom(1)" id="master-zoom-btn-1" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white transition">1x</button>
+                            <button onclick="requestDedicatedZoom(1.5)" id="master-zoom-btn-1.5" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">1.5x</button>
+                            <button onclick="requestDedicatedZoom(2)" id="master-zoom-btn-2" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition">2x</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -315,6 +400,28 @@
                 <div id="interaction-options" class="pt-2"></div>
             </div>
 
+            <!-- ENCART PETIT MOT LIBRE (INDÉPENDANT DE LA CARTE ACTIVE) -->
+            <div id="partner-whisper-box" class="bg-slate-900/95 p-4 rounded-2xl border border-pink-500/30 space-y-2.5 text-left shadow-lg">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-pink-300 uppercase tracking-wider">🤫 Glisser un petit mot</h3>
+                    <span class="text-[10px] text-slate-400">Hors défi</span>
+                </div>
+                <div id="partner-whisper-reply-banner" class="hidden bg-pink-950/50 border border-pink-500/40 rounded-xl px-3 py-2 text-xs text-pink-200 flex items-center justify-between gap-2">
+                    <span id="partner-whisper-reply-text" class="font-medium break-words">👑 Maître : ...</span>
+                    <span id="partner-whisper-reply-time" class="text-[10px] text-pink-300/70 shrink-0"></span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="sendQuickWhisper('J\'ai chaud...')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">🔥 J'ai chaud...</button>
+                    <button onclick="sendQuickWhisper('Encore ?')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">😏 Encore ?</button>
+                    <button onclick="sendQuickWhisper('Approche-toi')" class="text-[11px] px-2.5 py-1 bg-slate-800 hover:bg-pink-950/60 text-pink-200 border border-slate-700 rounded-xl transition">💋 Approche-toi</button>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="partner-whisper-input" onkeydown="if(event.key==='Enter') sendWhisperMessage();" placeholder="Écrire un petit mot à tout moment..." class="flex-1 p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500">
+                    <button onclick="sendWhisperMessage()" class="px-3.5 py-2.5 bg-pink-600 hover:bg-pink-500 rounded-xl font-bold text-xs text-white shadow transition">Envoyer</button>
+                </div>
+                <p id="partner-whisper-status" class="hidden text-[11px] text-emerald-300 font-medium">Petit mot envoyé ✨</p>
+            </div>
+
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-slate-300">Visio en Direct</h3>
                 <div class="flex gap-2">
@@ -335,7 +442,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Selfie & Caméra Arrière
+        Osmose Hot • Réponses Rapides Mots Doux
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -370,6 +477,266 @@
             }
             promptInput.focus();
             promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // --- ZOOM SUR LA CAMÉRA DÉDIÉE ---
+        let currentDedicatedZoom = 1;
+        let dedicatedCameraConn = null;
+
+        function updateZoomButtonsUI(prefix, activeZoom) {
+            [1, 1.5, 2].forEach((z) => {
+                const btn = document.getElementById(`${prefix}-zoom-btn-${z}`);
+                if (!btn) return;
+                if (z === activeZoom) {
+                    btn.className = btn.className.includes('px-2.5')
+                        ? "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-purple-600 text-white transition"
+                        : "py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white transition";
+                } else {
+                    btn.className = btn.className.includes('px-2.5')
+                        ? "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                        : "py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
+                }
+            });
+        }
+
+        async function applyHardwareZoomIfSupported(zoomVal) {
+            if (!localStream) return;
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (!videoTrack || typeof videoTrack.getCapabilities !== 'function') return;
+            try {
+                const capabilities = videoTrack.getCapabilities();
+                if (capabilities && capabilities.zoom) {
+                    const clamped = Math.max(capabilities.zoom.min || 1, Math.min(capabilities.zoom.max || zoomVal, zoomVal));
+                    await videoTrack.applyConstraints({ advanced: [{ zoom: clamped }] });
+                }
+            } catch (e) {
+                // Fallback visuel CSS si le zoom matériel n'est pas exposé
+            }
+        }
+
+        async function setDedicatedZoom(zoomVal) {
+            currentDedicatedZoom = zoomVal;
+            const localVid = document.getElementById('dedicated-local-video');
+            const label = document.getElementById('dedicated-local-zoom-label');
+            if (localVid) {
+                localVid.style.transform = `scale(${zoomVal})`;
+            }
+            if (label) {
+                label.innerText = `${zoomVal}x`;
+            }
+            updateZoomButtonsUI('cam', zoomVal);
+            await applyHardwareZoomIfSupported(zoomVal);
+        }
+
+        function setMasterDedicatedZoomPreview(zoomVal) {
+            currentDedicatedZoom = zoomVal;
+            const remoteVid = document.getElementById('dedicated-remote-video');
+            const badge = document.getElementById('master-dedicated-zoom-badge');
+            if (remoteVid) {
+                remoteVid.style.transform = `scale(${zoomVal})`;
+            }
+            if (badge) {
+                badge.innerText = `${zoomVal}x`;
+            }
+            updateZoomButtonsUI('master', zoomVal);
+        }
+
+        function requestDedicatedZoom(zoomVal) {
+            setMasterDedicatedZoomPreview(zoomVal);
+            if (dedicatedCameraConn && dedicatedCameraConn.open === true) {
+                dedicatedCameraConn.send({ type: 'set_zoom', zoom: zoomVal });
+            }
+        }
+
+        // --- MOTS DOUX LIBRES, RÉPONSES RAPIDES & ALERTES VISUELLES ---
+        let receivedWhispers = [];
+        let unreadWhisperCount = 0;
+        let whisperAlertTimeout = null;
+        let whisperToastTimeout = null;
+        let whisperStatusTimeout = null;
+        let masterReplyStatusTimeout = null;
+
+        function dispatchWhisperText(text) {
+            const cleanText = (text || '').trim();
+            if (!cleanText) return;
+            if (!conn || conn.open !== true) {
+                alert("Non connecté au Maître du Jeu.");
+                return;
+            }
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            conn.send({
+                type: 'whisper_chat',
+                text: cleanText,
+                time: nowTime
+            });
+
+            const statusElem = document.getElementById('partner-whisper-status');
+            if (statusElem) {
+                statusElem.innerText = `Envoyé à ${nowTime} : "${cleanText}" ✨`;
+                statusElem.classList.remove('hidden');
+                clearTimeout(whisperStatusTimeout);
+                whisperStatusTimeout = setTimeout(() => {
+                    statusElem.classList.add('hidden');
+                }, 2500);
+            }
+        }
+
+        function sendWhisperMessage() {
+            const input = document.getElementById('partner-whisper-input');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            dispatchWhisperText(text);
+            input.value = '';
+        }
+
+        function sendQuickWhisper(presetText) {
+            dispatchWhisperText(presetText);
+        }
+
+        function sendQuickMasterWhisperReply(replyText) {
+            const cleanReply = (replyText || '').trim();
+            if (!cleanReply) return;
+            if (!conn || conn.open !== true) {
+                alert("La partenaire n'est pas connectée !");
+                return;
+            }
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            conn.send({
+                type: 'whisper_reply',
+                text: cleanReply,
+                time: nowTime
+            });
+
+            const replyStatus = document.getElementById('master-whisper-reply-status');
+            if (replyStatus) {
+                replyStatus.innerText = `Envoyé : "${cleanReply}" ✨`;
+                replyStatus.classList.remove('hidden');
+                clearTimeout(masterReplyStatusTimeout);
+                masterReplyStatusTimeout = setTimeout(() => {
+                    replyStatus.classList.add('hidden');
+                }, 2500);
+            }
+        }
+
+        function handleIncomingWhisperReply(data) {
+            const text = (data && data.text) ? String(data.text) : '';
+            if (!text) return;
+            const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const banner = document.getElementById('partner-whisper-reply-banner');
+            const textElem = document.getElementById('partner-whisper-reply-text');
+            const timeElem = document.getElementById('partner-whisper-reply-time');
+
+            if (banner && textElem && timeElem) {
+                textElem.innerText = `👑 ${text}`;
+                timeElem.innerText = time;
+                banner.classList.remove('hidden', 'ring-2', 'ring-pink-400');
+                void banner.offsetWidth;
+                banner.classList.add('ring-2', 'ring-pink-400');
+                setTimeout(() => {
+                    banner.classList.remove('ring-2', 'ring-pink-400');
+                }, 2500);
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(60); } catch (e) {}
+            }
+        }
+
+        function handleIncomingWhisper(data) {
+            const text = (data && data.text) ? String(data.text) : '';
+            if (!text) return;
+            const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            receivedWhispers.unshift({ text, time });
+            if (receivedWhispers.length > 6) {
+                receivedWhispers = receivedWhispers.slice(0, 6);
+            }
+            renderWhisperHistory();
+            triggerWhisperVisualAlert(text);
+        }
+
+        function renderWhisperHistory() {
+            const listElem = document.getElementById('whisper-messages-list');
+            if (!listElem) return;
+            if (receivedWhispers.length === 0) {
+                listElem.innerHTML = `<p class="text-xs text-slate-500 italic">Aucun petit mot reçu pour l'instant.</p>`;
+                return;
+            }
+            listElem.innerHTML = receivedWhispers.map((msg, idx) => `
+                <div class="flex items-start justify-between gap-2 px-3 py-2 rounded-xl ${idx === 0 ? 'bg-pink-950/50 border border-pink-500/40 text-white' : 'bg-slate-800/70 text-slate-300'} text-xs">
+                    <span class="break-words font-medium">${escapeHtml(msg.text)}</span>
+                    <span class="text-[10px] text-slate-400 shrink-0">${escapeHtml(msg.time)}</span>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function triggerWhisperVisualAlert(previewText) {
+            const box = document.getElementById('master-whisper-box');
+            const badge = document.getElementById('whisper-unread-badge');
+            const toast = document.getElementById('whisper-toast');
+            const toastText = document.getElementById('whisper-toast-text');
+
+            unreadWhisperCount++;
+            if (badge) {
+                badge.innerText = unreadWhisperCount;
+                badge.classList.remove('hidden');
+            }
+
+            if (box) {
+                box.classList.add('ring-2', 'ring-pink-500', 'bg-pink-950/30', 'animate-pulse');
+                clearTimeout(whisperAlertTimeout);
+                whisperAlertTimeout = setTimeout(() => {
+                    box.classList.remove('ring-2', 'ring-pink-500', 'bg-pink-950/30', 'animate-pulse');
+                }, 3000);
+            }
+
+            if (toast && toastText) {
+                toastText.innerText = `💌 ${previewText}`;
+                toast.classList.remove('hidden');
+                clearTimeout(whisperToastTimeout);
+                whisperToastTimeout = setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 4500);
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(80); } catch (e) {}
+            }
+        }
+
+        function clearWhisperUnreadBadge() {
+            unreadWhisperCount = 0;
+            const badge = document.getElementById('whisper-unread-badge');
+            if (badge) {
+                badge.innerText = '0';
+                badge.classList.add('hidden');
+            }
+        }
+
+        function focusMasterWhisperBox() {
+            const toast = document.getElementById('whisper-toast');
+            if (toast) toast.classList.add('hidden');
+            clearWhisperUnreadBadge();
+            const box = document.getElementById('master-whisper-box');
+            if (box) {
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function clearWhisperHistory() {
+            receivedWhispers = [];
+            clearWhisperUnreadBadge();
+            renderWhisperHistory();
         }
 
         let currentRoomCode = "";
@@ -1004,7 +1371,7 @@
 
         function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
 
-        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false, currentFacingMode = 'user';
+        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false, isDedicatedCamera = false, currentFacingMode = 'user';
 
         window.onload = () => {
             try {
@@ -1013,7 +1380,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const roomParam = urlParams.get('room');
                 if (roomParam && roomParam.length === 4) {
-                    setupPartnerModal();
+                    setupPartnerModal('partner');
                     const codeInput = document.getElementById('room-code-input');
                     if (codeInput) codeInput.value = roomParam;
                     setTimeout(() => { connectAsPartner(); }, 500);
@@ -1031,6 +1398,7 @@
 
         function setupMaster() {
             isMaster = true;
+            isDedicatedCamera = false;
             requestWakeLock();
             currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('display-room-code').innerText = currentRoomCode;
@@ -1039,15 +1407,49 @@
 
             peer = new Peer('osmose-' + currentRoomCode);
             peer.on('connection', (connection) => {
+                if (connection.metadata && connection.metadata.role === 'camera') {
+                    dedicatedCameraConn = connection;
+                    connection.on('data', (d) => {
+                        if (d && d.type === 'zoom_synced' && typeof d.zoom === 'number') {
+                            setMasterDedicatedZoomPreview(d.zoom);
+                        }
+                    });
+                    return;
+                }
                 conn = connection;
                 setupConnectionEvents();
                 updateStatus('Connecté au Duo ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
             });
             peer.on('call', (call) => {
+                if (call.metadata && call.metadata.role === 'camera') {
+                    call.answer();
+                    call.on('stream', (camStream) => {
+                        const camVideo = document.getElementById('dedicated-remote-video');
+                        const camBox = document.getElementById('dedicated-cam-container');
+                        if (camVideo && camBox) {
+                            camVideo.srcObject = camStream;
+                            camBox.classList.remove('hidden');
+                        }
+                    });
+                    call.on('close', () => {
+                        hideDedicatedCameraStream();
+                    });
+                    return;
+                }
                 currentCall = call;
                 call.answer(localStream);
                 setupCallEvents(call);
             });
+        }
+
+        function hideDedicatedCameraStream() {
+            const camVideo = document.getElementById('dedicated-remote-video');
+            const camBox = document.getElementById('dedicated-cam-container');
+            if (camVideo) {
+                camVideo.srcObject = null;
+                camVideo.style.transform = 'scale(1)';
+            }
+            if (camBox) camBox.classList.add('hidden');
         }
 
         function copyInviteLink() {
@@ -1056,7 +1458,12 @@
             });
         }
 
-        function setupPartnerModal() {
+        function setupPartnerModal(mode = 'partner') {
+            isDedicatedCamera = (mode === 'camera');
+            const titleElem = document.getElementById('connect-modal-title');
+            if (titleElem) {
+                titleElem.innerText = isDedicatedCamera ? "Connexion Caméra Dédiée" : "Connexion au salon";
+            }
             document.getElementById('role-selection').classList.add('hidden');
             document.getElementById('partner-modal').classList.remove('hidden');
         }
@@ -1072,6 +1479,36 @@
 
             requestWakeLock();
             document.getElementById('partner-modal').classList.add('hidden');
+
+            if (isDedicatedCamera) {
+                document.getElementById('dedicated-camera-screen').classList.remove('hidden');
+                updateStatus('Caméra Dédiée prête', 'text-purple-300', 'bg-purple-900/50', 'border-purple-700');
+                currentFacingMode = 'environment';
+                const switchBtn = document.getElementById('dedicated-switch-cam-btn');
+                if (switchBtn) switchBtn.innerText = "🔄 Mode Selfie";
+
+                if (peer) {
+                    try { peer.destroy(); } catch(e) {}
+                }
+                peer = new Peer();
+                peer.on('open', () => {
+                    const masterId = 'osmose-' + code;
+                    dedicatedCameraConn = peer.connect(masterId, { metadata: { role: 'camera' } });
+                    dedicatedCameraConn.on('data', (d) => {
+                        if (d && d.type === 'set_zoom' && typeof d.zoom === 'number') {
+                            setDedicatedZoom(d.zoom);
+                        }
+                    });
+                    startDedicatedCameraStream(masterId).catch((err) => {
+                        alert("Erreur caméra dédiée : " + err.message);
+                    });
+                });
+                peer.on('error', (err) => {
+                    console.error("Erreur PeerJS Caméra Dédiée :", err);
+                });
+                return;
+            }
+
             document.getElementById('partner-screen').classList.remove('hidden');
             updateStatus('Connexion en cours...', 'text-amber-300', 'bg-amber-900/50', 'border-amber-700');
 
@@ -1114,6 +1551,84 @@
             });
         }
 
+        async function startDedicatedCameraStream(masterPeerId) {
+            const localVideoElem = document.getElementById('dedicated-local-video');
+            const toggleBtn = document.getElementById('dedicated-cam-toggle-btn');
+            const badge = document.getElementById('dedicated-stream-badge');
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: currentFacingMode } },
+                audio: false
+            });
+
+            if (localVideoElem) {
+                localVideoElem.srcObject = localStream;
+                localVideoElem.style.transform = `scale(${currentDedicatedZoom})`;
+                localVideoElem.classList.remove('hidden');
+            }
+            if (toggleBtn) {
+                toggleBtn.innerText = "🛑 Arrêter le flux";
+                toggleBtn.classList.replace('bg-indigo-600', 'bg-red-600');
+                toggleBtn.classList.replace('hover:bg-indigo-500', 'hover:bg-red-500');
+            }
+            if (badge) {
+                badge.innerText = "Envoi vers le Maître 🔴";
+                badge.className = "text-xs px-2.5 py-0.5 rounded-full bg-purple-900/60 text-purple-200 border border-purple-500/50";
+            }
+
+            await applyHardwareZoomIfSupported(currentDedicatedZoom);
+
+            const newVideoTrack = localStream.getVideoTracks()[0];
+            if (currentCall && currentCall.peerConnection) {
+                const videoSender = currentCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (videoSender && newVideoTrack) {
+                    await videoSender.replaceTrack(newVideoTrack);
+                }
+            } else if (peer && masterPeerId) {
+                currentCall = peer.call(masterPeerId, localStream, { metadata: { role: 'camera' } });
+            }
+        }
+
+        async function toggleDedicatedCamera() {
+            const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
+            const masterPeerId = code.length === 4 ? 'osmose-' + code : null;
+            const localVideoElem = document.getElementById('dedicated-local-video');
+            const toggleBtn = document.getElementById('dedicated-cam-toggle-btn');
+            const badge = document.getElementById('dedicated-stream-badge');
+
+            if (!localStream) {
+                try {
+                    await startDedicatedCameraStream(masterPeerId);
+                } catch (err) {
+                    alert("Erreur caméra dédiée : " + err.message);
+                }
+            } else {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                if (localVideoElem) {
+                    localVideoElem.srcObject = null;
+                    localVideoElem.style.transform = 'scale(1)';
+                }
+                if (currentCall) {
+                    try { currentCall.close(); } catch(e) {}
+                    currentCall = null;
+                }
+                if (toggleBtn) {
+                    toggleBtn.innerText = "🎥 Démarrer le flux";
+                    toggleBtn.classList.replace('bg-red-600', 'bg-indigo-600');
+                    toggleBtn.classList.replace('hover:bg-red-500', 'hover:bg-indigo-500');
+                }
+                if (badge) {
+                    badge.innerText = "Flux coupé";
+                    badge.className = "text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+                }
+            }
+        }
+
         function setupCallEvents(call) {
             call.on('stream', (remoteStream) => {
                 const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
@@ -1142,6 +1657,20 @@
             });
 
             conn.on('data', (data) => {
+                if (data.type === 'whisper_chat') {
+                    if (isMaster) {
+                        handleIncomingWhisper(data);
+                    }
+                    return;
+                }
+
+                if (data.type === 'whisper_reply') {
+                    if (!isMaster) {
+                        handleIncomingWhisperReply(data);
+                    }
+                    return;
+                }
+
                 if (data.type === 'photo_chunk') {
                     if (!incomingPhotoChunks[data.id]) {
                         incomingPhotoChunks[data.id] = {
@@ -1371,6 +1900,21 @@
         async function switchCameraFacingMode() {
             if (!localStream) return;
             currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+
+            if (isDedicatedCamera) {
+                const switchBtn = document.getElementById('dedicated-switch-cam-btn');
+                if (switchBtn) {
+                    switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
+                }
+                const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
+                try {
+                    await startDedicatedCameraStream(code.length === 4 ? 'osmose-' + code : null);
+                } catch (err) {
+                    alert("Impossible de basculer de caméra : " + err.message);
+                }
+                return;
+            }
+
             try {
                 await startCameraStream();
             } catch (err) {
