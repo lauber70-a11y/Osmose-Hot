@@ -207,6 +207,15 @@
                 </button>
             </div>
 
+            <!-- BANDEAU EN HAUT : RÉPONSE & STATUT EN DIRECT -->
+            <div id="master-top-feedback-box" onclick="document.getElementById('master-feedback').scrollIntoView({ behavior: 'smooth', block: 'center' })" class="bg-gradient-to-r from-slate-900 via-pink-950/30 to-slate-900 p-3.5 rounded-2xl border border-pink-500/40 shadow-lg cursor-pointer transition-all duration-300">
+                <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-pink-400">📩 Réponse & statut en direct</span>
+                    <span class="text-[10px] text-slate-400 underline">Détails ↓</span>
+                </div>
+                <div id="top-feedback-content" class="text-sm font-semibold text-slate-200 break-words">En attente d'une action...</div>
+            </div>
+
             <!-- ENCART DÉDIÉ : MOTS DOUX REÇUS + RÉPONSES RAPIDES -->
             <div id="master-whisper-box" onclick="clearWhisperUnreadBadge()" class="bg-slate-900 p-4 rounded-2xl border border-pink-500/30 space-y-3 transition-all duration-300">
                 <div class="flex items-center justify-between">
@@ -498,6 +507,26 @@
             { type: 'yesno', prompt: "Est-ce que tu veux qu'on commande un dessert surprise ?" },
             { type: 'text', prompt: "En un mot, décris ce que tu ressens pour moi là tout de suite." }
         ];
+
+        // --- BANDEAU DE RÉPONSE & STATUT EN HAUT CÔTÉ MAÎTRE ---
+        let topFeedbackTimeout = null;
+
+        function setMasterFeedback(html) {
+            const bottomElem = document.getElementById('feedback-content');
+            const topElem = document.getElementById('top-feedback-content');
+            const topBox = document.getElementById('master-top-feedback-box');
+
+            if (bottomElem) bottomElem.innerHTML = html;
+            if (topElem) topElem.innerHTML = html;
+
+            if (topBox) {
+                topBox.classList.add('ring-2', 'ring-pink-400');
+                clearTimeout(topFeedbackTimeout);
+                topFeedbackTimeout = setTimeout(() => {
+                    topBox.classList.remove('ring-2', 'ring-pink-400');
+                }, 1500);
+            }
+        }
 
         // --- RÉACTIONS ÉMOJI ÉCLAIRS CÔTÉ MAÎTRE ---
         let flashReactionStatusTimeout = null;
@@ -972,7 +1001,7 @@
             if (!conn || conn.open !== true) { alert("La partenaire n'est pas connectée !"); return; }
             const selectedCard = { type: combined[idx].type, prompt: combined[idx].prompt };
             conn.send(selectedCard);
-            document.getElementById('feedback-content').innerHTML = `<span class="text-indigo-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(selectedCard.type))}) :</span> ${escapeHtml(selectedCard.prompt)}`;
+            setMasterFeedback(`<span class="text-indigo-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(selectedCard.type))}) :</span> ${escapeHtml(selectedCard.prompt)}`);
         }
 
         function addNewCardToDeck() {
@@ -1129,7 +1158,7 @@
             if (!conn || conn.open !== true) { alert("Non connecté au partenaire !"); return; }
             const payload = { type: typeSelect.value, prompt: text };
             conn.send(payload);
-            document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(typeSelect.value))}) :</span> ${escapeHtml(text)}`;
+            setMasterFeedback(`<span class="text-pink-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(typeSelect.value))}) :</span> ${escapeHtml(text)}`);
             promptInput.value = '';
         }
 
@@ -1333,8 +1362,7 @@
                 });
 
                 if (isMaster) {
-                    document.getElementById('feedback-content').innerHTML =
-                        `<span class="text-amber-300 font-bold">📸 Photo envoyée :</span> "${escapeHtml(questionText)}" — En attente d'accusé de réception...`;
+                    setMasterFeedback(`<span class="text-amber-300 font-bold">📸 Photo envoyée :</span> "${escapeHtml(questionText)}" — En attente d'accusé de réception...`);
                 }
                 closePhotoComposer();
             } catch (err) {
@@ -1408,7 +1436,7 @@
                     setAudioProgress(100, `Envoyé : ${labelText}`);
                     setTimeout(() => setAudioProgress(null), 1200);
                     if (isMaster) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">🎵 Audio envoyé :</span> ${escapeHtml(labelText)}`;
+                        setMasterFeedback(`<span class="text-pink-400 font-bold">🎵 Audio envoyé :</span> ${escapeHtml(labelText)}`);
                     }
                     return;
                 }
@@ -1867,8 +1895,7 @@
 
                 if (data.type === 'photo_ack') {
                     if (isMaster) {
-                        document.getElementById('feedback-content').innerHTML =
-                            `<span class="text-emerald-400 font-bold">✅ Photo bien reçue par la partenaire !</span> ("${escapeHtml(data.prompt || '')}")`;
+                        setMasterFeedback(`<span class="text-emerald-400 font-bold">✅ Photo bien reçue par la partenaire !</span> ("${escapeHtml(data.prompt || '')}")`);
                     }
                     return;
                 }
@@ -1914,11 +1941,11 @@
 
                 if (isMaster) {
                     if (data.type === 'typing') {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`;
+                        setMasterFeedback(`<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`);
                     } else if (data.type && data.prompt) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">Pioche (${escapeHtml(getCardTypeLabel(data.type))})</span> : ${escapeHtml(data.prompt)}`;
+                        setMasterFeedback(`<span class="text-pink-400 font-bold">Pioche (${escapeHtml(getCardTypeLabel(data.type))})</span> : ${escapeHtml(data.prompt)}`);
                     } else if (data.action && data.value) {
-                        document.getElementById('feedback-content').innerHTML = `<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`;
+                        setMasterFeedback(`<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`);
                     }
                 } else if (data.type && data.prompt) {
                     displayCardToPartner(data);
