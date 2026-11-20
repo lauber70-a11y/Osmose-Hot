@@ -41,12 +41,12 @@
 
                 <div class="bg-amber-950/30 border border-amber-500/30 p-3 rounded-xl">
                     <h3 class="font-bold text-amber-300 mb-1">⚡ Action Immédiate</h3>
-                    <p class="text-xs text-amber-200">Lorsqu'une carte Action Immédiate apparaît, elle doit être réalisée sur-le-champ avant de passer à la suite !</p>
+                    <p class="text-xs text-amber-200">Lorsqu'une carte Action Immédiate apparaît, elle doit être réalisée sur-le-champ sans possibilité de Veto !</p>
                 </div>
 
                 <div class="bg-pink-950/30 border border-pink-500/30 p-3 rounded-xl">
                     <h3 class="font-bold text-pink-300 mb-1">🛡️ La Règle d'Or du Veto</h3>
-                    <p class="text-xs text-pink-200">Tout défi ou action peut être refusé instantanément en cliquant sur <b>Veto</b>. Aucun jugement, aucune justification requise !</p>
+                    <p class="text-xs text-pink-200">Les défis classiques peuvent être refusés instantanément en cliquant sur <b>Veto</b>. Aucun jugement, aucune justification requise !</p>
                 </div>
             </div>
 
@@ -280,7 +280,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Photo Corrigée & Actions Immédiates
+        Osmose Hot • Action Immédiate Sans Veto
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -629,7 +629,7 @@
             if (container) container.classList.add('hidden');
         }
 
-        // --- PHOTOS & GALERIE INTERACTIVE (CORRECTION INTÉGRÉE) ---
+        // --- PHOTOS & GALERIE INTERACTIVE ---
         function triggerPhotoCapture() {
             if (!conn || conn.open !== true) { alert("Non connecté !"); return; }
             document.getElementById('camera-file-input').click();
@@ -893,10 +893,10 @@
             optionsContainer.innerHTML = '';
 
             if (cardData.type === 'immediate') {
+                // Pas de bouton Veto sur les cartes Action Immédiate
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
-                        <button onclick="sendResponse('Action Immediate', 'Executee')" class="flex-1 py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
-                        <button onclick="sendResponse('Action Immediate', 'Veto')" class="px-4 py-3 bg-red-600/80 hover:bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">😈 Veto</button>
+                        <button onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
                     </div>`;
             } else if (cardData.type === 'defi') {
                 optionsContainer.innerHTML = `
