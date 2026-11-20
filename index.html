@@ -1631,11 +1631,17 @@
                     call.on('stream', (camStream) => {
                         const camVideo = document.getElementById('dedicated-remote-video');
                         const camBox = document.getElementById('dedicated-cam-container');
-                        if (camVideo && camBox) {
-                            camVideo.srcObject = camStream;
-                            camBox.classList.remove('hidden');
-                        }
+                        attachStreamToVideoElement(camVideo, camBox, camStream);
                     });
+                    if (call.peerConnection) {
+                        call.peerConnection.ontrack = (event) => {
+                            const camVideo = document.getElementById('dedicated-remote-video');
+                            const camBox = document.getElementById('dedicated-cam-container');
+                            if (event.streams && event.streams[0]) {
+                                attachStreamToVideoElement(camVideo, camBox, event.streams[0]);
+                            }
+                        };
+                    }
                     call.on('close', () => {
                         hideDedicatedCameraStream();
                     });
@@ -1771,9 +1777,8 @@
             });
 
             if (localVideoElem) {
-                localVideoElem.srcObject = localStream;
                 localVideoElem.style.transform = `scale(${currentDedicatedZoom})`;
-                localVideoElem.classList.remove('hidden');
+                attachStreamToVideoElement(localVideoElem, null, localStream);
             }
             if (toggleBtn) {
                 toggleBtn.innerText = "🛑 Arrêter le flux";
@@ -1834,14 +1839,91 @@
             }
         }
 
+        function forcePlayVideoElement(videoElem) {
+            if (!videoElem) return;
+            videoElem.muted = true;
+            try {
+                const p = videoElem.play();
+                if (p && typeof p.catch === 'function') {
+                    p.catch(() => {
+                        videoElem.muted = true;
+                        videoElem.play().catch(() => {});
+                    });
+                }
+            } catch (e) {}
+            if (videoElem.id === 'remote-video' || videoElem.id === 'partner-remote-video') {
+                setTimeout(() => {
+                    try {
+                        videoElem.muted = false;
+                        const p2 = videoElem.play();
+                        if (p2 && typeof p2.catch === 'function') {
+                            p2.catch(() => {
+                                videoElem.muted = true;
+                                videoElem.play().catch(() => {});
+                            });
+                        }
+                    } catch (e) {}
+                }, 120);
+            }
+        }
+
+        function attachStreamToVideoElement(videoElem, containerElem, stream) {
+            if (!videoElem || !stream) return;
+            if (videoElem.srcObject !== stream) {
+                videoElem.srcObject = stream;
+            }
+            if (containerElem) {
+                containerElem.classList.remove('hidden');
+            }
+            videoElem.classList.remove('hidden');
+            forcePlayVideoElement(videoElem);
+
+            videoElem.onloadedmetadata = () => forcePlayVideoElement(videoElem);
+            videoElem.oncanplay = () => forcePlayVideoElement(videoElem);
+
+            if (stream.getVideoTracks) {
+                stream.getVideoTracks().forEach((track) => {
+                    track.onunmute = () => forcePlayVideoElement(videoElem);
+                });
+            }
+        }
+
         function setupCallEvents(call) {
-            call.on('stream', (remoteStream) => {
+            const handleRemoteStream = (remoteStream) => {
+                if (!remoteStream) return;
                 const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
                 const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
-                
-                remoteElem.srcObject = remoteStream;
-                containerElem.classList.remove('hidden');
-            });
+                attachStreamToVideoElement(remoteElem, containerElem, remoteStream);
+            };
+
+            call.on('stream', handleRemoteStream);
+
+            if (call.peerConnection) {
+                call.peerConnection.ontrack = (event) => {
+                    const streamFromEvent = (event.streams && event.streams[0]) ? event.streams[0] : null;
+                    if (streamFromEvent) {
+                        handleRemoteStream(streamFromEvent);
+                    } else if (event.track) {
+                        const existing = isMaster
+                            ? document.getElementById('remote-video')?.srcObject
+                            : document.getElementById('partner-remote-video')?.srcObject;
+                        const ms = existing instanceof MediaStream ? existing : new MediaStream();
+                        if (!ms.getTracks().some(t => t.id === event.track.id)) {
+                            ms.addTrack(event.track);
+                        }
+                        handleRemoteStream(ms);
+                    }
+                };
+                call.peerConnection.oniceconnectionstatechange = () => {
+                    const st = call.peerConnection.iceConnectionState;
+                    if (st === 'connected' || st === 'completed') {
+                        const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
+                        if (remoteElem && remoteElem.srcObject) {
+                            forcePlayVideoElement(remoteElem);
+                        }
+                    }
+                };
+            }
 
             call.on('close', () => {
                 hideRemoteVideo();
@@ -2151,14 +2233,7 @@
             localStream = freshStream;
 
             if (localVideoElem) {
-                localVideoElem.srcObject = localStream;
-                localVideoElem.classList.remove('hidden');
-                try {
-                    const playPromise = localVideoElem.play();
-                    if (playPromise && typeof playPromise.catch === 'function') {
-                        playPromise.catch(() => {});
-                    }
-                } catch (e) {}
+                attachStreamToVideoElement(localVideoElem, null, localStream);
             }
 
             if (btnElem) {
@@ -2255,6 +2330,16 @@
                 isTogglingVideo = false;
             }
         }
+
+
+        document.addEventListener('click', () => {
+            ['local-video', 'remote-video', 'partner-local-video', 'partner-remote-video', 'dedicated-local-video', 'dedicated-remote-video'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el && el.srcObject && !el.classList.contains('hidden') && el.paused) {
+                    try { el.play().catch(() => {}); } catch (e) {}
+                }
+            });
+        }, { passive: true });
 
         function updateStatus(text, textColor, bgCol, borderCol) {
             const statusDiv = document.getElementById('connection-status');
