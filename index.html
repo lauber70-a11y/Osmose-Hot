@@ -1203,7 +1203,7 @@
             if (container) container.classList.add('hidden');
         }
 
-        // --- PHOTOS & GALERIE INTERACTIVE ---
+        // --- PHOTOS & GALERIE INTERACTIVE (ENVOI EN UN SEUL BLOC) ---
         let incomingPhotoChunks = {};
 
         function triggerPhotoCapture() {
@@ -1238,7 +1238,7 @@
                 };
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 320, MAX_HEIGHT = 320;
+                    const MAX_WIDTH = 220, MAX_HEIGHT = 220;
                     let width = img.width, height = img.height;
 
                     if (width > height) {
@@ -1253,50 +1253,33 @@
                         }
                     }
 
-                    canvas.width = Math.round(width);
-                    canvas.height = Math.round(height);
+                    canvas.width = Math.max(1, Math.round(width));
+                    canvas.height = Math.max(1, Math.round(height));
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                    const base64Data = canvas.toDataURL('image/jpeg', 0.45);
+                    const base64Data = canvas.toDataURL('image/jpeg', 0.35);
 
                     if (!conn || conn.open !== true) {
                         alert("Connexion interrompue : impossible d'envoyer la photo.");
                         return;
                     }
 
-                    const chunkSize = 8000;
-                    const totalChunks = Math.ceil(base64Data.length / chunkSize);
-                    const transferId = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-
-                    function sendPhotoStep(idx) {
-                        if (idx >= totalChunks) {
-                            if (isMaster) {
-                                document.getElementById('feedback-content').innerHTML =
-                                    `<span class="text-pink-400 font-bold">📸 Photo envoyée :</span> "${escapeHtml(questionText)}" — En attente de réponse...`;
-                            }
-                            alert("Photo interactive envoyée ! 📸");
-                            return;
-                        }
-
-                        if (!conn || conn.open !== true) {
-                            alert("Connexion interrompue pendant l'envoi de la photo.");
-                            return;
-                        }
-
+                    try {
                         conn.send({
-                            type: 'photo_chunk',
-                            id: transferId,
-                            index: idx,
-                            total: totalChunks,
-                            data: base64Data.slice(idx * chunkSize, (idx + 1) * chunkSize),
+                            type: 'photo_interactive',
+                            image: base64Data,
                             prompt: questionText
                         });
 
-                        setTimeout(() => sendPhotoStep(idx + 1), 15);
+                        if (isMaster) {
+                            document.getElementById('feedback-content').innerHTML =
+                                `<span class="text-pink-400 font-bold">📸 Photo envoyée :</span> "${escapeHtml(questionText)}" — En attente de réponse...`;
+                        }
+                        alert("Photo interactive envoyée ! 📸");
+                    } catch (err) {
+                        alert("Échec de l'envoi de la photo : " + err.message);
                     }
-
-                    sendPhotoStep(0);
                 };
                 img.src = e.target.result;
             };
@@ -1848,7 +1831,7 @@
                         };
                     }
                     const transfer = incomingAudioChunks[data.id];
-                    if (!transfer.chunks[data.index]) {
+                    if (typeof data.index === 'number' && !transfer.chunks[data.index]) {
                         transfer.chunks[data.index] = data.data;
                         transfer.received++;
                     }
