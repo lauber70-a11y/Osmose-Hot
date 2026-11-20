@@ -21,6 +21,15 @@
         <span class="text-[11px] font-bold bg-black/25 px-2 py-0.5 rounded-lg shrink-0">Voir</span>
     </div>
 
+    <!-- Bandeau de réaction émoji éclair côté Partenaire -->
+    <div id="partner-reaction-toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 max-w-xs w-[88%] bg-slate-900/95 text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-pink-500/50 flex items-center justify-center gap-2.5 backdrop-blur-sm transition-all duration-300">
+        <span id="partner-reaction-emoji" class="text-2xl leading-none">🔥</span>
+        <div class="text-left">
+            <p class="text-[10px] uppercase tracking-wider text-pink-300 font-bold">Réaction du Maître</p>
+            <p id="partner-reaction-time" class="text-[10px] text-slate-400"></p>
+        </div>
+    </div>
+
     <!-- En-tête -->
     <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center shadow-md">
         <h1 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Osmose Hot</h1>
@@ -329,9 +338,24 @@
                 </div>
             </div>
 
-            <div id="master-feedback" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-2">
+            <div id="master-feedback" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-3">
                 <p class="text-xs text-slate-400 uppercase tracking-wider">Dernière interaction reçue</p>
                 <div id="feedback-content" class="text-lg font-medium text-slate-300">En attente d'une action...</div>
+
+                <!-- Réactions émoji éclairs côté Maître -->
+                <div class="pt-3 border-t border-slate-800/80 space-y-2">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">⚡ Réactions émoji éclairs</span>
+                        <span id="master-flash-reaction-status" class="hidden text-[10px] text-emerald-300 font-medium">Envoyé ✨</span>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1.5">
+                        <button type="button" onclick="sendFlashReaction('🔥')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer 🔥">🔥</button>
+                        <button type="button" onclick="sendFlashReaction('😏')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer 😏">😏</button>
+                        <button type="button" onclick="sendFlashReaction('❤️')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer ❤️">❤️</button>
+                        <button type="button" onclick="sendFlashReaction('👏')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer 👏">👏</button>
+                        <button type="button" onclick="sendFlashReaction('⚡')" class="py-2 bg-slate-800 hover:bg-pink-950/70 border border-slate-700 hover:border-pink-500/40 rounded-xl text-lg active:scale-90 transition cursor-pointer" title="Envoyer ⚡">⚡</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -442,7 +466,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Réponses Rapides Mots Doux
+        Osmose Hot • Réactions Émoji Éclairs
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -477,6 +501,65 @@
             }
             promptInput.focus();
             promptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // --- RÉACTIONS ÉMOJI ÉCLAIRS CÔTÉ MAÎTRE ---
+        let flashReactionStatusTimeout = null;
+        let partnerReactionToastTimeout = null;
+
+        function sendFlashReaction(emoji) {
+            const cleanEmoji = (emoji || '').trim();
+            if (!cleanEmoji) return;
+            if (!isMaster) return;
+            if (!conn || conn.open !== true) {
+                alert("La partenaire n'est pas connectée !");
+                return;
+            }
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            conn.send({
+                type: 'flash_reaction',
+                emoji: cleanEmoji,
+                time: nowTime
+            });
+
+            const statusElem = document.getElementById('master-flash-reaction-status');
+            if (statusElem) {
+                statusElem.innerText = `${cleanEmoji} envoyé (${nowTime})`;
+                statusElem.classList.remove('hidden');
+                clearTimeout(flashReactionStatusTimeout);
+                flashReactionStatusTimeout = setTimeout(() => {
+                    statusElem.classList.add('hidden');
+                }, 2000);
+            }
+        }
+
+        function handleIncomingFlashReaction(data) {
+            const emoji = (data && data.emoji) ? String(data.emoji) : '🔥';
+            const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const toast = document.getElementById('partner-reaction-toast');
+            const emojiElem = document.getElementById('partner-reaction-emoji');
+            const timeElem = document.getElementById('partner-reaction-time');
+
+            if (toast && emojiElem && timeElem) {
+                emojiElem.innerText = emoji;
+                timeElem.innerText = `À l'instant • ${time}`;
+                toast.classList.remove('hidden', 'scale-110');
+                void toast.offsetWidth;
+                toast.classList.add('scale-110');
+                setTimeout(() => {
+                    toast.classList.remove('scale-110');
+                }, 250);
+
+                clearTimeout(partnerReactionToastTimeout);
+                partnerReactionToastTimeout = setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 2800);
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate([40, 30, 40]); } catch (e) {}
+            }
         }
 
         // --- ZOOM SUR LA CAMÉRA DÉDIÉE ---
@@ -1657,6 +1740,13 @@
             });
 
             conn.on('data', (data) => {
+                if (data.type === 'flash_reaction') {
+                    if (!isMaster) {
+                        handleIncomingFlashReaction(data);
+                    }
+                    return;
+                }
+
                 if (data.type === 'whisper_chat') {
                     if (isMaster) {
                         handleIncomingWhisper(data);
@@ -1961,4 +2051,3 @@
     </script>
 </body>
 </html>
-```[cite: 1]
