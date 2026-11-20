@@ -280,7 +280,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Action Immédiate Sans Veto
+        Osmose Hot • Pioche Personnalisée Synchronisée
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -294,6 +294,12 @@
         ];
 
         let currentRoomCode = "";
+
+        function syncCustomDeckToPartner() {
+            if (isMaster && conn && conn.open === true) {
+                conn.send({ type: 'sync_custom_deck', deck: getCustomDeck() });
+            }
+        }
 
         function getDefaultDeck() {
             const saved = localStorage.getItem('osmose_default_deck');
@@ -328,6 +334,7 @@
             localStorage.setItem('osmose_custom_deck', JSON.stringify(deck));
             updateDeckCount();
             populateMasterDeckSelect();
+            syncCustomDeckToPartner();
         }
 
         function resetCustomDeck() {
@@ -803,9 +810,15 @@
         function setupConnectionEvents() {
             conn.on('open', () => {
                 updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
+                syncCustomDeckToPartner();
             });
 
             conn.on('data', (data) => {
+                if (data.type === 'sync_custom_deck' && Array.isArray(data.deck)) {
+                    localStorage.setItem('osmose_custom_deck', JSON.stringify(data.deck));
+                    return;
+                }
+
                 if (data.type === 'photo_interactive') {
                     let modalContentHTML = `
                         <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
@@ -893,7 +906,6 @@
             optionsContainer.innerHTML = '';
 
             if (cardData.type === 'immediate') {
-                // Pas de bouton Veto sur les cartes Action Immédiate
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
                         <button onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
