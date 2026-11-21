@@ -2590,7 +2590,11 @@
                         setMasterEndActionButtonState(true);
                     } else if (data.action && data.value) {
                         playNotificationSound('feedback');
-                        setMasterFeedback(`<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`);
+                        if (String(data.value).includes('Contre-ordre')) {
+                            setMasterFeedback(`<span class="text-amber-300 font-extrabold">🔄 CONTRE-ORDRE :</span> ${escapeHtml(data.value)}`);
+                        } else {
+                            setMasterFeedback(`<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`);
+                        }
                     }
                 } else if (data.type && data.prompt) {
                     displayCardToPartner(data);
@@ -2691,9 +2695,14 @@
                     </div>`;
             } else if (cardData.type === 'defi') {
                 optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">✨</button>
-                        <button onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">😈</button>
+                    <div class="space-y-2.5">
+                        <div class="flex gap-3">
+                            <button onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl" title="Accepter le défi">✨</button>
+                            <button onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl" title="Veto">😈</button>
+                        </div>
+                        <button type="button" onclick="sendResponse('Defi', 'Contre_Ordre')" class="w-full py-2.5 bg-gradient-to-r from-amber-600/80 to-pink-600/80 hover:from-amber-500 hover:to-pink-500 border border-amber-400/50 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xs text-white flex items-center justify-center gap-1.5 transition">
+                            <span>🔄</span> Contre-ordre (Renvoyer au Maître)
+                        </button>
                     </div>`;
             } else if (cardData.type === 'vote') {
                 optionsContainer.innerHTML = `
@@ -2731,9 +2740,10 @@
                 if (value === 'Refus_Aime_Pas') displayValue = 'J aime pas';
                 if (value === 'Executee') displayValue = 'Action executee ! ⚡';
                 if (value === 'Duo_Valide') displayValue = 'Fait des deux côtés ! 🤝';
+                if (value === 'Contre_Ordre') displayValue = 'Contre-ordre ! À ton tour 🔄';
 
                 conn.send({ action: actionType, value: displayValue });
-                alert("Réponse envoyée !");
+                alert(value === 'Contre_Ordre' ? "Contre-ordre envoyé au Maître !" : "Réponse envoyée !");
             } else {
                 alert("Erreur : Non connecté au Maître du Jeu.");
             }
