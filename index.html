@@ -169,14 +169,14 @@
             <button onclick="location.reload()" class="text-sm text-slate-400 underline cursor-pointer">Retour</button>
         </div>
 
-        <!-- ÉCRAN CAMÉRA DÉDIÉE (3E SMARTPHONE -> MAÎTRE UNIQUEMENT) -->
+        <!-- ÉCRAN CAMÉRA DÉDIÉE (3E SMARTPHONE -> MAÎTRE UNIQUEMENT, IMAGE + SON) -->
         <div id="dedicated-camera-screen" class="hidden w-full space-y-5 text-center">
             <div class="bg-slate-900 p-5 rounded-3xl border border-pink-500/40 shadow-2xl space-y-4">
                 <div class="flex items-center justify-between">
                     <span class="text-xs uppercase tracking-widest text-pink-400 font-bold">📹 Caméra Dédiée</span>
                     <span id="dedicated-stream-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">En attente</span>
                 </div>
-                <p class="text-xs text-slate-400">Flux vidéo envoyé uniquement vers l'écran du Maître du Jeu (micro coupé par défaut pour éviter l'écho).</p>
+                <p class="text-xs text-slate-400">Flux vidéo et audio envoyé vers l'écran du Maître du Jeu (aperçu local coupé pour éviter l'écho).</p>
 
                 <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-slate-700">
                     <video id="dedicated-local-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
@@ -369,7 +369,7 @@
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-slate-300">Visio en Direct, Micro Live & Caméra Dédiée</h3>
                 <div class="flex gap-2">
-                    <button onclick="toggleVideo()" id="master-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
+                    <button onclick="toggleVideo()" id="master-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra (Image)</button>
                     <button onclick="switchCameraFacingMode()" id="master-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
                 </div>
 
@@ -389,7 +389,7 @@
                 <div id="dedicated-cam-container" class="hidden space-y-2 pt-1">
                     <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-purple-500/50">
                         <video id="dedicated-remote-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
-                        <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-purple-300">📹 Caméra Dédiée (<span id="master-dedicated-zoom-badge">1x</span>) 🔴</div>
+                        <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-purple-300">📹 Caméra Dédiée • Son+Image (<span id="master-dedicated-zoom-badge">1x</span>) 🔴</div>
                     </div>
                     <button type="button" onclick="requestRemoteDedicatedCapture()" id="master-remote-capture-btn" class="w-full py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl font-bold shadow active:scale-95 transition text-xs text-white flex items-center justify-center gap-2 cursor-pointer">
                         <span>📸</span> Capturer depuis la Caméra Dédiée
@@ -404,6 +404,7 @@
                         </div>
                     </div>
                 </div>
+                <audio id="dedicated-remote-audio" autoplay playsinline class="hidden"></audio>
             </div>
 
             <div id="master-feedback" class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-3">
@@ -530,7 +531,7 @@
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-slate-300">Visio & Voix en Direct</h3>
                 <div class="flex gap-2">
-                    <button onclick="toggleVideo()" id="partner-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
+                    <button onclick="toggleVideo()" id="partner-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra (Image)</button>
                     <button onclick="switchCameraFacingMode()" id="partner-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
                 </div>
 
@@ -1057,7 +1058,7 @@
                 btn.className = "w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 rounded-xl font-bold shadow active:scale-95 transition text-xs sm:text-sm text-white flex items-center justify-center gap-2 cursor-pointer";
                 if (status) {
                     if (localStream && hasAudioTrack) {
-                        status.innerText = "🎙️ Micro actif via la caméra";
+                        status.innerText = "🎙️ Micro actif";
                         status.classList.remove('hidden');
                     } else {
                         status.classList.add('hidden');
@@ -1089,19 +1090,23 @@
                     alert("La partenaire n'est pas connectée au salon !");
                     return;
                 }
-                if (localStream && localStream.getVideoTracks().length > 0) {
-                    const audioTracks = localStream.getAudioTracks();
-                    if (audioTracks.length > 0) {
-                        audioTracks.forEach(t => { t.enabled = true; });
-                        updateMasterLiveMicUI();
-                        return;
-                    }
-                }
 
                 try {
                     const audioStream = await acquireAudioOnlyStream();
                     if (localStream) {
                         localStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+                        const localVideoElem = document.getElementById('local-video');
+                        const vidBtn = document.getElementById('master-video-btn');
+                        const switchBtn = document.getElementById('master-switch-cam-btn');
+                        if (localVideoElem) {
+                            localVideoElem.srcObject = null;
+                            localVideoElem.classList.add('hidden');
+                        }
+                        if (vidBtn) {
+                            vidBtn.innerText = "🎥 Activer ma Caméra (Image)";
+                            vidBtn.classList.replace('bg-red-600', 'bg-indigo-600');
+                        }
+                        if (switchBtn) switchBtn.classList.add('hidden');
                     }
                     localStream = audioStream;
                     isMasterMicOnlyActive = true;
@@ -2141,22 +2146,33 @@
             peer.on('call', (call) => {
                 if (call.metadata && call.metadata.role === 'camera') {
                     call.answer();
-                    call.on('stream', (camStream) => {
+                    const attachDedicatedRemote = (camStream) => {
+                        if (!camStream) return;
                         const camVideo = document.getElementById('dedicated-remote-video');
                         const camBox = document.getElementById('dedicated-cam-container');
+                        const camAudio = document.getElementById('dedicated-remote-audio');
+
                         attachStreamToVideoElement(camVideo, camBox, camStream);
-                    });
+
+                        if (camAudio && camStream.getAudioTracks && camStream.getAudioTracks().length > 0) {
+                            camAudio.srcObject = camStream;
+                            camAudio.muted = false;
+                            camAudio.play().catch(() => {});
+                        }
+                    };
+
+                    call.on('stream', attachDedicatedRemote);
                     if (call.peerConnection) {
                         call.peerConnection.ontrack = (event) => {
-                            const camVideo = document.getElementById('dedicated-remote-video');
-                            const camBox = document.getElementById('dedicated-cam-container');
                             if (event.streams && event.streams[0]) {
-                                attachStreamToVideoElement(camVideo, camBox, event.streams[0]);
+                                attachDedicatedRemote(event.streams[0]);
                             }
                         };
                     }
                     call.on('close', () => {
                         hideDedicatedCameraStream();
+                        const camAudio = document.getElementById('dedicated-remote-audio');
+                        if (camAudio) camAudio.srcObject = null;
                     });
                     return;
                 }
@@ -2167,11 +2183,13 @@
         function hideDedicatedCameraStream() {
             const camVideo = document.getElementById('dedicated-remote-video');
             const camBox = document.getElementById('dedicated-cam-container');
+            const camAudio = document.getElementById('dedicated-remote-audio');
             if (camVideo) {
                 camVideo.srcObject = null;
                 camVideo.style.transform = 'scale(1)';
             }
             if (camBox) camBox.classList.add('hidden');
+            if (camAudio) camAudio.srcObject = null;
         }
 
         function copyInviteLink() {
@@ -2288,7 +2306,21 @@
                 localStream = null;
             }
 
-            localStream = await acquireMediaStreamWithFallback(currentFacingMode);
+            // Caméra dédiée : image + son activés
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Caméra/micro non pris en charge sur ce navigateur.");
+            }
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+                });
+            } catch (e) {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: { ideal: currentFacingMode } },
+                    audio: true
+                });
+            }
 
             if (localVideoElem) {
                 localVideoElem.style.transform = `scale(${currentDedicatedZoom})`;
@@ -2300,19 +2332,33 @@
                 toggleBtn.classList.replace('hover:bg-indigo-500', 'hover:bg-red-500');
             }
             if (badge) {
-                badge.innerText = "Envoi vers le Maître 🔴";
+                badge.innerText = "Son + Image vers le Maître 🔴";
                 badge.className = "text-xs px-2.5 py-0.5 rounded-full bg-purple-900/60 text-purple-200 border border-purple-500/50";
             }
 
             await applyHardwareZoomIfSupported(currentDedicatedZoom);
 
             const newVideoTrack = localStream.getVideoTracks()[0];
+            const newAudioTrack = localStream.getAudioTracks()[0];
             if (outgoingCall && outgoingCall.peerConnection && outgoingCall.peerConnection.connectionState !== 'closed') {
-                const videoSender = outgoingCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                const senders = outgoingCall.peerConnection.getSenders();
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                let replaced = false;
                 if (videoSender && newVideoTrack) {
-                    await videoSender.replaceTrack(newVideoTrack);
+                    try { await videoSender.replaceTrack(newVideoTrack); replaced = true; } catch (e) {}
                 }
-            } else if (peer && masterPeerId) {
+                if (audioSender && newAudioTrack) {
+                    try { await audioSender.replaceTrack(newAudioTrack); replaced = true; } catch (e) {}
+                }
+                if (replaced) return;
+            }
+
+            if (outgoingCall) {
+                try { outgoingCall.close(); } catch(e) {}
+                outgoingCall = null;
+            }
+            if (peer && masterPeerId) {
                 outgoingCall = peer.call(masterPeerId, localStream, { metadata: { role: 'camera' } });
             }
         }
@@ -2627,10 +2673,12 @@
                         setMasterFeedback(`<span class="text-pink-400 font-bold">Pioche (${escapeHtml(getCardTypeLabel(data.type))})</span> : ${escapeHtml(data.prompt)}`);
                         setMasterEndActionButtonState(true);
                     } else if (data.action && data.value) {
-                        playNotificationSound('feedback');
-                        if (String(data.value).includes('Contre-ordre')) {
-                            setMasterFeedback(`<span class="text-amber-300 font-extrabold">🔄 CONTRE-ORDRE :</span> ${escapeHtml(data.value)}`);
+                        if (data.action === 'Contre-ordre') {
+                            playNotificationSound('immediate');
+                            const cardRef = data.cardPrompt ? ` <em>(${escapeHtml(data.cardPrompt)})</em>` : '';
+                            setMasterFeedback(`<span class="text-amber-300 font-extrabold">🔄 CONTRE-ORDRE :</span> ${escapeHtml(data.value)}${cardRef}`);
                         } else {
+                            playNotificationSound('feedback');
                             setMasterFeedback(`<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`);
                         }
                     }
@@ -2719,47 +2767,87 @@
             }
 
             const optionsContainer = document.getElementById('interaction-options');
-            optionsContainer.innerHTML = '';
+            let mainHtml = '';
+            let counterOrderHtml = '';
 
             if (cardData.type === 'immediate') {
-                optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
-                    </div>`;
+                mainHtml = `
+                    <button type="button" onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
+                `;
             } else if (cardData.type === 'duo') {
-                optionsContainer.innerHTML = `
-                    <div class="flex gap-3">
-                        <button onclick="sendResponse('Carte A Deux', 'Duo_Valide')" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">🤝 C'est fait des deux côtés !</button>
-                    </div>`;
+                mainHtml = `
+                    <button type="button" onclick="sendResponse('Carte A Deux', 'Duo_Valide')" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">🤝 C'est fait des deux côtés !</button>
+                `;
             } else if (cardData.type === 'defi') {
-                optionsContainer.innerHTML = `
-                    <div class="space-y-2.5">
-                        <div class="flex gap-3">
-                            <button onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl" title="Accepter le défi">✨</button>
-                            <button onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl" title="Veto">😈</button>
-                        </div>
-                        <button type="button" onclick="sendResponse('Defi', 'Contre_Ordre')" class="w-full py-2.5 bg-gradient-to-r from-amber-600/80 to-pink-600/80 hover:from-amber-500 hover:to-pink-500 border border-amber-400/50 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xs text-white flex items-center justify-center gap-1.5 transition">
-                            <span>🔄</span> Contre-ordre (Renvoyer au Maître)
-                        </button>
-                    </div>`;
+                mainHtml = `
+                    <div class="flex gap-3">
+                        <button type="button" onclick="sendResponse('Defi', 'Accepte')" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl" title="Accepter le défi">✨</button>
+                        <button type="button" onclick="sendResponse('Defi', 'Veto')" class="flex-1 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl" title="Veto">😈</button>
+                    </div>
+                `;
+                counterOrderHtml = `
+                    <button type="button" id="partner-counter-order-btn" onclick="triggerCounterOrder()" class="w-full py-2.5 bg-gradient-to-r from-amber-600/80 to-pink-600/80 hover:from-amber-500 hover:to-pink-500 border border-amber-400/50 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xs text-white flex items-center justify-center gap-1.5 transition">
+                        <span>🔄</span> Contre-ordre
+                    </button>
+                    <p id="partner-counter-order-status" class="hidden text-[11px] text-amber-300 text-center font-semibold"></p>
+                `;
             } else if (cardData.type === 'vote') {
-                optionsContainer.innerHTML = `
+                mainHtml = `
                     <div class="flex gap-3">
-                        <button onclick="sendResponse('Vote', 'Aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">❤️</button>
-                        <button onclick="sendResponse('Vote', 'Refus_Aime_Pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
-                    </div>`;
+                        <button type="button" onclick="sendResponse('Vote', 'Aime')" class="flex-1 py-3 bg-pink-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">❤️</button>
+                        <button type="button" onclick="sendResponse('Vote', 'Refus_Aime_Pas')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-xl">👎</button>
+                    </div>
+                `;
             } else if (cardData.type === 'yesno') {
-                optionsContainer.innerHTML = `
+                mainHtml = `
                     <div class="flex gap-3">
-                        <button onclick="sendResponse('Oui/Non', 'OUI')" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">✅ OUI</button>
-                        <button onclick="sendResponse('Oui/Non', 'NON')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">❌ NON</button>
-                    </div>`;
+                        <button type="button" onclick="sendResponse('Oui/Non', 'OUI')" class="flex-1 py-3 bg-blue-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">✅ OUI</button>
+                        <button type="button" onclick="sendResponse('Oui/Non', 'NON')" class="flex-1 py-3 bg-slate-700 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm">❌ NON</button>
+                    </div>
+                `;
             } else if (cardData.type === 'text') {
-                optionsContainer.innerHTML = `
+                mainHtml = `
                     <div class="space-y-3">
                         <input type="text" id="partner-text-input" placeholder="Votre réponse..." oninput="notifyTyping()" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-pink-500">
-                        <button onclick="sendTextResponse()" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">Envoyer 💌</button>
-                    </div>`;
+                        <button type="button" onclick="sendTextResponse()" class="w-full py-3 bg-emerald-600 rounded-xl font-bold shadow active:scale-95 cursor-pointer">Envoyer 💌</button>
+                    </div>
+                `;
+            }
+
+            optionsContainer.innerHTML = `
+                <div class="space-y-2.5">
+                    ${mainHtml}
+                    ${counterOrderHtml}
+                </div>
+            `;
+        }
+
+        function triggerCounterOrder() {
+            const statusElem = document.getElementById('partner-counter-order-status');
+            const btnElem = document.getElementById('partner-counter-order-btn');
+            const promptText = document.getElementById('card-prompt-text')?.innerText || '';
+
+            if (!conn || conn.open !== true) {
+                if (statusElem) {
+                    statusElem.innerText = "Connexion inactive : impossible d'envoyer le contre-ordre.";
+                    statusElem.classList.remove('hidden');
+                }
+                return;
+            }
+
+            conn.send({
+                action: 'Contre-ordre',
+                value: 'Contre-ordre demandé par la Partenaire ! 🔄',
+                cardPrompt: promptText
+            });
+
+            if (btnElem) {
+                btnElem.disabled = true;
+                btnElem.classList.add('opacity-60', 'cursor-not-allowed');
+            }
+            if (statusElem) {
+                statusElem.innerText = "Contre-ordre envoyé au Maître 🔄";
+                statusElem.classList.remove('hidden');
             }
         }
 
@@ -2778,10 +2866,9 @@
                 if (value === 'Refus_Aime_Pas') displayValue = 'J aime pas';
                 if (value === 'Executee') displayValue = 'Action executee ! ⚡';
                 if (value === 'Duo_Valide') displayValue = 'Fait des deux côtés ! 🤝';
-                if (value === 'Contre_Ordre') displayValue = 'Contre-ordre ! À ton tour 🔄';
 
                 conn.send({ action: actionType, value: displayValue });
-                alert(value === 'Contre_Ordre' ? "Contre-ordre envoyé au Maître !" : "Réponse envoyée !");
+                alert("Réponse envoyée !");
             } else {
                 alert("Erreur : Non connecté au Maître du Jeu.");
             }
@@ -2797,17 +2884,17 @@
 
         let isTogglingVideo = false;
 
+        // Caméras Maître & Partenaire : image uniquement (audio: false)
         async function acquireMediaStreamWithFallback(facingMode) {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("Caméra non prise en charge sur ce navigateur.");
             }
 
             const attemptConfigs = [
-                { video: { facingMode: { exact: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true },
-                { video: { facingMode: { exact: facingMode } }, audio: true },
-                { video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true },
-                { video: { facingMode: { ideal: facingMode } }, audio: true },
-                { video: true, audio: true },
+                { video: { facingMode: { exact: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+                { video: { facingMode: { exact: facingMode } }, audio: false },
+                { video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+                { video: { facingMode: { ideal: facingMode } }, audio: false },
                 { video: true, audio: false }
             ];
 
@@ -3001,7 +3088,7 @@
                     if (switchBtn) switchBtn.classList.add('hidden');
 
                     if (btnElem) {
-                        btnElem.innerText = "🎥 Activer ma Caméra";
+                        btnElem.innerText = "🎥 Activer ma Caméra (Image)";
                         btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
                     }
 
@@ -3016,7 +3103,7 @@
                 }
             } catch (err) {
                 if (btnElem) {
-                    btnElem.innerText = "🎥 Activer ma Caméra";
+                    btnElem.innerText = "🎥 Activer ma Caméra (Image)";
                     btnElem.classList.replace('bg-red-600', 'bg-indigo-600');
                 }
                 alert("Erreur caméra : " + (err && err.message ? err.message : err));
@@ -3031,6 +3118,11 @@
             if (liveAudio && liveAudio.srcObject && liveAudio.paused) {
                 liveAudio.muted = false;
                 try { liveAudio.play().catch(() => {}); } catch (e) {}
+            }
+            const dedicatedAudio = document.getElementById('dedicated-remote-audio');
+            if (dedicatedAudio && dedicatedAudio.srcObject && dedicatedAudio.paused) {
+                dedicatedAudio.muted = false;
+                try { dedicatedAudio.play().catch(() => {}); } catch (e) {}
             }
             ['local-video', 'remote-video', 'partner-local-video', 'partner-remote-video', 'dedicated-local-video', 'dedicated-remote-video'].forEach((id) => {
                 const el = document.getElementById(id);
