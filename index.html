@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Osmose Hot - Duo Interactif</title>
+    <title>Sans Filtre - Duo Interactif</title>
     <!-- Tailwind CSS pour le design -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PeerJS pour la connexion P2P & WebRTC -->
@@ -30,14 +30,15 @@
         </div>
     </div>
 
-    <!-- En-tête -->
-    <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center shadow-md">
-        <h1 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Osmose Hot</h1>
-        <div class="flex items-center gap-2">
-            <button id="sound-toggle-btn" onclick="toggleSoundEffects()" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 transition" title="Activer/Couper les sons">🔊</button>
-            <button onclick="toggleHelpModal()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Règles du jeu">❓ Aide</button>
-            <button onclick="toggleFullScreen()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Plein écran">⛶</button>
-            <div id="connection-status" class="text-xs px-3 py-1 rounded-full bg-red-900/50 text-red-300 border border-red-700">Déconnecté</div>
+    <!-- En-tête (Titre centré & aligné) -->
+    <header class="p-4 bg-slate-900 border-b border-slate-800 grid grid-cols-[1fr_auto_1fr] items-center gap-2 shadow-md">
+        <div class="hidden sm:block"></div>
+        <h1 class="col-start-2 text-lg sm:text-xl font-bold text-center whitespace-nowrap bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Sans Filtre</h1>
+        <div class="col-start-3 flex items-center justify-end gap-1.5 sm:gap-2">
+            <button id="sound-toggle-btn" onclick="toggleSoundEffects()" class="text-xs px-2 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 transition" title="Activer/Couper les sons">🔊</button>
+            <button onclick="toggleHelpModal()" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Règles du jeu">❓ <span class="hidden sm:inline">Aide</span></button>
+            <button onclick="toggleFullScreen()" class="text-xs px-2 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Plein écran">⛶</button>
+            <div id="connection-status" class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-red-900/50 text-red-300 border border-red-700 whitespace-nowrap">Déconnecté</div>
         </div>
     </header>
 
@@ -45,7 +46,7 @@
     <div id="help-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl text-left my-8 max-h-[85vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h2 class="text-xl font-bold text-pink-400">📜 Règles du Jeu : Osmose Hot</h2>
+                <h2 class="text-xl font-bold text-pink-400">📜 Règles du Jeu : Sans Filtre</h2>
                 <button onclick="toggleHelpModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
             </div>
             
@@ -549,7 +550,7 @@
 
     <!-- Pied de page -->
     <footer class="p-4 text-center text-xs text-slate-600 border-t border-slate-900">
-        Osmose Hot • Duo Interactif
+        Sans Filtre • Duo Interactif
     </footer>
 
     <!-- Script Logique de l'Application -->
@@ -614,7 +615,6 @@
             });
         }
 
-        // Son métallique typique d'une cloche de ring de boxe (double frappe "ding-ding")
         function playBoxingBellStrike(ctx, startTime, duration = 0.75, volume = 0.22) {
             const partials = [
                 { freq: 830, amp: 1.0, decay: duration },
@@ -1475,7 +1475,7 @@
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "osmose_hot_decks.json");
+            downloadAnchor.setAttribute("download", "sans_filtre_decks.json");
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -2078,7 +2078,7 @@
             setMasterEndActionButtonState(false);
             updateMasterLiveMicUI();
 
-            peer = new Peer('osmose-' + currentRoomCode);
+            peer = new Peer('sansfiltre-' + currentRoomCode);
             peer.on('connection', (connection) => {
                 if (connection.metadata && connection.metadata.role === 'camera') {
                     dedicatedCameraConn = connection;
@@ -2181,7 +2181,7 @@
                 }
                 peer = new Peer();
                 peer.on('open', () => {
-                    const masterId = 'osmose-' + code;
+                    const masterId = 'sansfiltre-' + code;
                     dedicatedCameraConn = peer.connect(masterId, { metadata: { role: 'camera' } });
                     dedicatedCameraConn.on('data', (d) => {
                         if (d && d.type === 'set_zoom' && typeof d.zoom === 'number') {
@@ -2210,7 +2210,7 @@
             peer = new Peer();
 
             peer.on('open', () => {
-                const targetId = 'osmose-' + code;
+                const targetId = 'sansfiltre-' + code;
                 conn = peer.connect(targetId);
 
                 if (!conn) {
@@ -2281,7 +2281,7 @@
 
         async function toggleDedicatedCamera() {
             const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
-            const masterPeerId = code.length === 4 ? 'osmose-' + code : null;
+            const masterPeerId = code.length === 4 ? 'sansfiltre-' + code : null;
             const localVideoElem = document.getElementById('dedicated-local-video');
             const toggleBtn = document.getElementById('dedicated-cam-toggle-btn');
             const badge = document.getElementById('dedicated-stream-badge');
@@ -2400,7 +2400,6 @@
             }
         }
 
-        // Réception dédiée du flux vidéo / audio distant (sans écraser notre appel sortant)
         function handleIncomingMediaCall(call) {
             if (!call) return;
             if (incomingCall && incomingCall !== call) {
@@ -2408,7 +2407,6 @@
             }
             incomingCall = call;
 
-            // Réponse en réception pure (le flux local est envoyé via outgoingCall dédié)
             try {
                 call.answer();
             } catch (e) {}
@@ -2490,7 +2488,6 @@
                 if (!data || typeof data !== 'object') return;
 
                 if (data.type === 'video_ready') {
-                    // L'autre pair vient d'activer sa caméra / son micro : si notre flux est actif mais pas encore envoyé, on synchronise avec un léger décalage anti-collision
                     if (localStream) {
                         scheduleOutgoingMediaSync(conn.peer, isMaster ? 120 : 380);
                     }
@@ -2782,7 +2779,7 @@
             if (explicitTargetId) return explicitTargetId;
             if (conn && conn.peer) return conn.peer;
             const codeVal = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
-            if (codeVal.length === 4 && !isMaster) return 'osmose-' + codeVal;
+            if (codeVal.length === 4 && !isMaster) return 'sansfiltre-' + codeVal;
             return null;
         }
 
@@ -2793,7 +2790,6 @@
             }, delayMs);
         }
 
-        // Diffusion dédiée de notre flux local vers l'autre pair (sans toucher à incomingCall)
         async function syncOutgoingMediaCall(explicitTargetId = null) {
             if (!localStream || !peer || peer.destroyed) return;
             const targetId = resolveCallTargetPeerId(explicitTargetId);
@@ -2883,7 +2879,6 @@
                 switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
             }
 
-            // Léger décalage asymétrique (Maître 50ms / Partenaire 260ms) pour éviter toute collision simultanée
             await new Promise((r) => setTimeout(r, isMaster ? 50 : 260));
             await syncOutgoingMediaCall(targetIdForCall);
 
@@ -2905,7 +2900,7 @@
                         switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
                     }
                     const code = (document.getElementById('room-code-input')?.value || '').trim().toUpperCase();
-                    await startDedicatedCameraStream(code.length === 4 ? 'osmose-' + code : null);
+                    await startDedicatedCameraStream(code.length === 4 ? 'sansfiltre-' + code : null);
                     return;
                 }
 
@@ -3000,7 +2995,7 @@
         function updateStatus(text, textColor, bgCol, borderCol) {
             const statusDiv = document.getElementById('connection-status');
             statusDiv.innerText = text;
-            statusDiv.className = `text-xs px-3 py-1 rounded-full ${textColor} ${bgCol} border ${borderCol}`;
+            statusDiv.className = `text-[11px] sm:text-xs px-2.5 py-1 rounded-full ${textColor} ${bgCol} border ${borderCol} whitespace-nowrap`;
         }
     </script>
 </body>
