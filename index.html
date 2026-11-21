@@ -391,6 +391,10 @@
                         <video id="dedicated-remote-video" autoplay playsinline muted class="w-full h-full object-cover transition-transform duration-200"></video>
                         <div class="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs text-purple-300">📹 Caméra Dédiée (<span id="master-dedicated-zoom-badge">1x</span>) 🔴</div>
                     </div>
+                    <button type="button" onclick="requestRemoteDedicatedCapture()" id="master-remote-capture-btn" class="w-full py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl font-bold shadow active:scale-95 transition text-xs text-white flex items-center justify-center gap-2 cursor-pointer">
+                        <span>📸</span> Capturer depuis la Caméra Dédiée
+                    </button>
+                    <p id="master-remote-capture-status" class="hidden text-[11px] text-emerald-300 font-semibold">Demande de capture envoyée...</p>
                     <div class="flex items-center justify-between gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2">
                         <span class="text-[11px] text-slate-300 font-semibold">🔍 Zoom Caméra</span>
                         <div class="flex gap-1.5">
@@ -930,8 +934,9 @@
             }
         }
 
-        // --- CAPTURE PHOTO DEPUIS LA CAMÉRA DÉDIÉE VERS L'ÉCRAN DU MAÎTRE ---
+        // --- CAPTURE PHOTO DEPUIS LA CAMÉRA DÉDIÉE (LOCALE OU DÉCLENCHÉE PAR LE MAÎTRE) ---
         let dedicatedPhotoStatusTimeout = null;
+        let masterRemoteCaptureStatusTimeout = null;
 
         function setDedicatedPhotoStatus(msg, isError = false) {
             const statusElem = document.getElementById('dedicated-photo-status');
@@ -947,14 +952,43 @@
             }, 2600);
         }
 
+        function setMasterRemoteCaptureStatus(msg, isError = false) {
+            const statusElem = document.getElementById('master-remote-capture-status');
+            if (!statusElem) return;
+            statusElem.innerText = msg;
+            statusElem.className = isError
+                ? "text-[11px] text-rose-300 font-semibold"
+                : "text-[11px] text-emerald-300 font-semibold";
+            statusElem.classList.remove('hidden');
+            clearTimeout(masterRemoteCaptureStatusTimeout);
+            masterRemoteCaptureStatusTimeout = setTimeout(() => {
+                statusElem.classList.add('hidden');
+            }, 2600);
+        }
+
+        function requestRemoteDedicatedCapture() {
+            getAudioContext();
+            if (!isMaster) return;
+            if (!dedicatedCameraConn || dedicatedCameraConn.open !== true) {
+                setMasterRemoteCaptureStatus("Caméra dédiée non connectée.", true);
+                return;
+            }
+            try {
+                dedicatedCameraConn.send({ type: 'request_capture' });
+                setMasterRemoteCaptureStatus("Capture demandée à la caméra dédiée 📸");
+            } catch (err) {
+                setMasterRemoteCaptureStatus("Impossible de demander la capture.", true);
+            }
+        }
+
         function captureAndSendDedicatedPhoto() {
             getAudioContext();
             if (!localStream) {
-                alert("Démarrez d'abord le flux de la Caméra Dédiée.");
+                setDedicatedPhotoStatus("Flux caméra inactif : capture impossible.", true);
                 return;
             }
             if (!dedicatedCameraConn || dedicatedCameraConn.open !== true) {
-                alert("La connexion vers le Maître du Jeu n'est pas encore ouverte.");
+                setDedicatedPhotoStatus("Connexion vers le Maître non ouverte.", true);
                 return;
             }
 
@@ -2089,6 +2123,7 @@
                         } else if (d.type === 'photo_interactive' && d.image) {
                             showInteractivePhotoModal(d.image, d.prompt || "Capture Caméra Dédiée");
                             setMasterFeedback(`<span class="text-purple-300 font-bold">📸 Capture reçue de la Caméra Dédiée</span> (${escapeHtml(d.time || '')})`);
+                            setMasterRemoteCaptureStatus(`Capture reçue (${d.time || 'à l\'instant'}) ✨`);
                             if (connection.open === true) {
                                 connection.send({ type: 'photo_ack', prompt: d.prompt || '' });
                             }
@@ -2184,9 +2219,12 @@
                     const masterId = 'sansfiltre-' + code;
                     dedicatedCameraConn = peer.connect(masterId, { metadata: { role: 'camera' } });
                     dedicatedCameraConn.on('data', (d) => {
-                        if (d && d.type === 'set_zoom' && typeof d.zoom === 'number') {
+                        if (!d || typeof d !== 'object') return;
+                        if (d.type === 'set_zoom' && typeof d.zoom === 'number') {
                             setDedicatedZoom(d.zoom);
-                        } else if (d && d.type === 'photo_ack') {
+                        } else if (d.type === 'request_capture') {
+                            captureAndSendDedicatedPhoto();
+                        } else if (d.type === 'photo_ack') {
                             setDedicatedPhotoStatus("Capture bien reçue par le Maître ✅");
                         }
                     });
