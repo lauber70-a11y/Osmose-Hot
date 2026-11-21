@@ -34,6 +34,7 @@
     <header class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center shadow-md">
         <h1 class="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">🔥 Osmose Hot</h1>
         <div class="flex items-center gap-2">
+            <button id="sound-toggle-btn" onclick="toggleSoundEffects()" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-pink-300 border border-slate-700 transition" title="Activer/Couper les sons">🔊</button>
             <button onclick="toggleHelpModal()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Règles du jeu">❓ Aide</button>
             <button onclick="toggleFullScreen()" class="text-xs px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition" title="Plein écran">⛶</button>
             <div id="connection-status" class="text-xs px-3 py-1 rounded-full bg-red-900/50 text-red-300 border border-red-700">Déconnecté</div>
@@ -51,7 +52,12 @@
             <div class="space-y-4 text-sm text-slate-300">
                 <div>
                     <h3 class="font-bold text-white mb-1">🎯 Objectif</h3>
-                    <p>Partager un moment intime, complice et sur-mesure en duo, entre défis, actions immédiates, votes, discussions, audios et photos instantanées.</p>
+                    <p>Partager un moment intime, complice et sur-mesure en duo, entre défis, actions immédiates, cartes à deux, votes, discussions, audios et photos instantanées.</p>
+                </div>
+
+                <div class="bg-indigo-950/40 border border-indigo-500/30 p-3 rounded-xl">
+                    <h3 class="font-bold text-indigo-300 mb-1">🤝 Carte À deux</h3>
+                    <p class="text-xs text-indigo-200">Une action partagée à réaliser ensemble (en même temps ou chacun son tour), validée une fois accomplie des deux côtés.</p>
                 </div>
 
                 <div class="bg-amber-950/30 border border-amber-500/30 p-3 rounded-xl">
@@ -286,6 +292,7 @@
                 <div class="flex gap-2">
                     <select id="live-card-type" class="w-full p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
                         <option value="immediate">⚡ Action Immédiate</option>
+                        <option value="duo">🤝 À deux</option>
                         <option value="defi">✨ Défi</option>
                         <option value="vote">❤️ Vote</option>
                         <option value="yesno">❓ Oui / Non</option>
@@ -316,10 +323,11 @@
             <!-- Panneau Création de Cartes -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
                 <h3 class="font-semibold text-slate-300 text-sm">✍️ Créer une nouvelle carte</h3>
-                <input type="text" id="new-card-prompt" placeholder="Ex: Fais-moi un massage..." class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
+                <input type="text" id="new-card-prompt" onkeydown="if(event.key==='Enter') addNewCardToDeck();" placeholder="Ex: Chacun fait un compliment à l'autre..." class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-pink-500">
                 <div class="flex gap-2">
                     <select id="new-card-type" class="flex-1 p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-300 focus:outline-none">
                         <option value="immediate">⚡ Action Immédiate</option>
+                        <option value="duo">🤝 À deux</option>
                         <option value="defi">✨ Défi</option>
                         <option value="vote">❤️ Vote</option>
                         <option value="yesno">❓ Oui / Non</option>
@@ -442,6 +450,12 @@
                     <span>ACTION IMMÉDIATE : À exécuter tout de suite !</span>
                 </div>
 
+                <!-- Bannière spéciale Carte À deux (masquée par défaut) -->
+                <div id="duo-action-banner" class="hidden bg-indigo-500/20 border border-indigo-400 text-indigo-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <span>🤝</span>
+                    <span>CARTE À DEUX : Action partagée ensemble !</span>
+                </div>
+
                 <p id="card-prompt-text" class="text-lg font-semibold text-white break-words"></p>
 
                 <!-- CHRONOMÈTRE DISTANT (Piloté par le Maître) -->
@@ -500,8 +514,129 @@
 
     <!-- Script Logique de l'Application -->
     <script>
+        // --- EFFETS SONORES PAR TYPE (WEB AUDIO API) ---
+        let soundEffectsEnabled = localStorage.getItem('osmose_sound_enabled') !== 'false';
+        let audioCtx = null;
+
+        function getAudioContext() {
+            const Ctx = window.AudioContext || window.webkitAudioContext;
+            if (!Ctx) return null;
+            if (!audioCtx) {
+                audioCtx = new Ctx();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function updateSoundToggleButton() {
+            const btn = document.getElementById('sound-toggle-btn');
+            if (!btn) return;
+            btn.innerText = soundEffectsEnabled ? '🔊' : '🔇';
+            btn.title = soundEffectsEnabled ? 'Sons activés (cliquer pour couper)' : 'Sons coupés (cliquer pour activer)';
+        }
+
+        function toggleSoundEffects() {
+            soundEffectsEnabled = !soundEffectsEnabled;
+            localStorage.setItem('osmose_sound_enabled', soundEffectsEnabled ? 'true' : 'false');
+            updateSoundToggleButton();
+            if (soundEffectsEnabled) {
+                playToneSequence([{ freq: 587.33, delay: 0, duration: 0.08, type: 'sine', gain: 0.12 }]);
+            }
+        }
+
+        function playToneSequence(notes) {
+            if (!soundEffectsEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const baseTime = ctx.currentTime + 0.01;
+            notes.forEach((n) => {
+                try {
+                    const osc = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    osc.type = n.type || 'sine';
+                    osc.frequency.setValueAtTime(n.freq, baseTime + (n.delay || 0));
+
+                    const dur = n.duration || 0.14;
+                    const peakGain = n.gain || 0.14;
+                    gainNode.gain.setValueAtTime(0.0001, baseTime + (n.delay || 0));
+                    gainNode.gain.exponentialRampToValueAtTime(peakGain, baseTime + (n.delay || 0) + 0.015);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, baseTime + (n.delay || 0) + dur);
+
+                    osc.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+
+                    osc.start(baseTime + (n.delay || 0));
+                    osc.stop(baseTime + (n.delay || 0) + dur + 0.02);
+                } catch (e) {}
+            });
+        }
+
+        function playNotificationSound(kind) {
+            if (!soundEffectsEnabled) return;
+            switch (kind) {
+                case 'immediate':
+                    playToneSequence([
+                        { freq: 659.25, delay: 0, duration: 0.11, type: 'triangle', gain: 0.18 },
+                        { freq: 880.00, delay: 0.11, duration: 0.11, type: 'triangle', gain: 0.18 },
+                        { freq: 1046.50, delay: 0.22, duration: 0.16, type: 'triangle', gain: 0.18 }
+                    ]);
+                    break;
+                case 'duo':
+                    playToneSequence([
+                        { freq: 523.25, delay: 0, duration: 0.12, type: 'sine', gain: 0.15 },
+                        { freq: 659.25, delay: 0.10, duration: 0.12, type: 'sine', gain: 0.15 },
+                        { freq: 783.99, delay: 0.20, duration: 0.20, type: 'sine', gain: 0.16 }
+                    ]);
+                    break;
+                case 'card':
+                    playToneSequence([
+                        { freq: 523.25, delay: 0, duration: 0.13, type: 'sine', gain: 0.15 },
+                        { freq: 783.99, delay: 0.13, duration: 0.20, type: 'sine', gain: 0.15 }
+                    ]);
+                    break;
+                case 'whisper':
+                    playToneSequence([
+                        { freq: 440.00, delay: 0, duration: 0.12, type: 'sine', gain: 0.10 },
+                        { freq: 554.37, delay: 0.11, duration: 0.15, type: 'sine', gain: 0.10 }
+                    ]);
+                    break;
+                case 'reaction':
+                    playToneSequence([
+                        { freq: 740.00, delay: 0, duration: 0.08, type: 'sine', gain: 0.12 }
+                    ]);
+                    break;
+                case 'media':
+                    playToneSequence([
+                        { freq: 587.33, delay: 0, duration: 0.12, type: 'sine', gain: 0.15 },
+                        { freq: 739.99, delay: 0.11, duration: 0.12, type: 'sine', gain: 0.15 },
+                        { freq: 880.00, delay: 0.22, duration: 0.22, type: 'sine', gain: 0.15 }
+                    ]);
+                    break;
+                case 'feedback':
+                    playToneSequence([
+                        { freq: 698.46, delay: 0, duration: 0.10, type: 'sine', gain: 0.11 }
+                    ]);
+                    break;
+                case 'timer_end':
+                    playToneSequence([
+                        { freq: 783.99, delay: 0, duration: 0.16, type: 'triangle', gain: 0.20 },
+                        { freq: 783.99, delay: 0.20, duration: 0.16, type: 'triangle', gain: 0.20 },
+                        { freq: 1046.50, delay: 0.40, duration: 0.35, type: 'triangle', gain: 0.22 }
+                    ]);
+                    break;
+                default:
+                    playToneSequence([
+                        { freq: 587.33, delay: 0, duration: 0.12, type: 'sine', gain: 0.12 }
+                    ]);
+            }
+        }
+
         const originalDefaultCards = [
             { type: 'defi', prompt: "Fais-moi un massage des épaules pendant 2 minutes." },
+            { type: 'duo', prompt: "Chacun son tour, dites ce que vous préférez chez l'autre en ce moment." },
             { type: 'vote', prompt: "Préfères-tu un bisou dans le cou ou un câlin serré ?" },
             { type: 'immediate', prompt: "Viens m'embrasser passionnément pendant 10 secondes !" },
             { type: 'yesno', prompt: "Est-ce que tu veux qu'on commande un dessert surprise ?" },
@@ -562,6 +697,8 @@
             const emoji = (data && data.emoji) ? String(data.emoji) : '🔥';
             const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+            playNotificationSound('reaction');
+
             const toast = document.getElementById('partner-reaction-toast');
             const emojiElem = document.getElementById('partner-reaction-emoji');
             const timeElem = document.getElementById('partner-reaction-time');
@@ -617,9 +754,7 @@
                     const clamped = Math.max(capabilities.zoom.min || 1, Math.min(capabilities.zoom.max || zoomVal, zoomVal));
                     await videoTrack.applyConstraints({ advanced: [{ zoom: clamped }] });
                 }
-            } catch (e) {
-                // Fallback visuel CSS si le zoom matériel n'est pas exposé
-            }
+            } catch (e) {}
         }
 
         async function setDedicatedZoom(zoomVal) {
@@ -732,6 +867,8 @@
             if (!text) return;
             const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+            playNotificationSound('whisper');
+
             const banner = document.getElementById('partner-whisper-reply-banner');
             const textElem = document.getElementById('partner-whisper-reply-text');
             const timeElem = document.getElementById('partner-whisper-reply-time');
@@ -756,6 +893,8 @@
             const text = (data && data.text) ? String(data.text) : '';
             if (!text) return;
             const time = (data && data.time) ? String(data.time) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            playNotificationSound('whisper');
 
             receivedWhispers.unshift({ text, time });
             if (receivedWhispers.length > 6) {
@@ -856,9 +995,7 @@
                 if (!wakeLock || wakeLock.released) {
                     wakeLock = await navigator.wakeLock.request('screen');
                 }
-            } catch (err) {
-                // Ignorer si non autorisé ou en économie d'énergie
-            }
+            } catch (err) {}
         }
 
         document.addEventListener('visibilitychange', () => {
@@ -875,7 +1012,7 @@
 
         function sanitizeCardList(list) {
             if (!Array.isArray(list)) return [];
-            const validTypes = ['immediate', 'defi', 'vote', 'yesno', 'text'];
+            const validTypes = ['immediate', 'duo', 'defi', 'vote', 'yesno', 'text'];
             return list
                 .filter(c => c && typeof c.prompt === 'string' && c.prompt.trim().length > 0)
                 .map(c => ({
@@ -946,6 +1083,7 @@
 
         function getCardTypeLabel(type) {
             if (type === 'immediate') return '⚡ ACTION IMMÉDIATE';
+            if (type === 'duo') return '🤝 À DEUX';
             if (type === 'defi') return '✨ DÉFI';
             if (type === 'vote') return '❤️ VOTE';
             if (type === 'yesno') return '❓ OUI / NON';
@@ -1079,6 +1217,7 @@
                     <div class="flex justify-between items-center gap-2">
                         <select id="edit-custom-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
                             <option value="immediate" ${card.type === 'immediate' ? 'selected' : ''}>⚡ Action Immédiate</option>
+                            <option value="duo" ${card.type === 'duo' ? 'selected' : ''}>🤝 À deux</option>
                             <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
                             <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
                             <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
@@ -1100,6 +1239,7 @@
                     <div class="flex justify-between items-center gap-2">
                         <select id="edit-default-type-${index}" class="p-1 bg-slate-900 border border-slate-700 rounded-lg text-xs text-pink-400 font-bold focus:outline-none">
                             <option value="immediate" ${card.type === 'immediate' ? 'selected' : ''}>⚡ Action Immédiate</option>
+                            <option value="duo" ${card.type === 'duo' ? 'selected' : ''}>🤝 À deux</option>
                             <option value="defi" ${card.type === 'defi' ? 'selected' : ''}>✨ Défi</option>
                             <option value="vote" ${card.type === 'vote' ? 'selected' : ''}>❤️ Vote</option>
                             <option value="yesno" ${card.type === 'yesno' ? 'selected' : ''}>❓ Oui/Non</option>
@@ -1184,6 +1324,9 @@
                     if (masterTimeLeft > 0) {
                         masterTimeLeft--;
                         updateMasterTimerDisplay();
+                        if (masterTimeLeft === 0) {
+                            playNotificationSound('timer_end');
+                        }
                     } else {
                         stopMasterTimerLocally();
                     }
@@ -1233,6 +1376,9 @@
                     if (partnerTimeLeft > 0) {
                         partnerTimeLeft--;
                         updatePartnerTimerDisplay();
+                        if (partnerTimeLeft === 0) {
+                            playNotificationSound('timer_end');
+                        }
                     } else {
                         stopPartnerTimer();
                     }
@@ -1293,7 +1439,6 @@
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 result = canvas.toDataURL('image/jpeg', quality);
 
-                // Garantie sous 12 000 caractères pour passer en 1 seul paquet DataChannel WebRTC
                 if (result.length <= 12000) {
                     break;
                 }
@@ -1371,6 +1516,7 @@
         }
 
         function showInteractivePhotoModal(imageSrc, promptText) {
+            playNotificationSound('media');
             const safePrompt = escapeHtml(promptText || "Ça te plaît ?");
             const modalContentHTML = `
                 <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">📸 Défi Photo Reçu !</h3>
@@ -1564,6 +1710,7 @@
         }
 
         function showAudioModal(audioSrc, labelText) {
+            playNotificationSound('media');
             document.getElementById('photo-modal-content').innerHTML = `
                 <h3 class="text-sm font-bold text-pink-400 uppercase tracking-wider">🎵 Message Audio Reçu</h3>
                 <p class="text-xs text-slate-300 font-medium">${escapeHtml(labelText || 'Audio')}</p>
@@ -1579,6 +1726,7 @@
 
         window.onload = () => {
             try {
+                updateSoundToggleButton();
                 updateDeckCount();
                 populateMasterDeckSelect();
                 const urlParams = new URLSearchParams(window.location.search);
@@ -1601,6 +1749,7 @@
         }
 
         function setupMaster() {
+            getAudioContext();
             isMaster = true;
             isDedicatedCamera = false;
             requestWakeLock();
@@ -1673,6 +1822,7 @@
         }
 
         function setupPartnerModal(mode = 'partner') {
+            getAudioContext();
             isDedicatedCamera = (mode === 'camera');
             const titleElem = document.getElementById('connect-modal-title');
             if (titleElem) {
@@ -1683,6 +1833,7 @@
         }
 
         function connectAsPartner() {
+            getAudioContext();
             const codeInput = document.getElementById('room-code-input');
             const code = codeInput.value.trim().toUpperCase();
             
@@ -1772,12 +1923,10 @@
 
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
             }
 
-            localStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: { ideal: currentFacingMode } },
-                audio: false
-            });
+            localStream = await acquireMediaStreamWithFallback(currentFacingMode);
 
             if (localVideoElem) {
                 localVideoElem.style.transform = `scale(${currentDedicatedZoom})`;
@@ -1983,6 +2132,7 @@
 
                 if (data.type === 'photo_ack') {
                     if (isMaster) {
+                        playNotificationSound('feedback');
                         setMasterFeedback(`<span class="text-emerald-400 font-bold">✅ Photo bien reçue par la partenaire !</span> ("${escapeHtml(data.prompt || '')}")`);
                     }
                     return;
@@ -2031,8 +2181,10 @@
                     if (data.type === 'typing') {
                         setMasterFeedback(`<span class="text-pink-400 font-bold animate-pulse">La partenaire rédige... ✍️</span>`);
                     } else if (data.type && data.prompt) {
+                        playNotificationSound('feedback');
                         setMasterFeedback(`<span class="text-pink-400 font-bold">Pioche (${escapeHtml(getCardTypeLabel(data.type))})</span> : ${escapeHtml(data.prompt)}`);
                     } else if (data.action && data.value) {
+                        playNotificationSound('feedback');
                         setMasterFeedback(`<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`);
                     }
                 } else if (data.type && data.prompt) {
@@ -2058,11 +2210,21 @@
 
         function displayCardToPartner(cardData) {
             if (!cardData || !cardData.prompt) return;
+
+            if (cardData.type === 'immediate') {
+                playNotificationSound('immediate');
+            } else if (cardData.type === 'duo') {
+                playNotificationSound('duo');
+            } else {
+                playNotificationSound('card');
+            }
+
             document.getElementById('mystery-card').classList.add('hidden');
             const cardContainer = document.getElementById('active-card-container');
             const badgeElem = document.getElementById('card-type-badge');
             const newBadge = document.getElementById('card-new-badge');
             const immediateBanner = document.getElementById('immediate-action-banner');
+            const duoBanner = document.getElementById('duo-action-banner');
 
             cardContainer.classList.remove('hidden', 'ring-2', 'ring-pink-400');
             void cardContainer.offsetWidth;
@@ -2083,18 +2245,24 @@
 
             stopPartnerTimer();
 
+            cardContainer.classList.remove('border-pink-500/50', 'border-amber-500', 'bg-amber-950/20', 'border-indigo-400', 'bg-indigo-950/25');
+            immediateBanner.classList.add('hidden');
+            duoBanner.classList.add('hidden');
+
             if (cardData.type === 'immediate') {
-                cardContainer.classList.remove('border-pink-500/50');
                 cardContainer.classList.add('border-amber-500', 'bg-amber-950/20');
                 badgeElem.className = "text-xs uppercase tracking-widest text-amber-400 font-extrabold";
                 badgeElem.innerText = "⚡ ACTION IMMÉDIATE";
                 immediateBanner.classList.remove('hidden');
+            } else if (cardData.type === 'duo') {
+                cardContainer.classList.add('border-indigo-400', 'bg-indigo-950/25');
+                badgeElem.className = "text-xs uppercase tracking-widest text-indigo-300 font-extrabold";
+                badgeElem.innerText = "🤝 À DEUX";
+                duoBanner.classList.remove('hidden');
             } else {
-                cardContainer.classList.remove('border-amber-500', 'bg-amber-950/20');
                 cardContainer.classList.add('border-pink-500/50');
                 badgeElem.className = "text-xs uppercase tracking-widest text-pink-400 font-bold";
                 badgeElem.innerText = getCardTypeLabel(cardData.type);
-                immediateBanner.classList.add('hidden');
             }
 
             const optionsContainer = document.getElementById('interaction-options');
@@ -2104,6 +2272,11 @@
                 optionsContainer.innerHTML = `
                     <div class="flex gap-3">
                         <button onclick="sendResponse('Action Immediate', 'Executee')" class="w-full py-3 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">⚡ C'est fait !</button>
+                    </div>`;
+            } else if (cardData.type === 'duo') {
+                optionsContainer.innerHTML = `
+                    <div class="flex gap-3">
+                        <button onclick="sendResponse('Carte A Deux', 'Duo_Valide')" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 rounded-xl font-bold shadow active:scale-95 cursor-pointer text-sm text-white">🤝 C'est fait des deux côtés !</button>
                     </div>`;
             } else if (cardData.type === 'defi') {
                 optionsContainer.innerHTML = `
@@ -2146,6 +2319,7 @@
                 if (value === 'Veto') displayValue = 'Veto / Refuse';
                 if (value === 'Refus_Aime_Pas') displayValue = 'J aime pas';
                 if (value === 'Executee') displayValue = 'Action executee ! ⚡';
+                if (value === 'Duo_Valide') displayValue = 'Fait des deux côtés ! 🤝';
 
                 conn.send({ action: actionType, value: displayValue });
                 alert("Réponse envoyée !");
@@ -2170,6 +2344,8 @@
             }
 
             const attemptConfigs = [
+                { video: { facingMode: { exact: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true },
+                { video: { facingMode: { exact: facingMode } }, audio: true },
                 { video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true },
                 { video: { facingMode: { ideal: facingMode } }, audio: true },
                 { video: true, audio: true },
@@ -2182,7 +2358,7 @@
                     return await navigator.mediaDevices.getUserMedia(attemptConfigs[i]);
                 } catch (err) {
                     lastErr = err;
-                    await new Promise((r) => setTimeout(r, 150));
+                    await new Promise((r) => setTimeout(r, 120));
                 }
             }
             throw lastErr || new Error("Impossible d'accéder à la caméra.");
@@ -2238,16 +2414,18 @@
             const btnElem = isMaster ? document.getElementById('master-video-btn') : document.getElementById('partner-video-btn');
             const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
 
-            const freshStream = await acquireMediaStreamWithFallback(currentFacingMode);
-
-            if (localStream && localStream !== freshStream) {
+            if (localStream) {
                 localStream.getTracks().forEach(track => {
                     try { track.stop(); } catch (e) {}
                 });
+                localStream = null;
             }
+
+            const freshStream = await acquireMediaStreamWithFallback(currentFacingMode);
             localStream = freshStream;
 
             if (localVideoElem) {
+                localVideoElem.srcObject = null;
                 attachStreamToVideoElement(localVideoElem, null, localStream);
             }
 
@@ -2267,6 +2445,7 @@
         async function switchCameraFacingMode() {
             if (!localStream || isTogglingVideo) return;
             isTogglingVideo = true;
+            const previousFacingMode = currentFacingMode;
             currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
 
             try {
@@ -2282,6 +2461,7 @@
 
                 await startCameraStream();
             } catch (err) {
+                currentFacingMode = previousFacingMode;
                 alert("Impossible de basculer de caméra : " + (err && err.message ? err.message : err));
             } finally {
                 isTogglingVideo = false;
@@ -2289,6 +2469,7 @@
         }
 
         async function toggleVideo() {
+            getAudioContext();
             if (isTogglingVideo) return;
             isTogglingVideo = true;
 
@@ -2346,8 +2527,8 @@
             }
         }
 
-
         document.addEventListener('click', () => {
+            getAudioContext();
             ['local-video', 'remote-video', 'partner-local-video', 'partner-remote-video', 'dedicated-local-video', 'dedicated-remote-video'].forEach((id) => {
                 const el = document.getElementById(id);
                 if (el && el.srcObject && !el.classList.contains('hidden') && el.paused) {
