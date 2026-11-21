@@ -194,6 +194,12 @@
                     </div>
                 </div>
 
+                <!-- Capture photo instantanée vers l'écran du Maître -->
+                <button type="button" onclick="captureAndSendDedicatedPhoto()" id="dedicated-capture-photo-btn" class="w-full py-3 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm text-white flex items-center justify-center gap-2">
+                    <span>📸</span> Capturer & Envoyer au Maître
+                </button>
+                <p id="dedicated-photo-status" class="hidden text-xs text-emerald-300 font-semibold">Capture envoyée au Maître ✨</p>
+
                 <div class="flex gap-2">
                     <button onclick="toggleDedicatedCamera()" id="dedicated-cam-toggle-btn" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Démarrer le flux</button>
                     <button onclick="switchCameraFacingMode()" id="dedicated-switch-cam-btn" class="px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
@@ -319,7 +325,8 @@
             <!-- CONTRÔLE DU CHRONOMÈTRE -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-pink-400 text-sm">⏱️ Contrôle du Chronomètre (Maître)</h3>
-                <div class="flex justify-center gap-2">
+                <div class="flex flex-wrap justify-center gap-2">
+                    <button onclick="requestStartTimer(30)" class="px-3 py-1.5 bg-pink-950/60 hover:bg-pink-900 text-xs font-bold rounded-xl text-pink-200 border border-pink-500/40">30s</button>
                     <button onclick="requestStartTimer(60)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">1 min</button>
                     <button onclick="requestStartTimer(120)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">2 min</button>
                     <button onclick="requestStartTimer(300)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300 border border-slate-700">5 min</button>
@@ -357,13 +364,19 @@
                 <p id="deck-count" class="text-xs text-slate-500 text-center pt-1"></p>
             </div>
 
-            <!-- Contrôle Vidéo Maître (Partenaire + Caméra Dédiée) -->
+            <!-- Contrôle Vidéo & Micro Live Maître (Partenaire + Caméra Dédiée) -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
-                <h3 class="font-semibold text-slate-300">Visio en Direct & Caméra Dédiée</h3>
+                <h3 class="font-semibold text-slate-300">Visio en Direct, Micro Live & Caméra Dédiée</h3>
                 <div class="flex gap-2">
                     <button onclick="toggleVideo()" id="master-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
                     <button onclick="switchCameraFacingMode()" id="master-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
                 </div>
+
+                <!-- Micro Live du Maître vers la Partenaire (sans activer la caméra) -->
+                <button type="button" onclick="toggleMasterLiveMic()" id="master-live-mic-btn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 rounded-xl font-bold shadow active:scale-95 transition text-xs sm:text-sm text-white flex items-center justify-center gap-2 cursor-pointer">
+                    <span>🎤</span> Parler en direct à la Partenaire
+                </button>
+                <p id="master-live-mic-status" class="hidden text-[11px] text-emerald-300 font-semibold animate-pulse">🎙️ Micro live actif vers la Partenaire</p>
                 
                 <video id="local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
 
@@ -510,11 +523,18 @@
             </div>
 
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
-                <h3 class="font-semibold text-slate-300">Visio en Direct</h3>
+                <h3 class="font-semibold text-slate-300">Visio & Voix en Direct</h3>
                 <div class="flex gap-2">
                     <button onclick="toggleVideo()" id="partner-video-btn" class="flex-1 py-3 bg-indigo-600 rounded-xl font-bold shadow-lg active:scale-95 transition text-xs sm:text-sm">🎥 Activer ma Caméra</button>
                     <button onclick="switchCameraFacingMode()" id="partner-switch-cam-btn" class="hidden px-3 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold shadow active:scale-95 transition text-xs text-pink-300">🔄 Caméra Arrière</button>
                 </div>
+
+                <!-- Lecteur audio dédié quand le Maître parle en direct sans caméra -->
+                <div id="partner-live-mic-banner" class="hidden bg-emerald-950/40 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs text-emerald-200 font-semibold flex items-center justify-center gap-2">
+                    <span>🎙️</span>
+                    <span>Le Maître parle en direct...</span>
+                </div>
+                <audio id="partner-live-audio" autoplay playsinline class="hidden"></audio>
                 
                 <video id="partner-local-video" autoplay playsinline muted class="hidden w-full aspect-video bg-black rounded-xl object-cover border border-slate-700"></video>
 
@@ -907,6 +927,173 @@
             setMasterDedicatedZoomPreview(zoomVal);
             if (dedicatedCameraConn && dedicatedCameraConn.open === true) {
                 dedicatedCameraConn.send({ type: 'set_zoom', zoom: zoomVal });
+            }
+        }
+
+        // --- CAPTURE PHOTO DEPUIS LA CAMÉRA DÉDIÉE VERS L'ÉCRAN DU MAÎTRE ---
+        let dedicatedPhotoStatusTimeout = null;
+
+        function setDedicatedPhotoStatus(msg, isError = false) {
+            const statusElem = document.getElementById('dedicated-photo-status');
+            if (!statusElem) return;
+            statusElem.innerText = msg;
+            statusElem.className = isError
+                ? "text-xs text-rose-300 font-semibold"
+                : "text-xs text-emerald-300 font-semibold";
+            statusElem.classList.remove('hidden');
+            clearTimeout(dedicatedPhotoStatusTimeout);
+            dedicatedPhotoStatusTimeout = setTimeout(() => {
+                statusElem.classList.add('hidden');
+            }, 2600);
+        }
+
+        function captureAndSendDedicatedPhoto() {
+            getAudioContext();
+            if (!localStream) {
+                alert("Démarrez d'abord le flux de la Caméra Dédiée.");
+                return;
+            }
+            if (!dedicatedCameraConn || dedicatedCameraConn.open !== true) {
+                alert("La connexion vers le Maître du Jeu n'est pas encore ouverte.");
+                return;
+            }
+
+            const videoElem = document.getElementById('dedicated-local-video');
+            const sourceWidth = videoElem ? videoElem.videoWidth : 0;
+            const sourceHeight = videoElem ? videoElem.videoHeight : 0;
+            if (!sourceWidth || !sourceHeight) {
+                setDedicatedPhotoStatus("Flux vidéo en cours d'initialisation, réessayez dans 1s.", true);
+                return;
+            }
+
+            const rawCanvas = document.createElement('canvas');
+            rawCanvas.width = sourceWidth;
+            rawCanvas.height = sourceHeight;
+            const rawCtx = rawCanvas.getContext('2d');
+
+            const zoomFactor = currentDedicatedZoom > 1 ? currentDedicatedZoom : 1;
+            const cropW = sourceWidth / zoomFactor;
+            const cropH = sourceHeight / zoomFactor;
+            const cropX = (sourceWidth - cropW) / 2;
+            const cropY = (sourceHeight - cropH) / 2;
+
+            rawCtx.drawImage(videoElem, cropX, cropY, cropW, cropH, 0, 0, sourceWidth, sourceHeight);
+            const compactBase64 = compressImageToCompactJpeg(rawCanvas);
+
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const promptLabel = `Capture Caméra Dédiée (${nowTime}) — Ça te plaît ?`;
+
+            try {
+                dedicatedCameraConn.send({
+                    type: 'photo_interactive',
+                    id: 'cam_p_' + Date.now(),
+                    image: compactBase64,
+                    prompt: promptLabel,
+                    source: 'dedicated_camera',
+                    time: nowTime
+                });
+                setDedicatedPhotoStatus(`Capture envoyée au Maître (${nowTime}) ✨`);
+                if (navigator.vibrate) {
+                    try { navigator.vibrate(50); } catch (e) {}
+                }
+            } catch (err) {
+                setDedicatedPhotoStatus("Échec de l'envoi de la capture : " + err.message, true);
+            }
+        }
+
+        // --- MICRO LIVE DU MAÎTRE VERS LA PARTENAIRE (SANS CAMÉRA) ---
+        let isMasterMicOnlyActive = false;
+
+        function updateMasterLiveMicUI() {
+            const btn = document.getElementById('master-live-mic-btn');
+            const status = document.getElementById('master-live-mic-status');
+            if (!btn) return;
+
+            const hasAudioTrack = !!(localStream && localStream.getAudioTracks().some(t => t.enabled));
+
+            if (isMasterMicOnlyActive) {
+                btn.innerHTML = `<span>🔇</span> Couper mon Micro Live`;
+                btn.className = "w-full py-2.5 bg-amber-600 hover:bg-amber-500 rounded-xl font-bold shadow active:scale-95 transition text-xs sm:text-sm text-white flex items-center justify-center gap-2 cursor-pointer";
+                if (status) {
+                    status.innerText = "🎙️ Micro live actif vers la Partenaire (sans caméra)";
+                    status.classList.remove('hidden');
+                }
+            } else {
+                btn.innerHTML = `<span>🎤</span> Parler en direct à la Partenaire`;
+                btn.className = "w-full py-2.5 bg-emerald-700 hover:bg-emerald-600 rounded-xl font-bold shadow active:scale-95 transition text-xs sm:text-sm text-white flex items-center justify-center gap-2 cursor-pointer";
+                if (status) {
+                    if (localStream && hasAudioTrack) {
+                        status.innerText = "🎙️ Micro actif via la caméra";
+                        status.classList.remove('hidden');
+                    } else {
+                        status.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        async function acquireAudioOnlyStream() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("Micro non pris en charge sur ce navigateur.");
+            }
+            try {
+                return await navigator.mediaDevices.getUserMedia({
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                    video: false
+                });
+            } catch (e) {
+                return await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            }
+        }
+
+        async function toggleMasterLiveMic() {
+            getAudioContext();
+            if (!isMaster) return;
+
+            if (!isMasterMicOnlyActive) {
+                if (!conn || conn.open !== true) {
+                    alert("La partenaire n'est pas connectée au salon !");
+                    return;
+                }
+                if (localStream && localStream.getVideoTracks().length > 0) {
+                    const audioTracks = localStream.getAudioTracks();
+                    if (audioTracks.length > 0) {
+                        audioTracks.forEach(t => { t.enabled = true; });
+                        updateMasterLiveMicUI();
+                        return;
+                    }
+                }
+
+                try {
+                    const audioStream = await acquireAudioOnlyStream();
+                    if (localStream) {
+                        localStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+                    }
+                    localStream = audioStream;
+                    isMasterMicOnlyActive = true;
+                    updateMasterLiveMicUI();
+
+                    await syncOutgoingMediaCall(conn.peer);
+                    if (conn && conn.open === true) {
+                        conn.send({ type: 'video_ready' });
+                    }
+                } catch (err) {
+                    alert("Impossible d'activer le micro : " + (err && err.message ? err.message : err));
+                }
+            } else {
+                isMasterMicOnlyActive = false;
+                if (localStream && localStream.getVideoTracks().length === 0) {
+                    localStream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+                    localStream = null;
+                    if (outgoingCall) {
+                        try { outgoingCall.close(); } catch (e) {}
+                        outgoingCall = null;
+                    }
+                    if (conn && conn.open === true) {
+                        conn.send({ type: 'stop_video' });
+                    }
+                }
+                updateMasterLiveMicUI();
             }
         }
 
@@ -1533,16 +1720,19 @@
             fileInput.click();
         }
 
-        function compressImageToCompactJpeg(img) {
+        function compressImageToCompactJpeg(sourceElement) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             let maxDim = 200;
             let quality = 0.45;
             let result = '';
 
+            const srcWidth = sourceElement.videoWidth || sourceElement.width || 200;
+            const srcHeight = sourceElement.videoHeight || sourceElement.height || 200;
+
             for (let attempt = 0; attempt < 5; attempt++) {
-                let width = img.width;
-                let height = img.height;
+                let width = srcWidth;
+                let height = srcHeight;
                 if (width > height) {
                     if (width > maxDim) {
                         height = Math.round(height * (maxDim / width));
@@ -1557,7 +1747,7 @@
                 canvas.width = Math.max(1, width);
                 canvas.height = Math.max(1, height);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(sourceElement, 0, 0, canvas.width, canvas.height);
                 result = canvas.toDataURL('image/jpeg', quality);
 
                 if (result.length <= 12000) {
@@ -1855,6 +2045,7 @@
                 updateDeckCount();
                 populateMasterDeckSelect();
                 setMasterEndActionButtonState(false);
+                updateMasterLiveMicUI();
                 const urlParams = new URLSearchParams(window.location.search);
                 const roomParam = urlParams.get('room');
                 if (roomParam && roomParam.length === 4) {
@@ -1885,14 +2076,22 @@
             document.getElementById('master-screen').classList.remove('hidden');
             populateMasterDeckSelect();
             setMasterEndActionButtonState(false);
+            updateMasterLiveMicUI();
 
             peer = new Peer('osmose-' + currentRoomCode);
             peer.on('connection', (connection) => {
                 if (connection.metadata && connection.metadata.role === 'camera') {
                     dedicatedCameraConn = connection;
                     connection.on('data', (d) => {
-                        if (d && d.type === 'zoom_synced' && typeof d.zoom === 'number') {
+                        if (!d || typeof d !== 'object') return;
+                        if (d.type === 'zoom_synced' && typeof d.zoom === 'number') {
                             setMasterDedicatedZoomPreview(d.zoom);
+                        } else if (d.type === 'photo_interactive' && d.image) {
+                            showInteractivePhotoModal(d.image, d.prompt || "Capture Caméra Dédiée");
+                            setMasterFeedback(`<span class="text-purple-300 font-bold">📸 Capture reçue de la Caméra Dédiée</span> (${escapeHtml(d.time || '')})`);
+                            if (connection.open === true) {
+                                connection.send({ type: 'photo_ack', prompt: d.prompt || '' });
+                            }
                         }
                     });
                     return;
@@ -1987,6 +2186,8 @@
                     dedicatedCameraConn.on('data', (d) => {
                         if (d && d.type === 'set_zoom' && typeof d.zoom === 'number') {
                             setDedicatedZoom(d.zoom);
+                        } else if (d && d.type === 'photo_ack') {
+                            setDedicatedPhotoStatus("Capture bien reçue par le Maître ✅");
                         }
                     });
                     startDedicatedCameraStream(masterId).catch((err) => {
@@ -2142,16 +2343,47 @@
             }
         }
 
+        function attachAudioStreamToPartner(stream) {
+            if (!stream || isMaster) return;
+            const hasAudio = stream.getAudioTracks && stream.getAudioTracks().length > 0;
+            const audioElem = document.getElementById('partner-live-audio');
+            const bannerElem = document.getElementById('partner-live-mic-banner');
+            if (audioElem && hasAudio) {
+                audioElem.srcObject = stream;
+                audioElem.muted = false;
+                try {
+                    const p = audioElem.play();
+                    if (p && typeof p.catch === 'function') p.catch(() => {});
+                } catch (e) {}
+            }
+            if (bannerElem && hasAudio) {
+                bannerElem.classList.remove('hidden');
+            }
+        }
+
         function attachStreamToVideoElement(videoElem, containerElem, stream) {
             if (!videoElem || !stream) return;
+            const hasVideo = stream.getVideoTracks && stream.getVideoTracks().length > 0;
+
+            if (videoElem.id === 'partner-remote-video' && !hasVideo) {
+                attachAudioStreamToPartner(stream);
+                return;
+            }
+
             if (videoElem.srcObject !== stream) {
                 videoElem.srcObject = stream;
             }
-            if (containerElem) {
+            if (containerElem && hasVideo) {
                 containerElem.classList.remove('hidden');
             }
-            videoElem.classList.remove('hidden');
+            if (hasVideo) {
+                videoElem.classList.remove('hidden');
+            }
             forcePlayVideoElement(videoElem);
+
+            if (videoElem.id === 'partner-remote-video' && stream.getAudioTracks && stream.getAudioTracks().length > 0) {
+                attachAudioStreamToPartner(stream);
+            }
 
             videoElem.onloadedmetadata = () => forcePlayVideoElement(videoElem);
             videoElem.oncanplay = () => forcePlayVideoElement(videoElem);
@@ -2168,7 +2400,7 @@
             }
         }
 
-        // Réception dédiée du flux vidéo distant (sans écraser notre appel sortant)
+        // Réception dédiée du flux vidéo / audio distant (sans écraser notre appel sortant)
         function handleIncomingMediaCall(call) {
             if (!call) return;
             if (incomingCall && incomingCall !== call) {
@@ -2198,7 +2430,7 @@
                     } else if (event.track) {
                         const existing = isMaster
                             ? document.getElementById('remote-video')?.srcObject
-                            : document.getElementById('partner-remote-video')?.srcObject;
+                            : (document.getElementById('partner-remote-video')?.srcObject || document.getElementById('partner-live-audio')?.srcObject);
                         const ms = existing instanceof MediaStream ? existing : new MediaStream();
                         if (!ms.getTracks().some(t => t.id === event.track.id)) {
                             ms.addTrack(event.track);
@@ -2212,6 +2444,11 @@
                         const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
                         if (remoteElem && remoteElem.srcObject) {
                             forcePlayVideoElement(remoteElem);
+                        }
+                        const audioElem = document.getElementById('partner-live-audio');
+                        if (audioElem && audioElem.srcObject) {
+                            audioElem.muted = false;
+                            audioElem.play().catch(() => {});
                         }
                     } else if (st === 'failed' || st === 'closed') {
                         if (incomingCall === call) {
@@ -2232,8 +2469,12 @@
         function hideRemoteVideo() {
             const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
             const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
+            const audioElem = document.getElementById('partner-live-audio');
+            const bannerElem = document.getElementById('partner-live-mic-banner');
             if (remoteElem) remoteElem.srcObject = null;
             if (containerElem) containerElem.classList.add('hidden');
+            if (audioElem) audioElem.srcObject = null;
+            if (bannerElem) bannerElem.classList.add('hidden');
         }
 
         function setupConnectionEvents() {
@@ -2249,7 +2490,7 @@
                 if (!data || typeof data !== 'object') return;
 
                 if (data.type === 'video_ready') {
-                    // L'autre pair vient d'activer sa caméra : si notre caméra est active mais pas encore envoyée, on synchronise avec un léger décalage anti-collision
+                    // L'autre pair vient d'activer sa caméra / son micro : si notre flux est actif mais pas encore envoyé, on synchronise avec un léger décalage anti-collision
                     if (localStream) {
                         scheduleOutgoingMediaSync(conn.peer, isMaster ? 120 : 380);
                     }
@@ -2622,6 +2863,10 @@
 
             const freshStream = await acquireMediaStreamWithFallback(currentFacingMode);
             localStream = freshStream;
+            if (isMaster) {
+                isMasterMicOnlyActive = false;
+                updateMasterLiveMicUI();
+            }
 
             if (localVideoElem) {
                 localVideoElem.srcObject = null;
@@ -2683,7 +2928,8 @@
             const switchBtn = isMaster ? document.getElementById('master-switch-cam-btn') : document.getElementById('partner-switch-cam-btn');
 
             try {
-                if (!localStream) {
+                const hasActiveVideo = !!(localStream && localStream.getVideoTracks().length > 0);
+                if (!hasActiveVideo) {
                     if (btnElem) btnElem.innerText = "⏳ Activation caméra...";
                     const targetId = resolveCallTargetPeerId();
                     await startCameraStream(targetId);
@@ -2701,6 +2947,10 @@
                         try { track.stop(); } catch (e) {}
                     });
                     localStream = null;
+                    if (isMaster) {
+                        isMasterMicOnlyActive = false;
+                        updateMasterLiveMicUI();
+                    }
                     if (localVideoElem) {
                         localVideoElem.srcObject = null;
                         localVideoElem.classList.add('hidden');
@@ -2734,6 +2984,11 @@
 
         document.addEventListener('click', () => {
             getAudioContext();
+            const liveAudio = document.getElementById('partner-live-audio');
+            if (liveAudio && liveAudio.srcObject && liveAudio.paused) {
+                liveAudio.muted = false;
+                try { liveAudio.play().catch(() => {}); } catch (e) {}
+            }
             ['local-video', 'remote-video', 'partner-local-video', 'partner-remote-video', 'dedicated-local-video', 'dedicated-remote-video'].forEach((id) => {
                 const el = document.getElementById(id);
                 if (el && el.srcObject && !el.classList.contains('hidden') && el.paused) {
