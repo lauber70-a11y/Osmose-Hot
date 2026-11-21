@@ -302,6 +302,20 @@
                 <button onclick="sendLiveCard()" class="w-full py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-indigo-500 rounded-xl font-bold text-xs shadow transition">Envoyer au Duo 🚀</button>
             </div>
 
+            <!-- BOUTON DESIGN : CLÔTURER L'ACTION / LE DÉFI AVEC CLOCHE DE RING -->
+            <div class="pt-0.5">
+                <button id="master-end-action-btn" type="button" onclick="triggerEndActionBell()" disabled class="w-full py-3.5 px-4 rounded-2xl font-bold text-xs sm:text-sm bg-gradient-to-r from-amber-500/20 via-pink-600/25 to-purple-600/25 hover:from-amber-500/35 hover:via-pink-600/40 hover:to-purple-600/40 border border-amber-400/50 text-amber-100 shadow-lg shadow-amber-950/30 active:scale-95 transition-all duration-200 flex items-center justify-between gap-3 disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-base shadow-inner">🔔</span>
+                        <span class="text-left">
+                            <span class="block font-bold text-white leading-tight">Terminer l'action / le défi</span>
+                            <span id="master-end-action-sub" class="block text-[10px] text-amber-200/80 font-normal">En attente d'une carte envoyée</span>
+                        </span>
+                    </span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-200 border border-amber-300/30 shrink-0">🥊 Ring</span>
+                </button>
+            </div>
+
             <!-- CONTRÔLE DU CHRONOMÈTRE -->
             <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center space-y-3">
                 <h3 class="font-semibold text-pink-400 text-sm">⏱️ Contrôle du Chronomètre (Maître)</h3>
@@ -458,6 +472,12 @@
 
                 <p id="card-prompt-text" class="text-lg font-semibold text-white break-words"></p>
 
+                <!-- Bannière de fin d'action / défi déclenchée par le Maître -->
+                <div id="card-ended-banner" class="hidden bg-amber-500/15 border border-amber-400/60 text-amber-200 px-3 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <span>🔔</span>
+                    <span>Temps / Action clôturée par le Maître !</span>
+                </div>
+
                 <!-- CHRONOMÈTRE DISTANT (Piloté par le Maître) -->
                 <div id="partner-giant-timer-container" class="hidden bg-slate-950 border border-pink-500/40 rounded-2xl p-4 text-center space-y-2">
                     <div id="partner-giant-timer-display" class="text-4xl font-extrabold text-pink-400 tracking-wider">00:00</div>
@@ -574,9 +594,52 @@
             });
         }
 
+        // Son métallique typique d'une cloche de ring de boxe (double frappe "ding-ding")
+        function playBoxingBellStrike(ctx, startTime, duration = 0.75, volume = 0.22) {
+            const partials = [
+                { freq: 830, amp: 1.0, decay: duration },
+                { freq: 1245, amp: 0.65, decay: duration * 0.78 },
+                { freq: 1890, amp: 0.45, decay: duration * 0.55 },
+                { freq: 2480, amp: 0.28, decay: duration * 0.38 }
+            ];
+
+            partials.forEach((p) => {
+                try {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(p.freq, startTime);
+
+                    const peak = Math.max(0.001, volume * p.amp);
+                    gain.gain.setValueAtTime(0.0001, startTime);
+                    gain.gain.linearRampToValueAtTime(peak, startTime + 0.008);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + p.decay);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + p.decay + 0.03);
+                } catch (e) {}
+            });
+        }
+
+        function playBoxingBellSound() {
+            if (!soundEffectsEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const t0 = ctx.currentTime + 0.01;
+            playBoxingBellStrike(ctx, t0, 0.45, 0.20);
+            playBoxingBellStrike(ctx, t0 + 0.22, 0.85, 0.23);
+        }
+
         function playNotificationSound(kind) {
             if (!soundEffectsEnabled) return;
             switch (kind) {
+                case 'boxing_bell':
+                    playBoxingBellSound();
+                    break;
                 case 'immediate':
                     playToneSequence([
                         { freq: 659.25, delay: 0, duration: 0.11, type: 'triangle', gain: 0.18 },
@@ -631,6 +694,62 @@
                     playToneSequence([
                         { freq: 587.33, delay: 0, duration: 0.12, type: 'sine', gain: 0.12 }
                     ]);
+            }
+        }
+
+        // --- BOUTON FIN D'ACTION / DÉFI AVEC CLOCHE DE RING ---
+        let hasActiveSentCard = false;
+
+        function setMasterEndActionButtonState(enabled, labelOverride = null) {
+            const btn = document.getElementById('master-end-action-btn');
+            const sub = document.getElementById('master-end-action-sub');
+            if (!btn) return;
+            hasActiveSentCard = !!enabled;
+            btn.disabled = !hasActiveSentCard;
+            if (sub) {
+                if (labelOverride) {
+                    sub.innerText = labelOverride;
+                } else {
+                    sub.innerText = hasActiveSentCard
+                        ? "Sonner la cloche pour clôturer"
+                        : "En attente d'une carte envoyée";
+                }
+            }
+        }
+
+        function triggerEndActionBell() {
+            if (!isMaster) return;
+            if (!conn || conn.open !== true) {
+                alert("La partenaire n'est pas connectée !");
+                return;
+            }
+            if (!hasActiveSentCard) return;
+
+            const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            playNotificationSound('boxing_bell');
+            conn.send({ type: 'end_card_action', time: nowTime });
+
+            setMasterFeedback(`<span class="text-amber-300 font-bold">🔔 Cloche du ring (${escapeHtml(nowTime)}) :</span> Action / défi clôturé !`);
+            setMasterEndActionButtonState(false, `Cloche sonnée à ${nowTime}`);
+        }
+
+        function handleIncomingEndCardAction(data) {
+            playNotificationSound('boxing_bell');
+            const endedBanner = document.getElementById('card-ended-banner');
+            const cardContainer = document.getElementById('active-card-container');
+            if (endedBanner) {
+                const timeStr = (data && data.time) ? ` (${data.time})` : '';
+                endedBanner.innerHTML = `<span>🔔</span><span>Action / défi clôturé par le Maître${escapeHtml(timeStr)} !</span>`;
+                endedBanner.classList.remove('hidden');
+            }
+            if (cardContainer && !cardContainer.classList.contains('hidden')) {
+                cardContainer.classList.add('ring-2', 'ring-amber-400');
+                setTimeout(() => {
+                    cardContainer.classList.remove('ring-2', 'ring-amber-400');
+                }, 1200);
+            }
+            if (navigator.vibrate) {
+                try { navigator.vibrate([120, 60, 180]); } catch (e) {}
             }
         }
 
@@ -1140,6 +1259,7 @@
             const selectedCard = { type: combined[idx].type, prompt: combined[idx].prompt };
             conn.send(selectedCard);
             setMasterFeedback(`<span class="text-indigo-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(selectedCard.type))}) :</span> ${escapeHtml(selectedCard.prompt)}`);
+            setMasterEndActionButtonState(true);
         }
 
         function addNewCardToDeck() {
@@ -1299,6 +1419,7 @@
             const payload = { type: typeSelect.value, prompt: text };
             conn.send(payload);
             setMasterFeedback(`<span class="text-pink-400 font-bold">Carte envoyée (${escapeHtml(getCardTypeLabel(typeSelect.value))}) :</span> ${escapeHtml(text)}`);
+            setMasterEndActionButtonState(true);
             promptInput.value = '';
         }
 
@@ -1722,13 +1843,18 @@
 
         function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
 
-        let peer = null, conn = null, localStream = null, currentCall = null, isMaster = false, isDedicatedCamera = false, currentFacingMode = 'user';
+        // --- GESTION WEBRTC BIDIRECTIONNELLE STABILISÉE (APPEL SORTANT + ENTRANT SÉPARÉS) ---
+        let peer = null, conn = null, localStream = null;
+        let outgoingCall = null, incomingCall = null;
+        let isMaster = false, isDedicatedCamera = false, currentFacingMode = 'user';
+        let mediaSyncTimer = null;
 
         window.onload = () => {
             try {
                 updateSoundToggleButton();
                 updateDeckCount();
                 populateMasterDeckSelect();
+                setMasterEndActionButtonState(false);
                 const urlParams = new URLSearchParams(window.location.search);
                 const roomParam = urlParams.get('room');
                 if (roomParam && roomParam.length === 4) {
@@ -1758,6 +1884,7 @@
             document.getElementById('role-selection').classList.add('hidden');
             document.getElementById('master-screen').classList.remove('hidden');
             populateMasterDeckSelect();
+            setMasterEndActionButtonState(false);
 
             peer = new Peer('osmose-' + currentRoomCode);
             peer.on('connection', (connection) => {
@@ -1774,7 +1901,7 @@
                 setupConnectionEvents();
                 updateStatus('Connecté au Duo ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
                 if (localStream) {
-                    syncMediaCallWithPeer(connection.peer).catch(() => {});
+                    scheduleOutgoingMediaSync(connection.peer, 200);
                 }
             });
             peer.on('call', (call) => {
@@ -1799,9 +1926,7 @@
                     });
                     return;
                 }
-                currentCall = call;
-                call.answer(localStream || undefined);
-                setupCallEvents(call);
+                handleIncomingMediaCall(call);
             });
         }
 
@@ -1910,9 +2035,7 @@
             });
 
             peer.on('call', (call) => {
-                currentCall = call;
-                call.answer(localStream || undefined);
-                setupCallEvents(call);
+                handleIncomingMediaCall(call);
             });
         }
 
@@ -1945,13 +2068,13 @@
             await applyHardwareZoomIfSupported(currentDedicatedZoom);
 
             const newVideoTrack = localStream.getVideoTracks()[0];
-            if (currentCall && currentCall.peerConnection) {
-                const videoSender = currentCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (outgoingCall && outgoingCall.peerConnection && outgoingCall.peerConnection.connectionState !== 'closed') {
+                const videoSender = outgoingCall.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
                 if (videoSender && newVideoTrack) {
                     await videoSender.replaceTrack(newVideoTrack);
                 }
             } else if (peer && masterPeerId) {
-                currentCall = peer.call(masterPeerId, localStream, { metadata: { role: 'camera' } });
+                outgoingCall = peer.call(masterPeerId, localStream, { metadata: { role: 'camera' } });
             }
         }
 
@@ -1975,9 +2098,9 @@
                     localVideoElem.srcObject = null;
                     localVideoElem.style.transform = 'scale(1)';
                 }
-                if (currentCall) {
-                    try { currentCall.close(); } catch(e) {}
-                    currentCall = null;
+                if (outgoingCall) {
+                    try { outgoingCall.close(); } catch(e) {}
+                    outgoingCall = null;
                 }
                 if (toggleBtn) {
                     toggleBtn.innerText = "🎥 Démarrer le flux";
@@ -2036,11 +2159,28 @@
             if (stream.getVideoTracks) {
                 stream.getVideoTracks().forEach((track) => {
                     track.onunmute = () => forcePlayVideoElement(videoElem);
+                    track.onended = () => {
+                        if (videoElem.id === 'remote-video' || videoElem.id === 'partner-remote-video') {
+                            hideRemoteVideo();
+                        }
+                    };
                 });
             }
         }
 
-        function setupCallEvents(call) {
+        // Réception dédiée du flux vidéo distant (sans écraser notre appel sortant)
+        function handleIncomingMediaCall(call) {
+            if (!call) return;
+            if (incomingCall && incomingCall !== call) {
+                try { incomingCall.close(); } catch (e) {}
+            }
+            incomingCall = call;
+
+            // Réponse en réception pure (le flux local est envoyé via outgoingCall dédié)
+            try {
+                call.answer();
+            } catch (e) {}
+
             const handleRemoteStream = (remoteStream) => {
                 if (!remoteStream) return;
                 const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
@@ -2073,20 +2213,27 @@
                         if (remoteElem && remoteElem.srcObject) {
                             forcePlayVideoElement(remoteElem);
                         }
+                    } else if (st === 'failed' || st === 'closed') {
+                        if (incomingCall === call) {
+                            hideRemoteVideo();
+                        }
                     }
                 };
             }
 
             call.on('close', () => {
-                hideRemoteVideo();
+                if (incomingCall === call) {
+                    incomingCall = null;
+                    hideRemoteVideo();
+                }
             });
         }
 
         function hideRemoteVideo() {
             const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
             const containerElem = isMaster ? document.getElementById('video-container') : document.getElementById('partner-video-container');
-            remoteElem.srcObject = null;
-            containerElem.classList.add('hidden');
+            if (remoteElem) remoteElem.srcObject = null;
+            if (containerElem) containerElem.classList.add('hidden');
         }
 
         function setupConnectionEvents() {
@@ -2094,12 +2241,27 @@
                 updateStatus('Connecté au Salon ❤️', 'text-emerald-300', 'bg-emerald-900/50', 'border-emerald-700');
                 syncCustomDeckToPartner();
                 if (localStream) {
-                    syncMediaCallWithPeer(conn.peer).catch(() => {});
+                    scheduleOutgoingMediaSync(conn.peer, isMaster ? 100 : 350);
                 }
             });
 
             conn.on('data', (data) => {
                 if (!data || typeof data !== 'object') return;
+
+                if (data.type === 'video_ready') {
+                    // L'autre pair vient d'activer sa caméra : si notre caméra est active mais pas encore envoyée, on synchronise avec un léger décalage anti-collision
+                    if (localStream) {
+                        scheduleOutgoingMediaSync(conn.peer, isMaster ? 120 : 380);
+                    }
+                    return;
+                }
+
+                if (data.type === 'end_card_action') {
+                    if (!isMaster) {
+                        handleIncomingEndCardAction(data);
+                    }
+                    return;
+                }
 
                 if (data.type === 'flash_reaction') {
                     if (!isMaster) {
@@ -2167,6 +2329,10 @@
                 }
 
                 if (data.type === 'stop_video') {
+                    if (incomingCall) {
+                        try { incomingCall.close(); } catch (e) {}
+                        incomingCall = null;
+                    }
                     hideRemoteVideo();
                     return;
                 }
@@ -2183,6 +2349,7 @@
                     } else if (data.type && data.prompt) {
                         playNotificationSound('feedback');
                         setMasterFeedback(`<span class="text-pink-400 font-bold">Pioche (${escapeHtml(getCardTypeLabel(data.type))})</span> : ${escapeHtml(data.prompt)}`);
+                        setMasterEndActionButtonState(true);
                     } else if (data.action && data.value) {
                         playNotificationSound('feedback');
                         setMasterFeedback(`<span class="text-pink-400 font-bold">${escapeHtml(data.action)}</span> : ${escapeHtml(data.value)}`);
@@ -2191,7 +2358,10 @@
                     displayCardToPartner(data);
                 }
             });
-            conn.on('close', () => updateStatus('Déconnecté', 'text-red-300', 'bg-red-900/50', 'border-red-700'));
+            conn.on('close', () => {
+                setMasterEndActionButtonState(false);
+                updateStatus('Déconnecté', 'text-red-300', 'bg-red-900/50', 'border-red-700');
+            });
         }
 
         function drawCustomCard() {
@@ -2225,8 +2395,11 @@
             const newBadge = document.getElementById('card-new-badge');
             const immediateBanner = document.getElementById('immediate-action-banner');
             const duoBanner = document.getElementById('duo-action-banner');
+            const endedBanner = document.getElementById('card-ended-banner');
 
-            cardContainer.classList.remove('hidden', 'ring-2', 'ring-pink-400');
+            if (endedBanner) endedBanner.classList.add('hidden');
+
+            cardContainer.classList.remove('hidden', 'ring-2', 'ring-pink-400', 'ring-amber-400');
             void cardContainer.offsetWidth;
             cardContainer.classList.add('ring-2', 'ring-pink-400');
             setTimeout(() => {
@@ -2372,40 +2545,66 @@
             return null;
         }
 
-        async function syncMediaCallWithPeer(explicitTargetId = null) {
+        function scheduleOutgoingMediaSync(explicitTargetId = null, delayMs = 0) {
+            clearTimeout(mediaSyncTimer);
+            mediaSyncTimer = setTimeout(() => {
+                syncOutgoingMediaCall(explicitTargetId).catch(() => {});
+            }, delayMs);
+        }
+
+        // Diffusion dédiée de notre flux local vers l'autre pair (sans toucher à incomingCall)
+        async function syncOutgoingMediaCall(explicitTargetId = null) {
             if (!localStream || !peer || peer.destroyed) return;
             const targetId = resolveCallTargetPeerId(explicitTargetId);
+            if (!targetId) return;
 
-            if (currentCall && currentCall.peerConnection && currentCall.peerConnection.connectionState !== 'closed') {
-                const senders = currentCall.peerConnection.getSenders();
-                const newVideoTrack = localStream.getVideoTracks()[0] || null;
-                const newAudioTrack = localStream.getAudioTracks()[0] || null;
+            if (outgoingCall && outgoingCall.peerConnection) {
+                const pcState = outgoingCall.peerConnection.connectionState;
+                const iceState = outgoingCall.peerConnection.iceConnectionState;
+                const isAlive = pcState !== 'closed' && pcState !== 'failed' && iceState !== 'closed' && iceState !== 'failed';
 
-                let replacedAny = false;
-                if (newVideoTrack) {
-                    const vSender = senders.find(s => s.track && s.track.kind === 'video');
-                    if (vSender && typeof vSender.replaceTrack === 'function') {
-                        try { await vSender.replaceTrack(newVideoTrack); replacedAny = true; } catch (e) {}
+                if (isAlive) {
+                    const senders = outgoingCall.peerConnection.getSenders();
+                    const newVideoTrack = localStream.getVideoTracks()[0] || null;
+                    const newAudioTrack = localStream.getAudioTracks()[0] || null;
+
+                    let replacedAny = false;
+                    if (newVideoTrack) {
+                        const vSender = senders.find(s => s.track && s.track.kind === 'video');
+                        if (vSender && typeof vSender.replaceTrack === 'function') {
+                            try { await vSender.replaceTrack(newVideoTrack); replacedAny = true; } catch (e) {}
+                        }
                     }
-                }
-                if (newAudioTrack) {
-                    const aSender = senders.find(s => s.track && s.track.kind === 'audio');
-                    if (aSender && typeof aSender.replaceTrack === 'function') {
-                        try { await aSender.replaceTrack(newAudioTrack); replacedAny = true; } catch (e) {}
+                    if (newAudioTrack) {
+                        const aSender = senders.find(s => s.track && s.track.kind === 'audio');
+                        if (aSender && typeof aSender.replaceTrack === 'function') {
+                            try { await aSender.replaceTrack(newAudioTrack); replacedAny = true; } catch (e) {}
+                        }
                     }
+                    if (replacedAny) return;
                 }
-                if (replacedAny) return;
             }
 
-            if (targetId) {
-                if (currentCall) {
-                    try { currentCall.close(); } catch (e) {}
-                }
-                const nextCall = peer.call(targetId, localStream);
-                if (nextCall) {
-                    currentCall = nextCall;
-                    setupCallEvents(nextCall);
-                }
+            if (outgoingCall) {
+                try { outgoingCall.close(); } catch (e) {}
+                outgoingCall = null;
+            }
+
+            const nextCall = peer.call(targetId, localStream, {
+                metadata: { role: isMaster ? 'master' : 'partner' }
+            });
+            if (nextCall) {
+                outgoingCall = nextCall;
+                nextCall.on('close', () => {
+                    if (outgoingCall === nextCall) {
+                        outgoingCall = null;
+                    }
+                });
+                nextCall.on('error', () => {
+                    if (outgoingCall === nextCall) {
+                        outgoingCall = null;
+                    }
+                });
             }
         }
 
@@ -2439,7 +2638,13 @@
                 switchBtn.innerText = currentFacingMode === 'user' ? "🔄 Caméra Arrière" : "🔄 Mode Selfie";
             }
 
-            await syncMediaCallWithPeer(targetIdForCall);
+            // Léger décalage asymétrique (Maître 50ms / Partenaire 260ms) pour éviter toute collision simultanée
+            await new Promise((r) => setTimeout(r, isMaster ? 50 : 260));
+            await syncOutgoingMediaCall(targetIdForCall);
+
+            if (conn && conn.open === true) {
+                conn.send({ type: 'video_ready' });
+            }
         }
 
         async function switchCameraFacingMode() {
@@ -2485,13 +2690,13 @@
 
                     if (localStream && peer && resolveCallTargetPeerId()) {
                         setTimeout(() => {
-                            const remoteElem = isMaster ? document.getElementById('remote-video') : document.getElementById('partner-remote-video');
-                            if (localStream && (!remoteElem || !remoteElem.srcObject)) {
-                                syncMediaCallWithPeer().catch(() => {});
+                            if (localStream && (!outgoingCall || !outgoingCall.peerConnection || outgoingCall.peerConnection.connectionState === 'closed')) {
+                                syncOutgoingMediaCall().catch(() => {});
                             }
-                        }, 500);
+                        }, 650);
                     }
                 } else {
+                    clearTimeout(mediaSyncTimer);
                     localStream.getTracks().forEach(track => {
                         try { track.stop(); } catch (e) {}
                     });
@@ -2511,9 +2716,9 @@
                         conn.send({ type: 'stop_video' });
                     }
 
-                    if (currentCall) {
-                        try { currentCall.close(); } catch (e) {}
-                        currentCall = null;
+                    if (outgoingCall) {
+                        try { outgoingCall.close(); } catch (e) {}
+                        outgoingCall = null;
                     }
                 }
             } catch (err) {
