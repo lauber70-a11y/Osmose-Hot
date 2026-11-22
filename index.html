@@ -8,21 +8,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        /* Palette sombre velours et or */
+        /* Palette sombre rose et or rosé */
         :root {
-            --bg-top: #190c12;
-            --bg-bottom: #0b0709;
-            --card-surface: #1b1116;
-            --card-elevated: #24141c;
-            --gold: #d4af37;
-            --gold-bright: #e6c656;
-            --gold-line: rgba(212, 175, 55, 0.36);
-            --gold-soft: rgba(212, 175, 55, 0.14);
-            --text-primary: #f6efe6;
-            --text-secondary: #baa89a;
-            --danger-bg: rgba(122, 24, 44, 0.42);
-            --danger-border: rgba(244, 150, 162, 0.52);
-            --danger-text: #f9aeb8;
+            --bg-top: #220d18;
+            --bg-bottom: #10070c;
+            --card-surface: #24121c;
+            --card-elevated: #301625;
+            --gold: #f0a8c4;
+            --gold-bright: #ffc4db;
+            --gold-line: rgba(240, 168, 196, 0.36);
+            --gold-soft: rgba(240, 168, 196, 0.15);
+            --text-primary: #fff3f8;
+            --text-secondary: #d4b2c1;
+            --danger-bg: rgba(145, 25, 62, 0.44);
+            --danger-border: rgba(255, 158, 188, 0.54);
+            --danger-text: #ffc2d4;
             --radius-card: 22px;
             --radius-panel: 20px;
             --radius-control: 12px;
@@ -48,16 +48,16 @@
             overflow-x: hidden;
         }
 
-        /* Grille plein écran stable */
+        /* Grille plein écran stable et aérée */
         .app-shell {
             min-height: 100dvh;
             width: 100%;
-            max-width: 960px;
+            max-width: 880px;
             margin: 0 auto;
-            padding: 18px 16px 24px 16px;
+            padding: 14px 14px 20px 14px;
             display: grid;
             grid-template-rows: auto auto 1fr auto;
-            gap: 14px;
+            gap: 12px;
             align-items: center;
         }
 
@@ -68,7 +68,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .top-bar-actions {
@@ -80,30 +80,45 @@
             flex-shrink: 0;
         }
 
+        .top-bar-actions.is-hidden {
+            display: none;
+        }
+
         .brand-title {
-            width: 100%;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
             text-align: center;
             font-family: "Dancing Script", "Brush Script MT", cursive;
-            font-size: clamp(2.1rem, 5.5vw, 2.9rem);
+            font-size: clamp(1.95rem, 5vw, 2.65rem);
             font-weight: 700;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             color: var(--gold);
-            text-shadow: 0 4px 18px rgba(212, 175, 55, 0.24);
+            text-shadow: 0 3px 16px rgba(240, 168, 196, 0.25);
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 8px rgba(240, 168, 196, 0.32));
         }
 
         .btn {
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 600;
             line-height: 1.2;
-            min-height: 44px;
-            padding: 10px 16px;
-            border-radius: var(--radius-control);
+            min-height: 42px;
+            padding: 8px 14px;
+            border-radius: var(--radius-small);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 7px;
             transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.1s ease;
             user-select: none;
         }
@@ -117,6 +132,12 @@
             color: var(--gold);
             border: 1px solid var(--gold-line);
             white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-deck-icon {
+            width: 17px;
+            height: 17px;
             flex-shrink: 0;
         }
 
@@ -157,7 +178,28 @@
             background: var(--gold-soft);
             color: var(--gold);
             border-color: var(--gold);
-            box-shadow: 0 0 18px rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 18px rgba(240, 168, 196, 0.22);
+        }
+
+        .ambient-style-select {
+            min-height: 42px;
+            padding: 6px 10px;
+            border-radius: var(--radius-small);
+            border: 1px solid rgba(212, 175, 55, 0.32);
+            background: var(--card-surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .ambient-style-select:hover,
+        .ambient-style-select:focus {
+            border-color: var(--gold);
+            color: var(--gold);
+            outline: none;
         }
 
         /* Sélecteur discret de filtre de tirage sur l'écran principal */
@@ -168,23 +210,23 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             padding: 4px;
-            border-radius: var(--radius-control);
+            border-radius: var(--radius-small);
             background: rgba(27, 17, 22, 0.72);
             border: 1px solid rgba(212, 175, 55, 0.22);
         }
 
         .filter-pill {
             flex: 1 1 auto;
-            min-height: 36px;
-            padding: 6px 12px;
-            border-radius: var(--radius-small);
+            min-height: 34px;
+            padding: 5px 10px;
+            border-radius: 6px;
             border: 1px solid transparent;
             background: transparent;
             color: var(--text-secondary);
             font-family: inherit;
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -208,18 +250,18 @@
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             padding: 4px;
-            border-radius: var(--radius-control);
+            border-radius: var(--radius-small);
             background: rgba(27, 17, 22, 0.72);
             border: 1px solid rgba(212, 175, 55, 0.22);
         }
 
         .mode-pill {
             flex: 1 1 auto;
-            min-height: 36px;
-            padding: 6px 11px;
-            border-radius: var(--radius-small);
+            min-height: 34px;
+            padding: 5px 10px;
+            border-radius: 6px;
             border: 1px solid transparent;
             background: transparent;
             color: var(--text-secondary);
@@ -245,18 +287,61 @@
             display: none;
         }
 
+        .controls-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .controls-stack-body {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .controls-stack.is-collapsed .controls-stack-body {
+            display: none;
+        }
+
+        .btn-toggle-options {
+            min-height: 30px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(240, 168, 196, 0.28);
+            background: rgba(27, 17, 22, 0.72);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-toggle-options:hover {
+            color: var(--gold);
+            border-color: var(--gold-line);
+            background: var(--card-elevated);
+        }
+
         .turn-indicator {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 999px;
             border: 1px solid rgba(212, 175, 55, 0.28);
             background: rgba(11, 7, 9, 0.55);
             color: var(--text-secondary);
-            font-size: 0.74rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
         }
 
         .turn-indicator.is-hidden {
@@ -266,7 +351,7 @@
         .stage {
             width: 100%;
             height: 100%;
-            min-height: 340px;
+            min-height: 310px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -275,17 +360,24 @@
         /* Carte centrale unique avec deux faces alternant via .is-active */
         .game-card {
             width: 100%;
-            max-width: 460px;
-            min-height: 400px;
-            max-height: 62dvh;
+            max-width: 450px;
+            min-height: 340px;
+            max-height: 60dvh;
             background: linear-gradient(160deg, var(--card-elevated) 0%, var(--card-surface) 100%);
             border: 1px solid var(--gold-line);
-            border-radius: var(--radius-card);
-            box-shadow: 0 22px 54px rgba(0, 0, 0, 0.68);
+            border-radius: 20px;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.68);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
+            transition: max-width 0.2s ease, min-height 0.2s ease, max-height 0.2s ease;
+        }
+
+        .app-shell.options-collapsed .game-card {
+            max-width: 520px;
+            min-height: 380px;
+            max-height: 67dvh;
         }
 
         .card-face {
@@ -316,10 +408,193 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 32px 24px;
-            gap: 16px;
+            padding: 18px 16px;
+            gap: 10px;
             cursor: pointer;
-            background-image: radial-gradient(circle at 50% 35%, rgba(212, 175, 55, 0.12), transparent 65%);
+            background-image: radial-gradient(circle at 50% 35%, rgba(240, 168, 196, 0.14), transparent 65%);
+        }
+
+        .card-emblem {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            border: 1px solid var(--gold-line);
+            background: var(--gold-soft);
+            color: var(--gold);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-back-heading {
+            font-family: "Dancing Script", "Brush Script MT", cursive;
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--gold);
+        }
+
+        .target-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid var(--gold-line);
+            background: var(--gold-soft);
+            color: var(--gold);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .target-badge.is-hidden {
+            display: none;
+        }
+
+        .card-back-tip {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            max-width: 240px;
+            line-height: 1.35;
+        }
+
+        /* Face révélée (verso de la carte) */
+        .card-front {
+            padding: 12px 14px;
+            gap: 7px;
+        }
+
+        .card-front-meta {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 20px;
+            flex-shrink: 0;
+        }
+
+        .gold-rule {
+            width: 52px;
+            height: 1px;
+            margin: 0 auto;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            flex-shrink: 0;
+        }
+
+        .card-scroll-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 2px;
+        }
+
+        .card-photo {
+            display: none;
+            width: 100%;
+            max-width: 100%;
+            max-height: 190px;
+            object-fit: contain;
+            border-radius: var(--radius-small);
+            border: 1px solid var(--gold-line);
+            background: rgba(11, 7, 9, 0.55);
+            flex-shrink: 0;
+        }
+
+        .card-photo.is-visible {
+            display: block;
+        }
+
+        .card-video {
+            display: none;
+            width: 100%;
+            max-width: 100%;
+            max-height: 190px;
+            border-radius: var(--radius-small);
+            border: 1px solid var(--gold-line);
+            background: #080507;
+            flex-shrink: 0;
+        }
+
+        .card-video.is-visible {
+            display: block;
+        }
+
+        .btn-video-fullscreen {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-height: 30px;
+            padding: 4px 10px;
+            border-radius: var(--radius-small);
+            border: 1px solid var(--gold-line);
+            background: var(--card-surface);
+            color: var(--gold);
+            font-family: inherit;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-video-fullscreen:hover {
+            border-color: var(--gold);
+            background: var(--card-elevated);
+        }
+
+        .btn-video-fullscreen.is-visible {
+            display: inline-flex;
+        }
+
+        .card-prompt {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.1rem, 3vw, 1.32rem);
+            line-height: 1.5;
+            color: var(--text-primary);
+            text-align: center;
+            word-break: break-word;
+            width: 100%;
+        }
+
+        .card-prompt.is-hidden {
+            display: none;
+        }
+
+        /* Zone de contrôle sous la carte */
+        .bottom-controls {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .controls-row {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .controls-row .btn {
+            flex: 0 1 190px;
+            min-width: 135px;
         }
 
         .card-emblem {
@@ -518,7 +793,7 @@
 
         .btn-next {
             background: var(--gold);
-            color: #140b0f;
+            color: #1c0913;
             border: 1px solid var(--gold);
             font-weight: 700;
         }
@@ -529,44 +804,44 @@
         }
 
         .status-caption {
-            font-size: 0.82rem;
+            font-size: 0.74rem;
             color: var(--text-secondary);
             text-align: center;
-            min-height: 1.15em;
+            min-height: 1em;
         }
 
         /* Petit minuteur discret avec cloche de fin */
         .timer-dock {
             width: 100%;
-            max-width: 460px;
-            padding: 8px 12px;
-            border-radius: var(--radius-control);
+            max-width: 450px;
+            padding: 7px 10px;
+            border-radius: var(--radius-small);
             background: rgba(27, 17, 22, 0.78);
             border: 1px solid rgba(212, 175, 55, 0.24);
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .timer-presets {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
         .timer-preset-btn {
-            min-height: 32px;
-            padding: 4px 9px;
-            border-radius: var(--radius-small);
+            min-height: 26px;
+            padding: 2px 7px;
+            border-radius: 6px;
             border: 1px solid transparent;
             background: rgba(11, 7, 9, 0.55);
             color: var(--text-secondary);
             font-family: inherit;
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
@@ -584,21 +859,21 @@
         }
 
         .timer-readout {
-            min-width: 58px;
+            min-width: 50px;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            font-size: 1rem;
+            font-size: 0.88rem;
             font-weight: 700;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
             color: var(--gold);
-            padding: 3px 8px;
-            border-radius: var(--radius-small);
+            padding: 2px 6px;
+            border-radius: 6px;
             background: rgba(11, 7, 9, 0.68);
             border: 1px solid rgba(212, 175, 55, 0.25);
         }
 
         .timer-readout.is-finished {
-            color: #140b0f;
+            color: #1c0913;
             background: var(--gold);
             border-color: var(--gold-bright);
             animation: pulseBell 0.5s ease-in-out 2;
@@ -616,18 +891,18 @@
         .timer-actions {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .btn-timer {
-            min-height: 34px;
-            padding: 5px 11px;
-            border-radius: var(--radius-small);
+            min-height: 28px;
+            padding: 3px 8px;
+            border-radius: 6px;
             border: 1px solid var(--gold-line);
             background: var(--card-surface);
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 0.8rem;
+            font-size: 0.74rem;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -802,7 +1077,7 @@
 
         .btn-save {
             background: var(--gold);
-            color: #140b0f;
+            color: #1c0913;
             border: 1px solid var(--gold);
             min-height: 44px;
             padding: 8px 18px;
@@ -1109,15 +1384,15 @@
 
         @media (max-width: 600px) {
             .app-shell {
-                padding: 14px 12px 20px 12px;
-                gap: 12px;
+                padding: 10px 10px 16px 10px;
+                gap: 8px;
             }
 
             .top-bar {
                 flex-direction: column;
                 justify-content: center;
                 text-align: center;
-                gap: 10px;
+                gap: 6px;
             }
 
             .brand-title {
@@ -1129,6 +1404,7 @@
                 width: 100%;
                 justify-content: center;
                 flex-wrap: wrap;
+                gap: 6px;
             }
 
             .create-row {
@@ -1136,24 +1412,102 @@
             }
 
             .game-card {
-                min-height: 360px;
-                max-height: 60dvh;
+                min-height: 295px;
+                max-height: 57dvh;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+                gap: 5px;
+            }
+
+            .brand-title {
+                width: 100%;
+                text-align: center;
+            }
+
+            .top-bar-actions {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .create-row {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card {
+                min-height: 250px;
+                max-height: 52dvh;
+            }
+
+            .app-shell.options-collapsed {
+                padding: 10px 8px 14px 8px;
+                gap: 8px;
+            }
+
+            .app-shell.options-collapsed .brand-title {
+                font-size: 1.85rem;
+            }
+
+            .app-shell.options-collapsed .brand-logo {
+                width: 28px;
+                height: 28px;
+            }
+
+            .app-shell.options-collapsed .stage {
+                min-height: 0;
+            }
+
+            .app-shell.options-collapsed .game-card {
+                max-width: 100%;
+                min-height: 64dvh;
+                max-height: 73dvh;
+                border-radius: 22px;
+            }
+
+            .app-shell.options-collapsed .card-prompt {
+                font-size: clamp(1.22rem, 4.6vw, 1.48rem);
+                line-height: 1.55;
+            }
+
+            .app-shell.options-collapsed .card-photo,
+            .app-shell.options-collapsed .card-video {
+                max-height: 34dvh;
+            }
+
+            .app-shell.options-collapsed .bottom-controls {
+                max-width: 100%;
+                gap: 6px;
+            }
+
+            .app-shell.options-collapsed .controls-row .btn {
+                min-height: 46px;
+                font-size: 0.98rem;
+            }
+
+            .app-shell.options-collapsed .timer-dock {
+                max-width: 100%;
+                padding: 8px 10px;
             }
 
             .editor-sheet {
-                width: 95vw;
-                height: 90dvh;
+                width: 96vw;
+                height: 92dvh;
             }
 
             .editor-header,
             .editor-scroll,
             .editor-footer {
-                padding-left: 14px;
-                padding-right: 14px;
+                padding-left: 12px;
+                padding-right: 12px;
             }
 
             .create-box {
-                padding: 14px;
+                padding: 12px;
             }
         }
 
@@ -1174,33 +1528,54 @@
 <body>
     <div class="app-shell">
         <header class="top-bar">
-            <h1 class="brand-title">Soirée intime</h1>
+            <h1 class="brand-title">
+                <svg class="brand-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="18" cy="18" r="16.5" stroke="currentColor" stroke-width="1.3" stroke-opacity="0.45" fill="rgba(240, 168, 196, 0.12)" />
+                    <path d="M18 26.2C18 26.2 9.5 20.8 9.5 14.5C9.5 11.7 11.7 9.8 14.2 9.8C15.9 9.8 17.3 10.7 18 12.1C18.7 10.7 20.1 9.8 21.8 9.8C24.3 9.8 26.5 11.7 26.5 14.5C26.5 20.8 18 26.2 18 26.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+                    <path d="M26.8 8.2L27.5 10.1L29.4 10.8L27.5 11.5L26.8 13.4L26.1 11.5L24.2 10.8L26.1 10.1L26.8 8.2Z" fill="currentColor" />
+                </svg>
+                <span>Soirée intime</span>
+            </h1>
             <div class="top-bar-actions">
-                <button type="button" class="btn btn-ambient" id="ambientToggleBtn" aria-pressed="false" aria-label="Activer ou couper la musique d'ambiance douce">
+                <button type="button" class="btn btn-ambient" id="ambientToggleBtn" aria-pressed="false" aria-label="Activer ou couper la musique d'ambiance">
                     ♪ Ambiance : Off
                 </button>
+                <select class="ambient-style-select" id="ambientStyleSelect" aria-label="Style de musique d'ambiance">
+                    <option value="jazz" selected>Jazz feutré</option>
+                    <option value="soft">Nappe douce</option>
+                </select>
                 <button type="button" class="btn btn-restart" id="restartGameBtn" aria-label="Recommencer la partie au début">
                     Recommencer
                 </button>
                 <button type="button" class="btn btn-deck" id="openEditorBtn" aria-label="Ouvrir l'éditeur de cartes">
+                    <svg class="btn-deck-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <rect x="4" y="6" width="11" height="14" rx="2.2" stroke="currentColor" stroke-width="1.7" fill="rgba(240, 168, 196, 0.14)" />
+                        <rect x="9" y="3.5" width="11" height="14" rx="2.2" stroke="currentColor" stroke-width="1.7" fill="var(--card-surface)" />
+                        <path d="M14.5 8.2L15.1 9.8L16.7 10.4L15.1 11L14.5 12.6L13.9 11L12.3 10.4L13.9 9.8L14.5 8.2Z" fill="currentColor" />
+                    </svg>
                     <span id="deckCountText">Cartes (0)</span>
                 </button>
             </div>
         </header>
 
-        <section class="controls-stack" style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-            <nav class="mode-bar" aria-label="Choisir le mode de jeu">
-                <button type="button" class="mode-pill is-active" data-mode="free">Libre</button>
-                <button type="button" class="mode-pill" data-mode="alternating">Alterné (Elle / Lui)</button>
-                <button type="button" class="mode-pill" data-mode="random-turn">Aléatoire (Elle ou Lui)</button>
-            </nav>
+        <section class="controls-stack" id="controlsStack">
+            <div class="controls-stack-body" id="controlsStackBody">
+                <nav class="mode-bar" aria-label="Choisir le mode de jeu">
+                    <button type="button" class="mode-pill is-active" data-mode="free">Libre</button>
+                    <button type="button" class="mode-pill" data-mode="alternating">Alterné (Elle / Lui)</button>
+                    <button type="button" class="mode-pill" data-mode="random-turn">Aléatoire (Elle ou Lui)</button>
+                </nav>
 
-            <nav class="filter-bar" id="freeFilterBar" aria-label="Filtrer les cartes à piocher">
-                <button type="button" class="filter-pill is-active" data-filter="all">Tous (0)</button>
-                <button type="button" class="filter-pill" data-filter="she">Elle (0)</button>
-                <button type="button" class="filter-pill" data-filter="he">Lui (0)</button>
-                <button type="button" class="filter-pill" data-filter="both">Les deux (0)</button>
-            </nav>
+                <nav class="filter-bar" id="freeFilterBar" aria-label="Filtrer les cartes à piocher">
+                    <button type="button" class="filter-pill is-active" data-filter="all">Tous (0)</button>
+                    <button type="button" class="filter-pill" data-filter="she">Elle (0)</button>
+                    <button type="button" class="filter-pill" data-filter="he">Lui (0)</button>
+                    <button type="button" class="filter-pill" data-filter="both">Les deux (0)</button>
+                </nav>
+            </div>
+            <button type="button" class="btn-toggle-options" id="toggleOptionsBtn" aria-expanded="true" aria-controls="controlsStackBody">
+                <span id="toggleOptionsLabel">▴ Réduire les options</span>
+            </button>
         </section>
 
         <main class="stage">
@@ -1688,7 +2063,7 @@
                                         return;
                                     }
 
-                                    ctx.fillStyle = "#1b1116";
+                                    ctx.fillStyle = "#24121c";
                                     ctx.fillRect(0, 0, w, h);
                                     ctx.drawImage(image, 0, 0, w, h);
 
@@ -1711,12 +2086,16 @@
                 textarea.style.height = "auto";
                 textarea.style.height = Math.max(82, textarea.scrollHeight) + "px";
             }
-
-            // Références DOM
+            <!-- Références DOM -->
             const deckCountText = document.getElementById("deckCountText");
+            const topBarActions = document.querySelector(".top-bar-actions");
             const ambientToggleBtn = document.getElementById("ambientToggleBtn");
+            const ambientStyleSelect = document.getElementById("ambientStyleSelect");
             const restartGameBtn = document.getElementById("restartGameBtn");
             const openEditorBtn = document.getElementById("openEditorBtn");
+            const controlsStack = document.getElementById("controlsStack");
+            const toggleOptionsBtn = document.getElementById("toggleOptionsBtn");
+            const toggleOptionsLabel = document.getElementById("toggleOptionsLabel");
             const modePills = Array.from(document.querySelectorAll(".mode-pill"));
             const freeFilterBar = document.getElementById("freeFilterBar");
             const filterPills = Array.from(document.querySelectorAll(".filter-pill"));
@@ -1777,6 +2156,7 @@
             // État du jeu
             let cards = loadInitialDeck();
             let gameMode = "free";
+            let optionsCollapsed = false;
             let activeFilter = "all";
             let currentTurn = "she";
             let activeTurnForCard = null;
@@ -1799,9 +2179,10 @@
             let timerIntervalId = null;
             let sharedAudioCtx = null;
 
-            // Générateur de musique d'ambiance douce (nappe harmonique feutrée via Web Audio)
+            // Générateur de musique d'ambiance (Jazz feutré & Nappe douce via Web Audio)
             let ambientEngine = null;
             let isAmbientPlaying = false;
+            let ambientStyle = "jazz";
 
             function ensureAudioContext() {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1819,28 +2200,157 @@
                 if (!ambientToggleBtn) return;
                 ambientToggleBtn.classList.toggle("is-playing", isAmbientPlaying);
                 ambientToggleBtn.setAttribute("aria-pressed", isAmbientPlaying ? "true" : "false");
-                ambientToggleBtn.textContent = isAmbientPlaying ? "♪ Ambiance : On" : "♪ Ambiance : Off";
+                const styleName = ambientStyle === "jazz" ? "Jazz" : "Doux";
+                ambientToggleBtn.textContent = isAmbientPlaying ? "♪ " + styleName + " : On" : "♪ " + styleName + " : Off";
             }
 
-            function startAmbientMusic() {
-                const ctx = ensureAudioContext();
-                if (!ctx) {
-                    setStageStatus("Audio non pris en charge par ce navigateur.");
-                    return;
+            function triggerElectricPianoChord(ctx, bus, freqs, startTime, durationSec) {
+                freqs.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const overtone = ctx.createOscillator();
+                    const env = ctx.createGain();
+                    const overtoneGain = ctx.createGain();
+
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    osc.detune.setValueAtTime((idx - 1.5) * 3.5, startTime);
+
+                    overtone.type = "triangle";
+                    overtone.frequency.setValueAtTime(freq * 2, startTime);
+                    overtoneGain.gain.setValueAtTime(0.045, startTime);
+
+                    const peak = idx === 0 ? 0.085 : 0.065;
+                    env.gain.setValueAtTime(0.0001, startTime);
+                    env.gain.linearRampToValueAtTime(peak, startTime + 0.025);
+                    env.gain.exponentialRampToValueAtTime(peak * 0.45, startTime + durationSec * 0.45);
+                    env.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSec);
+
+                    osc.connect(env);
+                    overtone.connect(overtoneGain);
+                    overtoneGain.connect(env);
+                    env.connect(bus);
+
+                    osc.start(startTime);
+                    overtone.start(startTime);
+                    osc.stop(startTime + durationSec + 0.05);
+                    overtone.stop(startTime + durationSec + 0.05);
+                });
+            }
+
+            function triggerWalkingBassNote(ctx, bus, freq, startTime, durationSec) {
+                const osc = ctx.createOscillator();
+                const env = ctx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(freq, startTime);
+
+                env.gain.setValueAtTime(0.0001, startTime);
+                env.gain.linearRampToValueAtTime(0.14, startTime + 0.03);
+                env.gain.exponentialRampToValueAtTime(0.05, startTime + durationSec * 0.7);
+                env.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSec);
+
+                osc.connect(env);
+                env.connect(bus);
+                osc.start(startTime);
+                osc.stop(startTime + durationSec + 0.05);
+            }
+
+            function triggerSoftRideTap(ctx, bus, startTime, isAccent) {
+                const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * 0.045));
+                const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
                 }
-                if (isAmbientPlaying && ambientEngine) return;
 
+                const src = ctx.createBufferSource();
+                src.buffer = noiseBuffer;
+
+                const bandpass = ctx.createBiquadFilter();
+                bandpass.type = "bandpass";
+                bandpass.frequency.setValueAtTime(5400, startTime);
+                bandpass.Q.setValueAtTime(3.2, startTime);
+
+                const gain = ctx.createGain();
+                const peak = isAccent ? 0.022 : 0.012;
+                gain.gain.setValueAtTime(0.0001, startTime);
+                gain.gain.linearRampToValueAtTime(peak, startTime + 0.004);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.042);
+
+                src.connect(bandpass);
+                bandpass.connect(gain);
+                gain.connect(bus);
+                src.start(startTime);
+                src.stop(startTime + 0.05);
+            }
+
+            function startJazzEngine(ctx, masterGain) {
                 const now = ctx.currentTime;
-                const masterGain = ctx.createGain();
-                masterGain.gain.setValueAtTime(0.0001, now);
-                masterGain.gain.exponentialRampToValueAtTime(0.11, now + 2.2);
+                const jazzFilter = ctx.createBiquadFilter();
+                jazzFilter.type = "lowpass";
+                jazzFilter.frequency.setValueAtTime(1450, now);
+                jazzFilter.Q.setValueAtTime(0.65, now);
+                jazzFilter.connect(masterGain);
 
+                // Progression jazz chaleureuse en Fa majeur / Ré mineur (II - V - I - VI)
+                const bars = [
+                    { chord: [174.61, 220.0, 261.63, 329.63, 392.0], bass: [87.31, 110.0, 130.81, 146.83] },   // Fmaj9
+                    { chord: [146.83, 220.0, 261.63, 329.63, 392.0], bass: [73.42, 87.31, 110.0, 130.81] },    // Dm9
+                    { chord: [130.81, 196.0, 246.94, 293.66, 349.23], bass: [65.41, 73.42, 98.0, 123.47] },    // Gm9 / C13
+                    { chord: [164.81, 196.0, 246.94, 293.66, 392.0], bass: [82.41, 98.0, 123.47, 130.81] }     // Em7 -> A7alt
+                ];
+
+                const beatSec = 0.68; // Tempo lent et feutré (~88 BPM)
+                let stepInBar = 0;
+                let barIndex = 0;
+
+                const playJazzStep = () => {
+                    if (!sharedAudioCtx || !isAmbientPlaying || ambientStyle !== "jazz") return;
+                    const t = sharedAudioCtx.currentTime;
+                    const currentBar = bars[barIndex % bars.length];
+
+                    if (stepInBar === 0) {
+                        triggerElectricPianoChord(sharedAudioCtx, jazzFilter, currentBar.chord, t, beatSec * 3.8);
+                    } else if (stepInBar === 2) {
+                        // Petite relance d'accord douce sur le 3e temps
+                        triggerElectricPianoChord(sharedAudioCtx, jazzFilter, currentBar.chord.slice(1), t + 0.04, beatSec * 1.8);
+                    }
+
+                    const bassFreq = currentBar.bass[stepInBar % currentBar.bass.length];
+                    triggerWalkingBassNote(sharedAudioCtx, jazzFilter, bassFreq, t, beatSec * 0.92);
+
+                    // Cymbale ride légère avec toucher swing
+                    triggerSoftRideTap(sharedAudioCtx, jazzFilter, t, stepInBar === 0 || stepInBar === 2);
+                    triggerSoftRideTap(sharedAudioCtx, jazzFilter, t + beatSec * 0.62, false);
+
+                    stepInBar += 1;
+                    if (stepInBar >= 4) {
+                        stepInBar = 0;
+                        barIndex += 1;
+                    }
+                };
+
+                playJazzStep();
+                const stepTimer = setInterval(playJazzStep, beatSec * 1000);
+
+                return {
+                    cleanup: () => {
+                        clearInterval(stepTimer);
+                        try {
+                            jazzFilter.disconnect();
+                        } catch (_e) {
+                            // Ignorer
+                        }
+                    }
+                };
+            }
+
+            function startSoftPadEngine(ctx, masterGain) {
+                const now = ctx.currentTime;
                 const lowpass = ctx.createBiquadFilter();
                 lowpass.type = "lowpass";
                 lowpass.frequency.setValueAtTime(520, now);
                 lowpass.Q.setValueAtTime(0.8, now);
 
-                // Modulation lente du filtre pour un effet de respiration velouté
                 const lfo = ctx.createOscillator();
                 const lfoGain = ctx.createGain();
                 lfo.type = "sine";
@@ -1851,9 +2361,7 @@
                 lfo.start(now);
 
                 lowpass.connect(masterGain);
-                masterGain.connect(ctx.destination);
 
-                // Accords doux (Ré mineur 9 -> Sib majeur 7 -> Fa majeur 9 -> Do sus2)
                 const chordProgression = [
                     [146.83, 220.0, 261.63, 329.63],
                     [116.54, 174.61, 220.0, 293.66],
@@ -1876,7 +2384,7 @@
                 });
 
                 const chordTimer = setInterval(() => {
-                    if (!sharedAudioCtx || !isAmbientPlaying) return;
+                    if (!sharedAudioCtx || !isAmbientPlaying || ambientStyle !== "soft") return;
                     chordIndex = (chordIndex + 1) % chordProgression.length;
                     const nextChord = chordProgression[chordIndex];
                     const t = sharedAudioCtx.currentTime;
@@ -1887,10 +2395,48 @@
                     });
                 }, 8000);
 
-                ambientEngine = { masterGain, lfo, voices, chordTimer };
+                return {
+                    cleanup: () => {
+                        clearInterval(chordTimer);
+                        try {
+                            lfo.stop();
+                            voices.forEach((osc) => osc.stop());
+                            lowpass.disconnect();
+                        } catch (_e) {
+                            // Ignorer
+                        }
+                    }
+                };
+            }
+
+            function startAmbientMusic() {
+                const ctx = ensureAudioContext();
+                if (!ctx) {
+                    setStageStatus("Audio non pris en charge par ce navigateur.");
+                    return;
+                }
+                if (isAmbientPlaying && ambientEngine) {
+                    stopAmbientMusic(true);
+                }
+
+                const now = ctx.currentTime;
+                const masterGain = ctx.createGain();
+                masterGain.gain.setValueAtTime(0.0001, now);
+                masterGain.gain.exponentialRampToValueAtTime(ambientStyle === "jazz" ? 0.22 : 0.11, now + 1.4);
+                masterGain.connect(ctx.destination);
+
+                const subEngine = ambientStyle === "jazz"
+                    ? startJazzEngine(ctx, masterGain)
+                    : startSoftPadEngine(ctx, masterGain);
+
+                ambientEngine = { masterGain, cleanup: subEngine.cleanup };
                 isAmbientPlaying = true;
                 updateAmbientButtonUI();
-                setStageStatus("Musique d'ambiance douce activée");
+                setStageStatus(
+                    ambientStyle === "jazz"
+                        ? "Ambiance jazz feutrée activée"
+                        : "Nappe musicale douce activée"
+                );
             }
 
             function stopAmbientMusic(silent) {
@@ -1903,26 +2449,26 @@
                 ambientEngine = null;
                 isAmbientPlaying = false;
                 updateAmbientButtonUI();
-                clearInterval(engine.chordTimer);
 
                 if (sharedAudioCtx) {
                     const t = sharedAudioCtx.currentTime;
                     try {
                         engine.masterGain.gain.cancelScheduledValues(t);
                         engine.masterGain.gain.setValueAtTime(Math.max(0.0001, engine.masterGain.gain.value), t);
-                        engine.masterGain.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+                        engine.masterGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
                     } catch (_e) {
                         // Ignorer
                     }
                     setTimeout(() => {
+                        engine.cleanup();
                         try {
-                            engine.lfo.stop();
-                            engine.voices.forEach((osc) => osc.stop());
                             engine.masterGain.disconnect();
                         } catch (_e) {
                             // Ignorer
                         }
-                    }, 1300);
+                    }, 850);
+                } else {
+                    engine.cleanup();
                 }
 
                 if (!silent) {
@@ -1935,6 +2481,16 @@
                     if (isAmbientPlaying) {
                         stopAmbientMusic(false);
                     } else {
+                        startAmbientMusic();
+                    }
+                });
+            }
+
+            if (ambientStyleSelect) {
+                ambientStyleSelect.addEventListener("change", () => {
+                    ambientStyle = ambientStyleSelect.value === "soft" ? "soft" : "jazz";
+                    updateAmbientButtonUI();
+                    if (isAmbientPlaying) {
                         startAmbientMusic();
                     }
                 });
@@ -2521,8 +3077,40 @@
             modePills.forEach((pill) => {
                 pill.addEventListener("click", () => {
                     setGameMode(pill.getAttribute("data-mode"));
+                    setOptionsCollapsed(true);
                 });
             });
+
+            function setOptionsCollapsed(collapsed) {
+                optionsCollapsed = Boolean(collapsed);
+                const appShell = document.querySelector(".app-shell");
+                if (appShell) {
+                    appShell.classList.toggle("options-collapsed", optionsCollapsed);
+                }
+                if (controlsStack) {
+                    controlsStack.classList.toggle("is-collapsed", optionsCollapsed);
+                }
+                if (topBarActions) {
+                    topBarActions.classList.toggle("is-hidden", optionsCollapsed);
+                }
+                if (toggleOptionsBtn) {
+                    toggleOptionsBtn.setAttribute("aria-expanded", optionsCollapsed ? "false" : "true");
+                }
+                if (toggleOptionsLabel) {
+                    const modeSummary = gameMode === "alternating"
+                        ? "Alterné"
+                        : (gameMode === "random-turn" ? "Aléatoire" : "Libre • " + getFilterLabel(activeFilter));
+                    toggleOptionsLabel.textContent = optionsCollapsed
+                        ? "▾ Options (" + modeSummary + ")"
+                        : "▴ Réduire les options";
+                }
+            }
+
+            if (toggleOptionsBtn) {
+                toggleOptionsBtn.addEventListener("click", () => {
+                    setOptionsCollapsed(!optionsCollapsed);
+                });
+            }
 
             function setActiveFilter(nextFilter) {
                 const normalized = VALID_FILTERS.includes(nextFilter) ? nextFilter : "all";
@@ -3767,6 +4355,7 @@
             setImportMode("merge");
             setActiveFilter("all");
             setGameMode("free");
+            setOptionsCollapsed(false);
             refreshCounters();
             rebuildBag();
             rebuildTurnBag("she");
