@@ -8,22 +8,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        /* Palette sombre rose et or rosé */
+        /* Palette velours rose et or rosé */
         :root {
-            --bg-top: #220d18;
-            --bg-bottom: #10070c;
-            --card-surface: #24121c;
-            --card-elevated: #301625;
-            --gold: #f0a8c4;
-            --gold-bright: #ffc4db;
-            --gold-line: rgba(240, 168, 196, 0.36);
-            --gold-soft: rgba(240, 168, 196, 0.15);
-            --text-primary: #fff3f8;
-            --text-secondary: #d4b2c1;
-            --danger-bg: rgba(145, 25, 62, 0.44);
-            --danger-border: rgba(255, 158, 188, 0.54);
+            --bg-top: #260d1a;
+            --bg-bottom: #11060c;
+            --card-surface: #22101a;
+            --card-elevated: #311525;
+            --rose-accent: #f48fb1;
+            --gold: #f3b5c8;
+            --gold-bright: #ffd1e0;
+            --gold-line: rgba(244, 143, 177, 0.36);
+            --gold-soft: rgba(244, 143, 177, 0.15);
+            --text-primary: #fff5f8;
+            --text-secondary: #d7b2c2;
+            --danger-bg: rgba(145, 22, 58, 0.45);
+            --danger-border: rgba(251, 148, 178, 0.55);
             --danger-text: #ffc2d4;
-            --radius-card: 22px;
+            --radius-card: 24px;
             --radius-panel: 20px;
             --radius-control: 12px;
             --radius-small: 8px;
@@ -48,16 +49,15 @@
             overflow-x: hidden;
         }
 
-        /* Grille plein écran stable et aérée */
         .app-shell {
             min-height: 100dvh;
             width: 100%;
-            max-width: 880px;
+            max-width: 980px;
             margin: 0 auto;
-            padding: 14px 14px 20px 14px;
+            padding: 18px 16px 24px 16px;
             display: grid;
             grid-template-rows: auto auto 1fr auto;
-            gap: 12px;
+            gap: 14px;
             align-items: center;
         }
 
@@ -68,7 +68,30 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .brand-row {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 3px 10px rgba(244, 143, 177, 0.35));
+        }
+
+        .brand-title {
+            font-family: "Dancing Script", "Brush Script MT", cursive;
+            font-size: clamp(2.25rem, 6vw, 3.1rem);
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            color: var(--gold);
+            text-shadow: 0 4px 18px rgba(244, 143, 177, 0.28);
         }
 
         .top-bar-actions {
@@ -77,48 +100,21 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .top-bar-actions.is-hidden {
-            display: none;
-        }
-
-        .brand-title {
-            width: auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-            text-align: center;
-            font-family: "Dancing Script", "Brush Script MT", cursive;
-            font-size: clamp(1.95rem, 5vw, 2.65rem);
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            color: var(--gold);
-            text-shadow: 0 3px 16px rgba(240, 168, 196, 0.25);
-        }
-
-        .brand-logo {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
-            filter: drop-shadow(0 2px 8px rgba(240, 168, 196, 0.32));
         }
 
         .btn {
             font-family: inherit;
-            font-size: 0.92rem;
+            font-size: 0.96rem;
             font-weight: 600;
             line-height: 1.2;
-            min-height: 42px;
-            padding: 8px 14px;
-            border-radius: var(--radius-small);
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: var(--radius-control);
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 7px;
+            gap: 8px;
             transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.1s ease;
             user-select: none;
         }
@@ -132,13 +128,6 @@
             color: var(--gold);
             border: 1px solid var(--gold-line);
             white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .btn-deck-icon {
-            width: 17px;
-            height: 17px;
-            flex-shrink: 0;
         }
 
         .btn-deck:hover {
@@ -149,9 +138,8 @@
         .btn-restart {
             background: var(--card-surface);
             color: var(--text-secondary);
-            border: 1px solid rgba(212, 175, 55, 0.28);
+            border: 1px solid rgba(244, 143, 177, 0.28);
             white-space: nowrap;
-            flex-shrink: 0;
         }
 
         .btn-restart:hover {
@@ -160,123 +148,112 @@
             background: var(--card-elevated);
         }
 
-        .btn-ambient {
+        .btn-audio {
             background: var(--card-surface);
             color: var(--text-secondary);
-            border: 1px solid rgba(212, 175, 55, 0.28);
+            border: 1px solid rgba(244, 143, 177, 0.28);
             white-space: nowrap;
-            flex-shrink: 0;
         }
 
-        .btn-ambient:hover {
+        .btn-audio.is-playing {
+            background: var(--gold-soft);
+            color: var(--gold-bright);
             border-color: var(--gold);
+        }
+
+        .audio-style-select {
+            width: auto;
+            min-height: 44px;
+            padding: 8px 11px;
+            border-radius: var(--radius-control);
+            border: 1px solid rgba(244, 143, 177, 0.28);
+            background: var(--card-surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .options-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .options-panel {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .options-panel.is-collapsed {
+            display: none;
+        }
+
+        .options-toggle-btn {
+            min-height: 34px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(244, 143, 177, 0.3);
+            background: rgba(34, 16, 26, 0.82);
             color: var(--gold);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .options-toggle-btn:hover {
+            border-color: var(--gold);
             background: var(--card-elevated);
         }
 
-        .btn-ambient.is-playing {
-            background: var(--gold-soft);
-            color: var(--gold);
-            border-color: var(--gold);
-            box-shadow: 0 0 18px rgba(240, 168, 196, 0.22);
+        .filter-bar,
+        .mode-bar {
+            width: 100%;
+            max-width: 540px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 4px;
+            border-radius: var(--radius-control);
+            background: rgba(34, 16, 26, 0.78);
+            border: 1px solid rgba(244, 143, 177, 0.24);
         }
 
-        .ambient-style-select {
-            min-height: 42px;
-            padding: 6px 10px;
+        .filter-pill,
+        .mode-pill {
+            flex: 1 1 auto;
+            min-height: 38px;
+            padding: 6px 12px;
             border-radius: var(--radius-small);
-            border: 1px solid rgba(212, 175, 55, 0.32);
-            background: var(--card-surface);
-            color: var(--text-primary);
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
             font-family: inherit;
             font-size: 0.86rem;
             font-weight: 600;
             cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        .ambient-style-select:hover,
-        .ambient-style-select:focus {
-            border-color: var(--gold);
-            color: var(--gold);
-            outline: none;
-        }
-
-        /* Sélecteur discret de filtre de tirage sur l'écran principal */
-        .filter-bar {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding: 4px;
-            border-radius: var(--radius-small);
-            background: rgba(27, 17, 22, 0.72);
-            border: 1px solid rgba(212, 175, 55, 0.22);
-        }
-
-        .filter-pill {
-            flex: 1 1 auto;
-            min-height: 34px;
-            padding: 5px 10px;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            background: transparent;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
             transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
         }
 
-        .filter-pill:hover {
-            color: var(--text-primary);
-            border-color: rgba(212, 175, 55, 0.25);
-        }
-
-        .filter-pill.is-active {
-            background: var(--gold-soft);
-            color: var(--gold);
-            border-color: var(--gold-line);
-        }
-
-        .mode-bar {
-            width: 100%;
-            max-width: 520px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding: 4px;
-            border-radius: var(--radius-small);
-            background: rgba(27, 17, 22, 0.72);
-            border: 1px solid rgba(212, 175, 55, 0.22);
-        }
-
-        .mode-pill {
-            flex: 1 1 auto;
-            min-height: 34px;
-            padding: 5px 10px;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            background: transparent;
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-
+        .filter-pill:hover,
         .mode-pill:hover {
             color: var(--text-primary);
-            border-color: rgba(212, 175, 55, 0.25);
+            border-color: rgba(244, 143, 177, 0.25);
         }
 
+        .filter-pill.is-active,
         .mode-pill.is-active {
             background: var(--gold-soft);
             color: var(--gold);
@@ -287,61 +264,18 @@
             display: none;
         }
 
-        .controls-stack {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .controls-stack-body {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .controls-stack.is-collapsed .controls-stack-body {
-            display: none;
-        }
-
-        .btn-toggle-options {
-            min-height: 30px;
-            padding: 4px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(240, 168, 196, 0.28);
-            background: rgba(27, 17, 22, 0.72);
-            color: var(--text-secondary);
-            font-family: inherit;
-            font-size: 0.78rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .btn-toggle-options:hover {
-            color: var(--gold);
-            border-color: var(--gold-line);
-            background: var(--card-elevated);
-        }
-
         .turn-indicator {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 2px 8px;
+            padding: 4px 11px;
             border-radius: 999px;
-            border: 1px solid rgba(212, 175, 55, 0.28);
-            background: rgba(11, 7, 9, 0.55);
+            border: 1px solid rgba(244, 143, 177, 0.3);
+            background: rgba(17, 6, 12, 0.6);
             color: var(--text-secondary);
-            font-size: 0.7rem;
+            font-size: 0.78rem;
             font-weight: 600;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.04em;
         }
 
         .turn-indicator.is-hidden {
@@ -351,33 +285,26 @@
         .stage {
             width: 100%;
             height: 100%;
-            min-height: 310px;
+            min-height: 360px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Carte centrale unique avec deux faces alternant via .is-active */
         .game-card {
             width: 100%;
-            max-width: 450px;
-            min-height: 340px;
-            max-height: 60dvh;
+            max-width: 500px;
+            min-height: 430px;
+            max-height: 66dvh;
             background: linear-gradient(160deg, var(--card-elevated) 0%, var(--card-surface) 100%);
             border: 1px solid var(--gold-line);
-            border-radius: 20px;
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.68);
+            border-radius: var(--radius-card);
+            box-shadow: 0 22px 54px rgba(0, 0, 0, 0.72);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
             transition: max-width 0.2s ease, min-height 0.2s ease, max-height 0.2s ease;
-        }
-
-        .app-shell.options-collapsed .game-card {
-            max-width: 520px;
-            min-height: 380px;
-            max-height: 67dvh;
         }
 
         .card-face {
@@ -395,34 +322,29 @@
         }
 
         @keyframes fadeFace {
-            from {
-                opacity: 0.35;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0.35; }
+            to { opacity: 1; }
         }
 
-        /* Face dos (avant révélation) */
         .card-back {
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 18px 16px;
-            gap: 10px;
+            padding: 32px 24px;
+            gap: 16px;
             cursor: pointer;
-            background-image: radial-gradient(circle at 50% 35%, rgba(240, 168, 196, 0.14), transparent 65%);
+            background-image: radial-gradient(circle at 50% 35%, rgba(244, 143, 177, 0.16), transparent 65%);
         }
 
         .card-emblem {
-            width: 42px;
-            height: 42px;
+            width: 62px;
+            height: 62px;
             border-radius: 999px;
             border: 1px solid var(--gold-line);
             background: var(--gold-soft);
             color: var(--gold);
             font-family: Georgia, "Times New Roman", serif;
-            font-size: 1.15rem;
+            font-size: 1.6rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -430,190 +352,7 @@
 
         .card-back-heading {
             font-family: "Dancing Script", "Brush Script MT", cursive;
-            font-size: 1.55rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
-            color: var(--gold);
-        }
-
-        .target-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 3px 9px;
-            border-radius: 999px;
-            border: 1px solid var(--gold-line);
-            background: var(--gold-soft);
-            color: var(--gold);
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .target-badge.is-hidden {
-            display: none;
-        }
-
-        .card-back-tip {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            max-width: 240px;
-            line-height: 1.35;
-        }
-
-        /* Face révélée (verso de la carte) */
-        .card-front {
-            padding: 12px 14px;
-            gap: 7px;
-        }
-
-        .card-front-meta {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 20px;
-            flex-shrink: 0;
-        }
-
-        .gold-rule {
-            width: 52px;
-            height: 1px;
-            margin: 0 auto;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            flex-shrink: 0;
-        }
-
-        .card-scroll-body {
-            flex: 1 1 auto;
-            min-height: 0;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 2px;
-        }
-
-        .card-photo {
-            display: none;
-            width: 100%;
-            max-width: 100%;
-            max-height: 190px;
-            object-fit: contain;
-            border-radius: var(--radius-small);
-            border: 1px solid var(--gold-line);
-            background: rgba(11, 7, 9, 0.55);
-            flex-shrink: 0;
-        }
-
-        .card-photo.is-visible {
-            display: block;
-        }
-
-        .card-video {
-            display: none;
-            width: 100%;
-            max-width: 100%;
-            max-height: 190px;
-            border-radius: var(--radius-small);
-            border: 1px solid var(--gold-line);
-            background: #080507;
-            flex-shrink: 0;
-        }
-
-        .card-video.is-visible {
-            display: block;
-        }
-
-        .btn-video-fullscreen {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            min-height: 30px;
-            padding: 4px 10px;
-            border-radius: var(--radius-small);
-            border: 1px solid var(--gold-line);
-            background: var(--card-surface);
-            color: var(--gold);
-            font-family: inherit;
-            font-size: 0.76rem;
-            font-weight: 600;
-            cursor: pointer;
-            flex-shrink: 0;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .btn-video-fullscreen:hover {
-            border-color: var(--gold);
-            background: var(--card-elevated);
-        }
-
-        .btn-video-fullscreen.is-visible {
-            display: inline-flex;
-        }
-
-        .card-prompt {
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(1.1rem, 3vw, 1.32rem);
-            line-height: 1.5;
-            color: var(--text-primary);
-            text-align: center;
-            word-break: break-word;
-            width: 100%;
-        }
-
-        .card-prompt.is-hidden {
-            display: none;
-        }
-
-        /* Zone de contrôle sous la carte */
-        .bottom-controls {
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .controls-row {
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .controls-row .btn {
-            flex: 0 1 190px;
-            min-width: 135px;
-        }
-
-        .card-emblem {
-            width: 58px;
-            height: 58px;
-            border-radius: 999px;
-            border: 1px solid var(--gold-line);
-            background: var(--gold-soft);
-            color: var(--gold);
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .card-back-heading {
-            font-family: "Dancing Script", "Brush Script MT", cursive;
-            font-size: 2rem;
+            font-size: 2.15rem;
             font-weight: 700;
             letter-spacing: 0.03em;
             color: var(--gold);
@@ -628,7 +367,7 @@
             border: 1px solid var(--gold-line);
             background: var(--gold-soft);
             color: var(--gold);
-            font-size: 0.76rem;
+            font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.06em;
             text-transform: uppercase;
@@ -639,13 +378,12 @@
         }
 
         .card-back-tip {
-            font-size: 0.92rem;
+            font-size: 0.96rem;
             color: var(--text-secondary);
-            max-width: 280px;
+            max-width: 300px;
             line-height: 1.45;
         }
 
-        /* Face révélée (verso de la carte) */
         .card-front {
             padding: 18px;
             gap: 10px;
@@ -656,12 +394,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
             min-height: 24px;
             flex-shrink: 0;
         }
 
         .gold-rule {
-            width: 68px;
+            width: 74px;
             height: 1px;
             margin: 0 auto;
             background: linear-gradient(90deg, transparent, var(--gold), transparent);
@@ -678,18 +418,17 @@
             align-items: center;
             justify-content: center;
             gap: 14px;
-            padding: 4px 4px;
+            padding: 4px 6px;
         }
 
         .card-photo {
             display: none;
             width: 100%;
-            max-width: 100%;
-            max-height: 260px;
+            max-height: 270px;
             object-fit: contain;
             border-radius: var(--radius-control);
             border: 1px solid var(--gold-line);
-            background: rgba(11, 7, 9, 0.55);
+            background: rgba(17, 6, 12, 0.55);
             flex-shrink: 0;
         }
 
@@ -700,11 +439,10 @@
         .card-video {
             display: none;
             width: 100%;
-            max-width: 100%;
-            max-height: 260px;
+            max-height: 270px;
             border-radius: var(--radius-control);
             border: 1px solid var(--gold-line);
-            background: #080507;
+            background: #0c0408;
             flex-shrink: 0;
         }
 
@@ -728,12 +466,6 @@
             font-weight: 600;
             cursor: pointer;
             flex-shrink: 0;
-            transition: background-color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .btn-video-fullscreen:hover {
-            border-color: var(--gold);
-            background: var(--card-elevated);
         }
 
         .btn-video-fullscreen.is-visible {
@@ -742,8 +474,8 @@
 
         .card-prompt {
             font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(1.08rem, 3.2vw, 1.34rem);
-            line-height: 1.52;
+            font-size: clamp(1.15rem, 3.5vw, 1.44rem);
+            line-height: 1.54;
             color: var(--text-primary);
             text-align: center;
             word-break: break-word;
@@ -754,10 +486,9 @@
             display: none;
         }
 
-        /* Zone de contrôle sous la carte */
         .bottom-controls {
             width: 100%;
-            max-width: 460px;
+            max-width: 500px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
@@ -776,8 +507,8 @@
         }
 
         .controls-row .btn {
-            flex: 0 1 195px;
-            min-width: 145px;
+            flex: 1 1 180px;
+            min-width: 140px;
         }
 
         .btn-flip {
@@ -792,9 +523,9 @@
         }
 
         .btn-next {
-            background: var(--gold);
-            color: #1c0913;
-            border: 1px solid var(--gold);
+            background: var(--rose-accent);
+            color: #1c0812;
+            border: 1px solid var(--rose-accent);
             font-weight: 700;
         }
 
@@ -804,52 +535,45 @@
         }
 
         .status-caption {
-            font-size: 0.74rem;
+            font-size: 0.84rem;
             color: var(--text-secondary);
             text-align: center;
-            min-height: 1em;
+            min-height: 1.15em;
         }
 
-        /* Petit minuteur discret avec cloche de fin */
         .timer-dock {
             width: 100%;
-            max-width: 450px;
-            padding: 7px 10px;
-            border-radius: var(--radius-small);
-            background: rgba(27, 17, 22, 0.78);
-            border: 1px solid rgba(212, 175, 55, 0.24);
+            max-width: 500px;
+            padding: 8px 12px;
+            border-radius: var(--radius-control);
+            background: rgba(34, 16, 26, 0.82);
+            border: 1px solid rgba(244, 143, 177, 0.25);
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .timer-presets {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
             flex-wrap: wrap;
             justify-content: center;
         }
 
         .timer-preset-btn {
-            min-height: 26px;
-            padding: 2px 7px;
-            border-radius: 6px;
+            min-height: 32px;
+            padding: 4px 9px;
+            border-radius: var(--radius-small);
             border: 1px solid transparent;
-            background: rgba(11, 7, 9, 0.55);
+            background: rgba(17, 6, 12, 0.6);
             color: var(--text-secondary);
             font-family: inherit;
-            font-size: 0.72rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .timer-preset-btn:hover {
-            color: var(--text-primary);
-            border-color: rgba(212, 175, 55, 0.28);
         }
 
         .timer-preset-btn.is-active {
@@ -859,58 +583,48 @@
         }
 
         .timer-readout {
-            min-width: 50px;
+            min-width: 60px;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            font-size: 0.88rem;
+            font-size: 1.04rem;
             font-weight: 700;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.04em;
             color: var(--gold);
-            padding: 2px 6px;
-            border-radius: 6px;
-            background: rgba(11, 7, 9, 0.68);
-            border: 1px solid rgba(212, 175, 55, 0.25);
+            padding: 3px 9px;
+            border-radius: var(--radius-small);
+            background: rgba(17, 6, 12, 0.72);
+            border: 1px solid rgba(244, 143, 177, 0.25);
         }
 
         .timer-readout.is-finished {
-            color: #1c0913;
+            color: #1c0812;
             background: var(--gold);
             border-color: var(--gold-bright);
             animation: pulseBell 0.5s ease-in-out 2;
         }
 
         @keyframes pulseBell {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.07);
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.07); }
         }
 
         .timer-actions {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
         }
 
         .btn-timer {
-            min-height: 28px;
-            padding: 3px 8px;
-            border-radius: 6px;
+            min-height: 34px;
+            padding: 5px 11px;
+            border-radius: var(--radius-small);
             border: 1px solid var(--gold-line);
             background: var(--card-surface);
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 0.74rem;
+            font-size: 0.82rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-        }
-
-        .btn-timer:hover {
-            border-color: var(--gold);
-            color: var(--gold);
         }
 
         .btn-timer-start {
@@ -918,11 +632,11 @@
             color: var(--gold);
         }
 
-        /* Éditeur / gestionnaire spacieux */
+        /* Éditeur modal */
         .editor-backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(6, 4, 5, 0.86);
+            background: rgba(10, 3, 7, 0.88);
             display: none;
             align-items: center;
             justify-content: center;
@@ -950,7 +664,7 @@
 
         .editor-header {
             padding: 16px 20px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+            border-bottom: 1px solid rgba(244, 143, 177, 0.24);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -978,12 +692,6 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .btn-close-x:hover {
-            border-color: var(--gold);
-            color: var(--gold);
         }
 
         .editor-scroll {
@@ -1005,8 +713,8 @@
         }
 
         .create-box {
-            background: rgba(27, 17, 22, 0.78);
-            border: 1px solid rgba(212, 175, 55, 0.24);
+            background: rgba(34, 16, 26, 0.82);
+            border: 1px solid rgba(244, 143, 177, 0.24);
             border-radius: var(--radius-control);
             padding: 18px;
             display: flex;
@@ -1026,13 +734,6 @@
             font-size: 0.96rem;
             line-height: 1.45;
             padding: 11px 13px;
-        }
-
-        .input-control:focus,
-        .textarea-control:focus,
-        .select-control:focus {
-            outline: 2px solid rgba(212, 175, 55, 0.45);
-            border-color: var(--gold);
         }
 
         .create-row {
@@ -1070,24 +771,15 @@
             border-radius: var(--radius-small);
         }
 
-        .btn-ghost:hover {
-            border-color: var(--gold);
-            color: var(--gold);
-        }
-
         .btn-save {
-            background: var(--gold);
-            color: #1c0913;
-            border: 1px solid var(--gold);
+            background: var(--rose-accent);
+            color: #1c0812;
+            border: 1px solid var(--rose-accent);
             min-height: 44px;
             padding: 8px 18px;
             font-size: 0.94rem;
             font-weight: 700;
             border-radius: var(--radius-small);
-        }
-
-        .btn-save:hover {
-            background: var(--gold-bright);
         }
 
         .btn-remove {
@@ -1100,11 +792,6 @@
             border-radius: var(--radius-small);
         }
 
-        .btn-remove:hover {
-            background: #7a182c;
-            color: #ffffff;
-        }
-
         .attachment-preview {
             display: none;
             align-items: center;
@@ -1113,7 +800,7 @@
             padding: 10px 12px;
             border-radius: var(--radius-small);
             border: 1px solid var(--gold-line);
-            background: rgba(11, 7, 9, 0.72);
+            background: rgba(17, 6, 12, 0.75);
         }
 
         .attachment-preview.is-visible {
@@ -1168,14 +855,13 @@
         }
 
         .deck-item {
-            background: rgba(27, 17, 22, 0.92);
-            border: 1px solid rgba(212, 175, 55, 0.24);
+            background: rgba(34, 16, 26, 0.92);
+            border: 1px solid rgba(244, 143, 177, 0.24);
             border-radius: var(--radius-control);
             padding: 14px 16px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            transition: border-color 0.14s ease, opacity 0.14s ease, box-shadow 0.14s ease;
         }
 
         .deck-item.is-dragging {
@@ -1185,12 +871,10 @@
 
         .deck-item.drag-over-top {
             border-top: 3px solid var(--gold);
-            box-shadow: 0 -6px 0 -3px var(--gold);
         }
 
         .deck-item.drag-over-bottom {
             border-bottom: 3px solid var(--gold);
-            box-shadow: 0 6px 0 -3px var(--gold);
         }
 
         .drag-handle {
@@ -1201,24 +885,14 @@
             min-height: 36px;
             padding: 4px 8px;
             border-radius: var(--radius-small);
-            border: 1px solid rgba(212, 175, 55, 0.28);
-            background: rgba(11, 7, 9, 0.65);
+            border: 1px solid rgba(244, 143, 177, 0.28);
+            background: rgba(17, 6, 12, 0.65);
             color: var(--gold);
             font-size: 1rem;
             line-height: 1;
             cursor: grab;
             user-select: none;
             touch-action: none;
-            flex-shrink: 0;
-        }
-
-        .drag-handle:hover {
-            border-color: var(--gold);
-            background: var(--gold-soft);
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
         }
 
         .deck-item-title-wrap {
@@ -1226,6 +900,16 @@
             align-items: center;
             gap: 8px;
             min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .position-select {
+            width: auto;
+            min-width: 78px;
+            min-height: 34px;
+            padding: 4px 8px;
+            font-size: 0.82rem;
+            background: rgba(17, 6, 12, 0.75);
         }
 
         .deck-item-top {
@@ -1297,8 +981,8 @@
 
         .editor-footer {
             padding: 14px 20px;
-            border-top: 1px solid rgba(212, 175, 55, 0.22);
-            background: rgba(11, 7, 9, 0.88);
+            border-top: 1px solid rgba(244, 143, 177, 0.24);
+            background: rgba(17, 6, 12, 0.88);
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -1331,8 +1015,8 @@
         }
 
         .io-box {
-            background: rgba(27, 17, 22, 0.78);
-            border: 1px solid rgba(212, 175, 55, 0.24);
+            background: rgba(34, 16, 26, 0.82);
+            border: 1px solid rgba(244, 143, 177, 0.24);
             border-radius: var(--radius-control);
             padding: 16px 18px;
             display: flex;
@@ -1354,8 +1038,8 @@
             gap: 6px;
             padding: 4px;
             border-radius: var(--radius-small);
-            background: rgba(11, 7, 9, 0.72);
-            border: 1px solid rgba(212, 175, 55, 0.24);
+            background: rgba(17, 6, 12, 0.75);
+            border: 1px solid rgba(244, 143, 177, 0.24);
         }
 
         .import-mode-btn {
@@ -1369,11 +1053,6 @@
             font-size: 0.84rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .import-mode-btn:hover {
-            color: var(--text-primary);
         }
 
         .import-mode-btn.is-active {
@@ -1382,185 +1061,111 @@
             border-color: var(--gold-line);
         }
 
-        @media (max-width: 600px) {
+        /* Maximisation sur smartphone quand les options sont cachées */
+        @media (max-width: 640px) {
             .app-shell {
-                padding: 10px 10px 16px 10px;
+                padding: 12px 10px 18px 10px;
+                gap: 10px;
+            }
+
+            .app-shell.options-hidden {
+                padding: 8px 8px 12px 8px;
                 gap: 8px;
             }
 
-            .top-bar {
-                flex-direction: column;
-                justify-content: center;
-                text-align: center;
-                gap: 6px;
+            .app-shell.options-hidden .brand-title {
+                font-size: 1.95rem;
             }
 
-            .brand-title {
-                width: 100%;
-                text-align: center;
+            .app-shell.options-hidden .brand-logo {
+                width: 30px;
+                height: 30px;
             }
 
-            .top-bar-actions {
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-
-            .create-row {
-                grid-template-columns: 1fr;
-            }
-
-            .game-card {
-                min-height: 295px;
-                max-height: 57dvh;
-            }
-
-            .top-bar {
-                flex-direction: column;
-                justify-content: center;
-                text-align: center;
-                gap: 5px;
-            }
-
-            .brand-title {
-                width: 100%;
-                text-align: center;
-            }
-
-            .top-bar-actions {
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 5px;
-            }
-
-            .create-row {
-                grid-template-columns: 1fr;
-            }
-
-            .game-card {
-                min-height: 250px;
-                max-height: 52dvh;
-            }
-
-            .app-shell.options-collapsed {
-                padding: 10px 8px 14px 8px;
-                gap: 8px;
-            }
-
-            .app-shell.options-collapsed .brand-title {
-                font-size: 1.85rem;
-            }
-
-            .app-shell.options-collapsed .brand-logo {
-                width: 28px;
-                height: 28px;
-            }
-
-            .app-shell.options-collapsed .stage {
-                min-height: 0;
-            }
-
-            .app-shell.options-collapsed .game-card {
+            .app-shell.options-hidden .game-card {
                 max-width: 100%;
-                min-height: 64dvh;
+                min-height: 470px;
                 max-height: 73dvh;
-                border-radius: 22px;
             }
 
-            .app-shell.options-collapsed .card-prompt {
-                font-size: clamp(1.22rem, 4.6vw, 1.48rem);
-                line-height: 1.55;
+            .app-shell.options-hidden .card-prompt {
+                font-size: clamp(1.25rem, 4.2vw, 1.55rem);
             }
 
-            .app-shell.options-collapsed .card-photo,
-            .app-shell.options-collapsed .card-video {
-                max-height: 34dvh;
+            .app-shell.options-hidden .card-photo,
+            .app-shell.options-hidden .card-video {
+                max-height: 330px;
             }
 
-            .app-shell.options-collapsed .bottom-controls {
+            .app-shell.options-hidden .bottom-controls,
+            .app-shell.options-hidden .timer-dock {
                 max-width: 100%;
-                gap: 6px;
             }
 
-            .app-shell.options-collapsed .controls-row .btn {
-                min-height: 46px;
-                font-size: 0.98rem;
+            .create-row {
+                grid-template-columns: 1fr;
             }
 
-            .app-shell.options-collapsed .timer-dock {
-                max-width: 100%;
-                padding: 8px 10px;
+            .game-card {
+                min-height: 370px;
+                max-height: 60dvh;
             }
 
             .editor-sheet {
-                width: 96vw;
-                height: 92dvh;
+                width: 95vw;
+                height: 90dvh;
             }
 
             .editor-header,
             .editor-scroll,
             .editor-footer {
-                padding-left: 12px;
-                padding-right: 12px;
-            }
-
-            .create-box {
-                padding: 12px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .controls-row {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .controls-row .btn {
-                width: 100%;
-                max-width: 260px;
-                flex: 0 0 auto;
+                padding-left: 14px;
+                padding-right: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="app-shell">
+    <div class="app-shell" id="appShell">
         <header class="top-bar">
-            <h1 class="brand-title">
-                <svg class="brand-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <circle cx="18" cy="18" r="16.5" stroke="currentColor" stroke-width="1.3" stroke-opacity="0.45" fill="rgba(240, 168, 196, 0.12)" />
-                    <path d="M18 26.2C18 26.2 9.5 20.8 9.5 14.5C9.5 11.7 11.7 9.8 14.2 9.8C15.9 9.8 17.3 10.7 18 12.1C18.7 10.7 20.1 9.8 21.8 9.8C24.3 9.8 26.5 11.7 26.5 14.5C26.5 20.8 18 26.2 18 26.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
-                    <path d="M26.8 8.2L27.5 10.1L29.4 10.8L27.5 11.5L26.8 13.4L26.1 11.5L24.2 10.8L26.1 10.1L26.8 8.2Z" fill="currentColor" />
+            <div class="brand-row">
+                <svg class="brand-logo" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <path d="M20 34.5C20 34.5 6.5 25.8 6.5 15.2C6.5 10.6 10.1 7 14.5 7C17.2 7 19.1 8.4 20 10.2C20.9 8.4 22.8 7 25.5 7C29.9 7 33.5 10.6 33.5 15.2C33.5 25.8 20 34.5 20 34.5Z" fill="rgba(244,143,177,0.22)" stroke="#f3b5c8" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M26.5 11.5L27.5 14L30 15L27.5 16L26.5 18.5L25.5 16L23 15L25.5 14L26.5 11.5Z" fill="#ffd1e0"/>
                 </svg>
-                <span>Soirée intime</span>
-            </h1>
+                <h1 class="brand-title">Soirée intime</h1>
+            </div>
+
             <div class="top-bar-actions">
-                <button type="button" class="btn btn-ambient" id="ambientToggleBtn" aria-pressed="false" aria-label="Activer ou couper la musique d'ambiance">
-                    ♪ Ambiance : Off
-                </button>
-                <select class="ambient-style-select" id="ambientStyleSelect" aria-label="Style de musique d'ambiance">
-                    <option value="jazz" selected>Jazz feutré</option>
-                    <option value="soft">Nappe douce</option>
-                </select>
-                <button type="button" class="btn btn-restart" id="restartGameBtn" aria-label="Recommencer la partie au début">
-                    Recommencer
-                </button>
                 <button type="button" class="btn btn-deck" id="openEditorBtn" aria-label="Ouvrir l'éditeur de cartes">
-                    <svg class="btn-deck-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <rect x="4" y="6" width="11" height="14" rx="2.2" stroke="currentColor" stroke-width="1.7" fill="rgba(240, 168, 196, 0.14)" />
-                        <rect x="9" y="3.5" width="11" height="14" rx="2.2" stroke="currentColor" stroke-width="1.7" fill="var(--card-surface)" />
-                        <path d="M14.5 8.2L15.1 9.8L16.7 10.4L15.1 11L14.5 12.6L13.9 11L12.3 10.4L13.9 9.8L14.5 8.2Z" fill="currentColor" />
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="14" height="16" rx="2"></rect>
+                        <path d="M7 3h12a2 2 0 0 1 2 2v14"></path>
                     </svg>
                     <span id="deckCountText">Cartes (0)</span>
+                </button>
+                <button type="button" class="options-toggle-btn" id="toggleOptionsBtn" aria-expanded="true">
+                    ▴ Masquer options
                 </button>
             </div>
         </header>
 
-        <section class="controls-stack" id="controlsStack">
-            <div class="controls-stack-body" id="controlsStackBody">
-                <nav class="mode-bar" aria-label="Choisir le mode de jeu">
+        <section class="options-wrapper" aria-label="Options de jeu et ambiance">
+            <div class="options-panel" id="optionsPanel">
+                <div class="top-bar-actions">
+                    <button type="button" class="btn btn-audio" id="ambientToggleBtn" aria-pressed="false">
+                        ♪ Ambiance : Off
+                    </button>
+                    <select class="audio-style-select" id="ambientStyleSelect" aria-label="Style de musique d'ambiance">
+                        <option value="jazz" selected>Jazz feutré</option>
+                        <option value="soft">Nappe douce</option>
+                    </select>
+                    <button type="button" class="btn btn-restart" id="restartGameBtn" aria-label="Recommencer la partie au début">
+                        Recommencer
+                    </button>
+                </div>
+
+                <nav class="mode-bar" aria-label="Choisir le déroulé du jeu">
                     <button type="button" class="mode-pill is-active" data-mode="free">Libre</button>
                     <button type="button" class="mode-pill" data-mode="alternating">Alterné (Elle / Lui)</button>
                     <button type="button" class="mode-pill" data-mode="random-turn">Aléatoire (Elle ou Lui)</button>
@@ -1573,9 +1178,6 @@
                     <button type="button" class="filter-pill" data-filter="both">Les deux (0)</button>
                 </nav>
             </div>
-            <button type="button" class="btn-toggle-options" id="toggleOptionsBtn" aria-expanded="true" aria-controls="controlsStackBody">
-                <span id="toggleOptionsLabel">▴ Réduire les options</span>
-            </button>
         </section>
 
         <main class="stage">
@@ -1589,7 +1191,7 @@
                 </div>
 
                 <div class="card-face card-front" id="cardFront">
-                    <div class="card-front-meta" style="gap: 8px; flex-wrap: wrap;">
+                    <div class="card-front-meta">
                         <span class="turn-indicator is-hidden" id="frontTurnIndicator">Tour : Elle</span>
                         <span class="target-badge is-hidden" id="frontTargetBadge">Pour les deux</span>
                     </div>
@@ -1690,7 +1292,7 @@
                 </form>
 
                 <div>
-                    <h3 class="sub-heading" style="margin-bottom: 10px;">Cartes enregistrées</h3>
+                    <h3 class="sub-heading" style="margin-bottom: 10px;">Cartes enregistrées (ordre manuel)</h3>
                     <div class="deck-list" id="deckListContainer"></div>
                 </div>
 
@@ -1708,7 +1310,7 @@
                         <input type="file" id="importJsonInput" accept=".json,application/json" style="display:none;">
                     </div>
                     <p class="hint-note">
-                        L'export télécharge un fichier .json contenant vos cartes (texte, attribution, photos et métadonnées vidéo). Les fichiers vidéo locaux (blob) sont propres à la session en cours et ne sont pas réimportables d'une session à l'autre.
+                        L'export télécharge un fichier .json contenant vos cartes. Les vidéos locales (blob) restent propres à la session en cours.
                     </p>
                 </section>
             </div>
@@ -1730,7 +1332,6 @@
         (function () {
             "use strict";
 
-            // Paquet par défaut réparti entre Elle, Lui et Les deux
             const DEFAULT_CARDS_SEED = [
                 { text: "Quel est le détail physique ou l'attitude qui attire immédiatement ton attention ?", target: "both" },
                 { text: "Dépose un baiser lent dans le cou ou sur la tempe de la personne à ta gauche.", target: "she" },
@@ -1754,8 +1355,8 @@
                 { text: "Quelle a été ta première impression sur la personne à ta gauche en arrivant ?", target: "both" }
             ];
 
-            const STORAGE_KEY = "velours_secrets_deck_v3";
-            const EXPLICIT_EMPTY_KEY = "velours_secrets_explicit_empty_v3";
+            const STORAGE_KEY = "soiree_intime_deck_v1";
+            const EXPLICIT_EMPTY_KEY = "soiree_intime_explicit_empty_v1";
             const VALID_TARGETS = ["both", "she", "he"];
             const VALID_FILTERS = ["all", "she", "he", "both"];
             const VALID_MODES = ["free", "alternating", "random-turn"];
@@ -1783,13 +1384,6 @@
                 return "Tous";
             }
 
-            function getFilterScopeDescription(filter) {
-                if (filter === "she") return "Elle + Les deux";
-                if (filter === "he") return "Lui + Les deux";
-                if (filter === "both") return "Les deux uniquement";
-                return "Toutes les cartes";
-            }
-
             function getTurnLabel(turn) {
                 return turn === "he" ? "Lui" : "Elle";
             }
@@ -1803,11 +1397,6 @@
                 return true;
             }
 
-            function getPoolForTurn(turn) {
-                return getMatchingCards(turn === "he" ? "he" : "she");
-            }
-
-            // Repli de stockage : localStorage -> sessionStorage -> mémoire vive
             let memoryDeckRaw = null;
             let memoryEmptyFlag = false;
             let activeStorageBackend = "localStorage";
@@ -1823,9 +1412,7 @@
                             return v;
                         }
                     }
-                } catch (_e) {
-                    // Continuer vers sessionStorage
-                }
+                } catch (_e) {}
                 try {
                     if (window.sessionStorage) {
                         const sv = window.sessionStorage.getItem(key);
@@ -1834,9 +1421,7 @@
                             return sv;
                         }
                     }
-                } catch (_e) {
-                    // Continuer vers mémoire vive
-                }
+                } catch (_e) {}
                 activeStorageBackend = "mémoire";
                 return fallbackMemory;
             }
@@ -1851,18 +1436,14 @@
                         activeStorageBackend = "localStorage";
                         return "localStorage";
                     }
-                } catch (_e) {
-                    // Quota dépassé ou indisponible -> essayer sessionStorage
-                }
+                } catch (_e) {}
                 try {
                     if (window.sessionStorage) {
                         window.sessionStorage.setItem(key, value);
                         activeStorageBackend = "sessionStorage";
                         return "sessionStorage";
                     }
-                } catch (_e) {
-                    // Repli mémoire vive
-                }
+                } catch (_e) {}
                 activeStorageBackend = "mémoire";
                 return "mémoire";
             }
@@ -1872,9 +1453,6 @@
             }
 
             function createSessionBlobUrl(file) {
-                if (!file || typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
-                    throw new Error("Lecture vidéo locale impossible");
-                }
                 const url = URL.createObjectURL(file);
                 blobRegistry.set(url, file.name || "Vidéo locale");
                 return url;
@@ -1883,11 +1461,7 @@
             function releaseSessionBlobUrl(url) {
                 if (!url || !blobRegistry.has(url)) return;
                 blobRegistry.delete(url);
-                try {
-                    URL.revokeObjectURL(url);
-                } catch (_e) {
-                    // Ignorer
-                }
+                try { URL.revokeObjectURL(url); } catch (_e) {}
             }
 
             function isValidUrl(val) {
@@ -1909,40 +1483,26 @@
                 if (typeof item === "string") {
                     const text = item.trim();
                     if (!text) return null;
-                    return {
-                        id: makeId(index),
-                        text: text,
-                        target: "both",
-                        image: "",
-                        video: "",
-                        videoName: "",
-                        isBlobVideo: false
-                    };
+                    return { id: makeId(index), text, target: "both", image: "", video: "", videoName: "", isBlobVideo: false };
                 }
-                if (!item || typeof item !== "object" || Array.isArray(item)) {
-                    return null;
-                }
+                if (!item || typeof item !== "object" || Array.isArray(item)) return null;
                 const text = typeof item.text === "string" ? item.text.trim() : "";
                 const target = normalizeTarget(item.target);
                 const rawImg = typeof item.image === "string" ? item.image.trim() : "";
                 const image = isValidUrl(rawImg) ? rawImg : "";
-
                 const rawVid = typeof item.video === "string" ? item.video.trim() : "";
                 const videoName = typeof item.videoName === "string" ? item.videoName.trim() : "";
                 const isBlob = rawVid.startsWith("blob:") || Boolean(item.isBlobVideo && rawVid.startsWith("blob:"));
                 const blobAlive = isBlob && blobRegistry.has(rawVid);
                 const video = blobAlive ? rawVid : (!isBlob && isValidUrl(rawVid) ? rawVid : "");
 
-                if (!text && !image && !video) {
-                    return null;
-                }
-
+                if (!text && !image && !video) return null;
                 return {
                     id: typeof item.id === "string" && item.id.trim() ? item.id.trim() : makeId(index),
-                    text: text,
-                    target: target,
-                    image: image,
-                    video: video,
+                    text,
+                    target,
+                    image,
+                    video,
                     videoName: video ? (videoName || (blobAlive ? "Vidéo locale" : "")) : "",
                     isBlobVideo: Boolean(blobAlive)
                 };
@@ -1952,9 +1512,9 @@
                 return DEFAULT_CARDS_SEED.map((entry, idx) => sanitizeCard(entry, idx)).filter(Boolean);
             }
 
-            function serializeDeck(cards) {
+            function serializeDeck(cardsList) {
                 return JSON.stringify(
-                    cards.map((c) => ({
+                    cardsList.map((c) => ({
                         id: c.id,
                         text: c.text || "",
                         target: normalizeTarget(c.target),
@@ -1970,107 +1530,72 @@
                 startupNotice = "";
                 const emptyRaw = readRawStorage(EXPLICIT_EMPTY_KEY, memoryEmptyFlag ? "1" : "0");
                 const explicitlyEmpty = emptyRaw === "1";
-
                 try {
                     const raw = readRawStorage(STORAGE_KEY, memoryDeckRaw);
                     if (!raw) {
-                        if (explicitlyEmpty) {
-                            return [];
-                        }
+                        if (explicitlyEmpty) return [];
                         const defaults = getDefaultDeck();
                         writeRawStorage(STORAGE_KEY, serializeDeck(defaults), (v) => { memoryDeckRaw = v; });
                         return defaults;
                     }
-
                     const parsed = JSON.parse(raw);
                     if (!Array.isArray(parsed)) {
-                        startupNotice = "Format de sauvegarde invalide : cartes par défaut restaurées.";
                         const defaults = getDefaultDeck();
                         writeRawStorage(EXPLICIT_EMPTY_KEY, "0", (v) => { memoryEmptyFlag = v === "1"; });
                         writeRawStorage(STORAGE_KEY, serializeDeck(defaults), (v) => { memoryDeckRaw = v; });
                         return defaults;
                     }
-
                     const validCards = parsed.map((entry, idx) => sanitizeCard(entry, idx)).filter(Boolean);
                     if (validCards.length === 0) {
-                        if (explicitlyEmpty) {
-                            return [];
-                        }
-                        startupNotice = "Aucune carte valide trouvée : cartes par défaut restaurées.";
+                        if (explicitlyEmpty) return [];
                         const defaults = getDefaultDeck();
                         writeRawStorage(STORAGE_KEY, serializeDeck(defaults), (v) => { memoryDeckRaw = v; });
                         return defaults;
                     }
-
-                    if (validCards.length !== parsed.length) {
-                        startupNotice = "Certaines entrées incomplètes ont été ignorées.";
-                    }
                     return validCards;
                 } catch (_e) {
-                    startupNotice = "Stockage illisible : cartes par défaut restaurées.";
                     const defaults = getDefaultDeck();
-                    writeRawStorage(EXPLICIT_EMPTY_KEY, "0", (v) => { memoryEmptyFlag = v === "1"; });
-                    writeRawStorage(STORAGE_KEY, serializeDeck(defaults), (v) => { memoryDeckRaw = v; });
                     return defaults;
                 }
             }
 
-            // Compression photo via canvas (max 600px, JPEG 0.72)
             function compressPhotoToDataUrl(file) {
                 return new Promise((resolve, reject) => {
                     try {
                         if (!file || !file.type || !file.type.startsWith("image/")) {
-                            reject(new Error("Type de fichier non supporté"));
+                            reject(new Error("Type non supporté"));
                             return;
                         }
-                        if (typeof FileReader === "undefined") {
-                            reject(new Error("FileReader indisponible"));
-                            return;
-                        }
-
                         const reader = new FileReader();
-                        reader.onerror = () => reject(new Error("Erreur de lecture"));
+                        reader.onerror = () => reject(new Error("Erreur lecture"));
                         reader.onload = (ev) => {
                             const image = new Image();
-                            image.onerror = () => reject(new Error("Erreur de décodage image"));
+                            image.onerror = () => reject(new Error("Erreur image"));
                             image.onload = () => {
-                                try {
-                                    const maxDim = 600;
-                                    let w = image.naturalWidth || image.width;
-                                    let h = image.naturalHeight || image.height;
-
-                                    if (!w || !h) {
-                                        reject(new Error("Dimensions nulles"));
-                                        return;
-                                    }
-
-                                    if (w > maxDim || h > maxDim) {
-                                        if (w >= h) {
-                                            h = Math.max(1, Math.round((h * maxDim) / w));
-                                            w = maxDim;
-                                        } else {
-                                            w = Math.max(1, Math.round((w * maxDim) / h));
-                                            h = maxDim;
-                                        }
-                                    }
-
-                                    const canvas = document.createElement("canvas");
-                                    canvas.width = w;
-                                    canvas.height = h;
-                                    const ctx = canvas.getContext("2d");
-                                    if (!ctx) {
-                                        reject(new Error("Contexte canvas indisponible"));
-                                        return;
-                                    }
-
-                                    ctx.fillStyle = "#24121c";
-                                    ctx.fillRect(0, 0, w, h);
-                                    ctx.drawImage(image, 0, 0, w, h);
-
-                                    resolve(canvas.toDataURL("image/jpeg", 0.72));
-                                } catch (err) {
-                                    reject(err);
+                                const maxDim = 600;
+                                let w = image.naturalWidth || image.width;
+                                let h = image.naturalHeight || image.height;
+                                if (!w || !h) {
+                                    reject(new Error("Dimensions nulles"));
+                                    return;
                                 }
+                                if (w > maxDim || h > maxDim) {
+                                    if (w >= h) {
+                                        h = Math.max(1, Math.round((h * maxDim) / w));
+                                        w = maxDim;
+                                    } else {
+                                        w = Math.max(1, Math.round((w * maxDim) / h));
+                                        h = maxDim;
+                                    }
+                                }
+                                const canvas = document.createElement("canvas");
+                                canvas.width = w;
+                                canvas.height = h;
+                                const ctx = canvas.getContext("2d");
+                                ctx.fillStyle = "#22101a";
+                                ctx.fillRect(0, 0, w, h);
+                                ctx.drawImage(image, 0, 0, w, h);
+                                resolve(canvas.toDataURL("image/jpeg", 0.72));
                             };
                             image.src = ev.target.result;
                         };
@@ -2086,16 +1611,16 @@
                 textarea.style.height = "auto";
                 textarea.style.height = Math.max(82, textarea.scrollHeight) + "px";
             }
-            <!-- Références DOM -->
-            const deckCountText = document.getElementById("deckCountText");
-            const topBarActions = document.querySelector(".top-bar-actions");
+
+            // Références DOM
+            const appShell = document.getElementById("appShell");
+            const optionsPanel = document.getElementById("optionsPanel");
+            const toggleOptionsBtn = document.getElementById("toggleOptionsBtn");
             const ambientToggleBtn = document.getElementById("ambientToggleBtn");
             const ambientStyleSelect = document.getElementById("ambientStyleSelect");
+            const deckCountText = document.getElementById("deckCountText");
             const restartGameBtn = document.getElementById("restartGameBtn");
             const openEditorBtn = document.getElementById("openEditorBtn");
-            const controlsStack = document.getElementById("controlsStack");
-            const toggleOptionsBtn = document.getElementById("toggleOptionsBtn");
-            const toggleOptionsLabel = document.getElementById("toggleOptionsLabel");
             const modePills = Array.from(document.querySelectorAll(".mode-pill"));
             const freeFilterBar = document.getElementById("freeFilterBar");
             const filterPills = Array.from(document.querySelectorAll(".filter-pill"));
@@ -2153,36 +1678,32 @@
             const importJsonInput = document.getElementById("importJsonInput");
             const importModeBtns = Array.from(document.querySelectorAll(".import-mode-btn"));
 
-            // État du jeu
             let cards = loadInitialDeck();
             let gameMode = "free";
-            let optionsCollapsed = false;
             let activeFilter = "all";
             let currentTurn = "she";
             let activeTurnForCard = null;
             let bag = [];
             let turnIndices = { she: 0, he: 0 };
-            let lastPickedIdByPool = { free: null, she: null, he: null };
             let currentCard = null;
             let revealed = false;
 
-            // Réinitialisation en 2 clics
             let confirmResetStep = false;
             let resetTimerId = null;
             let importMode = "merge";
             let draggedCardId = null;
             let touchDragState = null;
 
-            // État du minuteur manuel
+            // Minuteur manuel (30s à 5 min)
             let timerDurationSec = 30;
             let timerRemainingSec = 30;
             let timerIntervalId = null;
             let sharedAudioCtx = null;
 
-            // Générateur de musique d'ambiance (Jazz feutré & Nappe douce via Web Audio)
-            let ambientEngine = null;
-            let isAmbientPlaying = false;
-            let ambientStyle = "jazz";
+            // Musique d'ambiance locale (Jazz feutré / Nappe douce)
+            let ambientPlaying = false;
+            let ambientLoopId = null;
+            let ambientStep = 0;
 
             function ensureAudioContext() {
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -2196,336 +1717,171 @@
                 return sharedAudioCtx;
             }
 
-            function updateAmbientButtonUI() {
-                if (!ambientToggleBtn) return;
-                ambientToggleBtn.classList.toggle("is-playing", isAmbientPlaying);
-                ambientToggleBtn.setAttribute("aria-pressed", isAmbientPlaying ? "true" : "false");
-                const styleName = ambientStyle === "jazz" ? "Jazz" : "Doux";
-                ambientToggleBtn.textContent = isAmbientPlaying ? "♪ " + styleName + " : On" : "♪ " + styleName + " : Off";
-            }
-
-            function triggerElectricPianoChord(ctx, bus, freqs, startTime, durationSec) {
-                freqs.forEach((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const overtone = ctx.createOscillator();
-                    const env = ctx.createGain();
-                    const overtoneGain = ctx.createGain();
-
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(freq, startTime);
-                    osc.detune.setValueAtTime((idx - 1.5) * 3.5, startTime);
-
-                    overtone.type = "triangle";
-                    overtone.frequency.setValueAtTime(freq * 2, startTime);
-                    overtoneGain.gain.setValueAtTime(0.045, startTime);
-
-                    const peak = idx === 0 ? 0.085 : 0.065;
-                    env.gain.setValueAtTime(0.0001, startTime);
-                    env.gain.linearRampToValueAtTime(peak, startTime + 0.025);
-                    env.gain.exponentialRampToValueAtTime(peak * 0.45, startTime + durationSec * 0.45);
-                    env.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSec);
-
-                    osc.connect(env);
-                    overtone.connect(overtoneGain);
-                    overtoneGain.connect(env);
-                    env.connect(bus);
-
-                    osc.start(startTime);
-                    overtone.start(startTime);
-                    osc.stop(startTime + durationSec + 0.05);
-                    overtone.stop(startTime + durationSec + 0.05);
-                });
-            }
-
-            function triggerWalkingBassNote(ctx, bus, freq, startTime, durationSec) {
-                const osc = ctx.createOscillator();
-                const env = ctx.createGain();
-                osc.type = "triangle";
-                osc.frequency.setValueAtTime(freq, startTime);
-
-                env.gain.setValueAtTime(0.0001, startTime);
-                env.gain.linearRampToValueAtTime(0.14, startTime + 0.03);
-                env.gain.exponentialRampToValueAtTime(0.05, startTime + durationSec * 0.7);
-                env.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSec);
-
-                osc.connect(env);
-                env.connect(bus);
-                osc.start(startTime);
-                osc.stop(startTime + durationSec + 0.05);
-            }
-
-            function triggerSoftRideTap(ctx, bus, startTime, isAccent) {
-                const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * 0.045));
-                const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-                const data = noiseBuffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
-                }
-
-                const src = ctx.createBufferSource();
-                src.buffer = noiseBuffer;
-
-                const bandpass = ctx.createBiquadFilter();
-                bandpass.type = "bandpass";
-                bandpass.frequency.setValueAtTime(5400, startTime);
-                bandpass.Q.setValueAtTime(3.2, startTime);
-
-                const gain = ctx.createGain();
-                const peak = isAccent ? 0.022 : 0.012;
-                gain.gain.setValueAtTime(0.0001, startTime);
-                gain.gain.linearRampToValueAtTime(peak, startTime + 0.004);
-                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.042);
-
-                src.connect(bandpass);
-                bandpass.connect(gain);
-                gain.connect(bus);
-                src.start(startTime);
-                src.stop(startTime + 0.05);
-            }
-
-            function startJazzEngine(ctx, masterGain) {
-                const now = ctx.currentTime;
-                const jazzFilter = ctx.createBiquadFilter();
-                jazzFilter.type = "lowpass";
-                jazzFilter.frequency.setValueAtTime(1450, now);
-                jazzFilter.Q.setValueAtTime(0.65, now);
-                jazzFilter.connect(masterGain);
-
-                // Progression jazz chaleureuse en Fa majeur / Ré mineur (II - V - I - VI)
-                const bars = [
-                    { chord: [174.61, 220.0, 261.63, 329.63, 392.0], bass: [87.31, 110.0, 130.81, 146.83] },   // Fmaj9
-                    { chord: [146.83, 220.0, 261.63, 329.63, 392.0], bass: [73.42, 87.31, 110.0, 130.81] },    // Dm9
-                    { chord: [130.81, 196.0, 246.94, 293.66, 349.23], bass: [65.41, 73.42, 98.0, 123.47] },    // Gm9 / C13
-                    { chord: [164.81, 196.0, 246.94, 293.66, 392.0], bass: [82.41, 98.0, 123.47, 130.81] }     // Em7 -> A7alt
-                ];
-
-                const beatSec = 0.68; // Tempo lent et feutré (~88 BPM)
-                let stepInBar = 0;
-                let barIndex = 0;
-
-                const playJazzStep = () => {
-                    if (!sharedAudioCtx || !isAmbientPlaying || ambientStyle !== "jazz") return;
-                    const t = sharedAudioCtx.currentTime;
-                    const currentBar = bars[barIndex % bars.length];
-
-                    if (stepInBar === 0) {
-                        triggerElectricPianoChord(sharedAudioCtx, jazzFilter, currentBar.chord, t, beatSec * 3.8);
-                    } else if (stepInBar === 2) {
-                        // Petite relance d'accord douce sur le 3e temps
-                        triggerElectricPianoChord(sharedAudioCtx, jazzFilter, currentBar.chord.slice(1), t + 0.04, beatSec * 1.8);
-                    }
-
-                    const bassFreq = currentBar.bass[stepInBar % currentBar.bass.length];
-                    triggerWalkingBassNote(sharedAudioCtx, jazzFilter, bassFreq, t, beatSec * 0.92);
-
-                    // Cymbale ride légère avec toucher swing
-                    triggerSoftRideTap(sharedAudioCtx, jazzFilter, t, stepInBar === 0 || stepInBar === 2);
-                    triggerSoftRideTap(sharedAudioCtx, jazzFilter, t + beatSec * 0.62, false);
-
-                    stepInBar += 1;
-                    if (stepInBar >= 4) {
-                        stepInBar = 0;
-                        barIndex += 1;
-                    }
-                };
-
-                playJazzStep();
-                const stepTimer = setInterval(playJazzStep, beatSec * 1000);
-
-                return {
-                    cleanup: () => {
-                        clearInterval(stepTimer);
-                        try {
-                            jazzFilter.disconnect();
-                        } catch (_e) {
-                            // Ignorer
-                        }
-                    }
-                };
-            }
-
-            function startSoftPadEngine(ctx, masterGain) {
-                const now = ctx.currentTime;
-                const lowpass = ctx.createBiquadFilter();
-                lowpass.type = "lowpass";
-                lowpass.frequency.setValueAtTime(520, now);
-                lowpass.Q.setValueAtTime(0.8, now);
-
-                const lfo = ctx.createOscillator();
-                const lfoGain = ctx.createGain();
-                lfo.type = "sine";
-                lfo.frequency.setValueAtTime(0.07, now);
-                lfoGain.gain.setValueAtTime(160, now);
-                lfo.connect(lfoGain);
-                lfoGain.connect(lowpass.frequency);
-                lfo.start(now);
-
-                lowpass.connect(masterGain);
-
-                const chordProgression = [
-                    [146.83, 220.0, 261.63, 329.63],
-                    [116.54, 174.61, 220.0, 293.66],
-                    [174.61, 220.0, 261.63, 329.63],
-                    [130.81, 196.0, 293.66, 329.63]
-                ];
-
-                let chordIndex = 0;
-                const voices = chordProgression[0].map((freq, idx) => {
-                    const osc = ctx.createOscillator();
-                    const voiceGain = ctx.createGain();
-                    osc.type = idx % 2 === 0 ? "sine" : "triangle";
-                    osc.frequency.setValueAtTime(freq, now);
-                    osc.detune.setValueAtTime((idx - 1.5) * 4, now);
-                    voiceGain.gain.setValueAtTime(idx === 0 ? 0.34 : 0.22, now);
-                    osc.connect(voiceGain);
-                    voiceGain.connect(lowpass);
-                    osc.start(now);
-                    return osc;
-                });
-
-                const chordTimer = setInterval(() => {
-                    if (!sharedAudioCtx || !isAmbientPlaying || ambientStyle !== "soft") return;
-                    chordIndex = (chordIndex + 1) % chordProgression.length;
-                    const nextChord = chordProgression[chordIndex];
-                    const t = sharedAudioCtx.currentTime;
-                    voices.forEach((osc, i) => {
-                        const targetFreq = nextChord[i] || nextChord[0];
-                        osc.frequency.cancelScheduledValues(t);
-                        osc.frequency.setTargetAtTime(targetFreq, t, 1.4);
-                    });
-                }, 8000);
-
-                return {
-                    cleanup: () => {
-                        clearInterval(chordTimer);
-                        try {
-                            lfo.stop();
-                            voices.forEach((osc) => osc.stop());
-                            lowpass.disconnect();
-                        } catch (_e) {
-                            // Ignorer
-                        }
-                    }
-                };
-            }
-
-            function startAmbientMusic() {
-                const ctx = ensureAudioContext();
-                if (!ctx) {
-                    setStageStatus("Audio non pris en charge par ce navigateur.");
-                    return;
-                }
-                if (isAmbientPlaying && ambientEngine) {
-                    stopAmbientMusic(true);
-                }
-
-                const now = ctx.currentTime;
-                const masterGain = ctx.createGain();
-                masterGain.gain.setValueAtTime(0.0001, now);
-                masterGain.gain.exponentialRampToValueAtTime(ambientStyle === "jazz" ? 0.22 : 0.11, now + 1.4);
-                masterGain.connect(ctx.destination);
-
-                const subEngine = ambientStyle === "jazz"
-                    ? startJazzEngine(ctx, masterGain)
-                    : startSoftPadEngine(ctx, masterGain);
-
-                ambientEngine = { masterGain, cleanup: subEngine.cleanup };
-                isAmbientPlaying = true;
-                updateAmbientButtonUI();
-                setStageStatus(
-                    ambientStyle === "jazz"
-                        ? "Ambiance jazz feutrée activée"
-                        : "Nappe musicale douce activée"
-                );
-            }
-
-            function stopAmbientMusic(silent) {
-                if (!ambientEngine) {
-                    isAmbientPlaying = false;
-                    updateAmbientButtonUI();
-                    return;
-                }
-                const engine = ambientEngine;
-                ambientEngine = null;
-                isAmbientPlaying = false;
-                updateAmbientButtonUI();
-
-                if (sharedAudioCtx) {
-                    const t = sharedAudioCtx.currentTime;
-                    try {
-                        engine.masterGain.gain.cancelScheduledValues(t);
-                        engine.masterGain.gain.setValueAtTime(Math.max(0.0001, engine.masterGain.gain.value), t);
-                        engine.masterGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
-                    } catch (_e) {
-                        // Ignorer
-                    }
-                    setTimeout(() => {
-                        engine.cleanup();
-                        try {
-                            engine.masterGain.disconnect();
-                        } catch (_e) {
-                            // Ignorer
-                        }
-                    }, 850);
-                } else {
-                    engine.cleanup();
-                }
-
-                if (!silent) {
-                    setStageStatus("Musique d'ambiance coupée");
-                }
-            }
-
-            if (ambientToggleBtn) {
-                ambientToggleBtn.addEventListener("click", () => {
-                    if (isAmbientPlaying) {
-                        stopAmbientMusic(false);
-                    } else {
-                        startAmbientMusic();
-                    }
-                });
-            }
-
-            if (ambientStyleSelect) {
-                ambientStyleSelect.addEventListener("change", () => {
-                    ambientStyle = ambientStyleSelect.value === "soft" ? "soft" : "jazz";
-                    updateAmbientButtonUI();
-                    if (isAmbientPlaying) {
-                        startAmbientMusic();
-                    }
-                });
-            }
-
             function playBellChime() {
                 try {
                     const ctx = ensureAudioContext();
                     if (!ctx) return;
-
                     const now = ctx.currentTime;
                     const harmonics = [
                         { freq: 880, gain: 0.22, decay: 1.45 },
                         { freq: 1318.5, gain: 0.11, decay: 1.05 },
                         { freq: 1760, gain: 0.06, decay: 0.75 }
                     ];
-
                     harmonics.forEach((h) => {
                         const osc = ctx.createOscillator();
                         const amp = ctx.createGain();
                         osc.type = "sine";
                         osc.frequency.setValueAtTime(h.freq, now);
-
                         amp.gain.setValueAtTime(0.0001, now);
                         amp.gain.exponentialRampToValueAtTime(h.gain, now + 0.015);
                         amp.gain.exponentialRampToValueAtTime(0.0001, now + h.decay);
-
                         osc.connect(amp);
                         amp.connect(ctx.destination);
                         osc.start(now);
                         osc.stop(now + h.decay + 0.05);
                     });
-                } catch (_e) {
-                    // Ignorer si l'audio est bloqué par le navigateur
+                } catch (_e) {}
+            }
+
+            function triggerJazzStep(ctx, stepIndex) {
+                const now = ctx.currentTime;
+                const chords = [
+                    [130.81, 196.0, 233.08, 293.66], // Cmin9
+                    [174.61, 220.0, 261.63, 329.63], // Fmaj9
+                    [196.0, 246.94, 293.66, 349.23], // G13
+                    [130.81, 196.0, 246.94, 329.63]  // Cmaj9
+                ];
+                const chord = chords[Math.floor(stepIndex / 4) % chords.length];
+                const barBeat = stepIndex % 4;
+
+                if (barBeat === 0) {
+                    chord.forEach((freq) => {
+                        const osc = ctx.createOscillator();
+                        const filter = ctx.createBiquadFilter();
+                        const gain = ctx.createGain();
+                        osc.type = "triangle";
+                        osc.frequency.setValueAtTime(freq, now);
+                        filter.type = "lowpass";
+                        filter.frequency.setValueAtTime(900, now);
+                        gain.gain.setValueAtTime(0.0001, now);
+                        gain.gain.exponentialRampToValueAtTime(0.032, now + 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + 2.6);
+                    });
                 }
+
+                // Contrebasse douce
+                const bassNotes = [65.41, 87.31, 98.0, 65.41];
+                const bassFreq = bassNotes[Math.floor(stepIndex / 4) % bassNotes.length] * (barBeat === 2 ? 1.5 : 1);
+                const bassOsc = ctx.createOscillator();
+                const bassGain = ctx.createGain();
+                bassOsc.type = "sine";
+                bassOsc.frequency.setValueAtTime(bassFreq, now);
+                bassGain.gain.setValueAtTime(0.0001, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.07, now + 0.03);
+                bassGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
+                bassOsc.connect(bassGain);
+                bassGain.connect(ctx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + 0.65);
+            }
+
+            function triggerSoftPadStep(ctx, stepIndex) {
+                const now = ctx.currentTime;
+                const pads = [
+                    [220.0, 277.18, 329.63, 415.3],
+                    [196.0, 246.94, 293.66, 392.0],
+                    [174.61, 220.0, 261.63, 349.23],
+                    [164.81, 207.65, 246.94, 329.63]
+                ];
+                const chord = pads[stepIndex % pads.length];
+                chord.forEach((freq) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.exponentialRampToValueAtTime(0.028, now + 0.6);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.7);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 2.8);
+                });
+            }
+
+            function runAmbientTick() {
+                if (!ambientPlaying) return;
+                const ctx = ensureAudioContext();
+                if (!ctx) return;
+                const style = ambientStyleSelect ? ambientStyleSelect.value : "jazz";
+                if (style === "soft") {
+                    triggerSoftPadStep(ctx, ambientStep);
+                    ambientStep += 1;
+                    ambientLoopId = setTimeout(runAmbientTick, 2400);
+                } else {
+                    triggerJazzStep(ctx, ambientStep);
+                    ambientStep += 1;
+                    ambientLoopId = setTimeout(runAmbientTick, 680);
+                }
+            }
+
+            function toggleAmbient() {
+                ambientPlaying = !ambientPlaying;
+                if (ambientLoopId) {
+                    clearTimeout(ambientLoopId);
+                    ambientLoopId = null;
+                }
+                if (ambientToggleBtn) {
+                    ambientToggleBtn.classList.toggle("is-playing", ambientPlaying);
+                    ambientToggleBtn.setAttribute("aria-pressed", ambientPlaying ? "true" : "false");
+                    ambientToggleBtn.textContent = ambientPlaying ? "♪ Ambiance : On" : "♪ Ambiance : Off";
+                }
+                if (ambientPlaying) {
+                    ambientStep = 0;
+                    runAmbientTick();
+                }
+            }
+
+            if (ambientToggleBtn) {
+                ambientToggleBtn.addEventListener("click", toggleAmbient);
+            }
+
+            if (ambientStyleSelect) {
+                ambientStyleSelect.addEventListener("change", () => {
+                    if (ambientPlaying) {
+                        if (ambientLoopId) clearTimeout(ambientLoopId);
+                        ambientStep = 0;
+                        runAmbientTick();
+                    }
+                });
+            }
+
+            // Masquage des options une fois le déroulé choisi
+            let optionsCollapsed = false;
+
+            function setOptionsCollapsed(collapsed) {
+                optionsCollapsed = Boolean(collapsed);
+                if (optionsPanel) {
+                    optionsPanel.classList.toggle("is-collapsed", optionsCollapsed);
+                }
+                if (appShell) {
+                    appShell.classList.toggle("options-hidden", optionsCollapsed);
+                }
+                if (toggleOptionsBtn) {
+                    toggleOptionsBtn.setAttribute("aria-expanded", String(!optionsCollapsed));
+                    toggleOptionsBtn.textContent = optionsCollapsed ? "▾ Options" : "▴ Masquer options";
+                }
+            }
+
+            if (toggleOptionsBtn) {
+                toggleOptionsBtn.addEventListener("click", () => {
+                    setOptionsCollapsed(!optionsCollapsed);
+                });
             }
 
             function formatTimerSeconds(totalSec) {
@@ -2570,7 +1926,6 @@
                 if (timerRemainingSec <= 0) {
                     timerRemainingSec = timerDurationSec;
                 }
-                renderTimerDisplay();
                 timerIntervalId = setInterval(() => {
                     timerRemainingSec -= 1;
                     if (timerRemainingSec <= 0) {
@@ -2595,14 +1950,9 @@
                 });
             });
 
-            if (timerToggleBtn) {
-                timerToggleBtn.addEventListener("click", toggleTimer);
-            }
-            if (timerResetBtn) {
-                timerResetBtn.addEventListener("click", () => resetTimer());
-            }
+            if (timerToggleBtn) timerToggleBtn.addEventListener("click", toggleTimer);
+            if (timerResetBtn) timerResetBtn.addEventListener("click", () => resetTimer());
 
-            // Brouillon de création
             let pendingImage = "";
             let pendingImageLabel = "";
             let pendingVideo = "";
@@ -2610,15 +1960,11 @@
             let pendingVideoIsBlob = false;
 
             function setStageStatus(message) {
-                if (stageStatus) {
-                    stageStatus.textContent = message || "";
-                }
+                if (stageStatus) stageStatus.textContent = message || "";
             }
 
             function setEditorStatus(message) {
-                if (editorStatus) {
-                    editorStatus.textContent = message || "";
-                }
+                if (editorStatus) editorStatus.textContent = message || "";
             }
 
             function clearResetConfirmation() {
@@ -2627,9 +1973,15 @@
                     clearTimeout(resetTimerId);
                     resetTimerId = null;
                 }
-                if (resetDefaultBtn) {
-                    resetDefaultBtn.textContent = "Réinitialiser par défaut";
-                }
+                if (resetDefaultBtn) resetDefaultBtn.textContent = "Réinitialiser par défaut";
+            }
+
+            function getMatchingCards(filter) {
+                return cards.filter((c) => matchesFilter(c, filter));
+            }
+
+            function getPoolForTurn(turn) {
+                return getMatchingCards(turn === "he" ? "he" : "she");
             }
 
             function refreshCounters() {
@@ -2656,30 +2008,16 @@
             function persistCards(statusNote, markExplicitEmpty) {
                 const isEmpty = cards.length === 0;
                 const explicitFlag = typeof markExplicitEmpty === "boolean" ? markExplicitEmpty : isEmpty;
-                writeRawStorage(EXPLICIT_EMPTY_KEY, explicitFlag ? "1" : "0", (v) => {
-                    memoryEmptyFlag = v === "1";
-                });
-                const backend = writeRawStorage(STORAGE_KEY, serializeDeck(cards), (v) => {
-                    memoryDeckRaw = v;
-                });
+                writeRawStorage(EXPLICIT_EMPTY_KEY, explicitFlag ? "1" : "0", (v) => { memoryEmptyFlag = v === "1"; });
+                const backend = writeRawStorage(STORAGE_KEY, serializeDeck(cards), (v) => { memoryDeckRaw = v; });
                 refreshCounters();
-                if (statusNote) {
-                    setEditorStatus(statusNote + " (" + backend + ")");
-                }
+                if (statusNote) setEditorStatus(statusNote + " (" + backend + ")");
             }
 
             function stopCardVideo() {
                 try {
-                    if (cardVideo && !cardVideo.paused) {
-                        cardVideo.pause();
-                    }
-                } catch (_e) {
-                    // Ignorer
-                }
-            }
-
-            function getMatchingCards(filter) {
-                return cards.filter((c) => matchesFilter(c, filter));
+                    if (cardVideo && !cardVideo.paused) cardVideo.pause();
+                } catch (_e) {}
             }
 
             function shuffleIds(ids, avoidId) {
@@ -2701,18 +2039,14 @@
 
             function rebuildBag() {
                 const pool = getMatchingCards(activeFilter);
-                const avoidId = currentCard ? currentCard.id : lastPickedIdByPool.free;
+                const avoidId = currentCard ? currentCard.id : null;
                 bag = shuffleIds(pool.map((c) => c.id), avoidId);
             }
 
             function rebuildTurnBag(turn) {
                 const normalizedTurn = turn === "he" ? "he" : "she";
                 const pool = getPoolForTurn(normalizedTurn);
-                if (pool.length === 0) {
-                    turnIndices[normalizedTurn] = 0;
-                    return;
-                }
-                if (turnIndices[normalizedTurn] >= pool.length || turnIndices[normalizedTurn] < 0) {
+                if (pool.length === 0 || turnIndices[normalizedTurn] >= pool.length || turnIndices[normalizedTurn] < 0) {
                     turnIndices[normalizedTurn] = 0;
                 }
             }
@@ -2729,26 +2063,22 @@
                 const pool = getPoolForTurn(normalizedTurn);
                 if (pool.length === 0) {
                     turnIndices[normalizedTurn] = 0;
-                    return { card: null, remaining: 0, cycled: false, position: 0, total: 0 };
+                    return { card: null, cycled: false, position: 0, total: 0 };
                 }
-
                 let cycled = false;
                 if (turnIndices[normalizedTurn] >= pool.length || turnIndices[normalizedTurn] < 0) {
                     turnIndices[normalizedTurn] = 0;
                     cycled = true;
                 }
-
                 const currentIndex = turnIndices[normalizedTurn];
                 const drawnCard = pool[currentIndex];
                 const nextIndex = currentIndex + 1;
                 const willWrapNext = nextIndex >= pool.length;
                 turnIndices[normalizedTurn] = willWrapNext ? 0 : nextIndex;
-                lastPickedIdByPool[normalizedTurn] = drawnCard.id;
 
                 return {
                     card: drawnCard,
-                    remaining: willWrapNext ? pool.length : (pool.length - nextIndex),
-                    cycled: cycled,
+                    cycled,
                     position: currentIndex + 1,
                     total: pool.length
                 };
@@ -2825,20 +2155,11 @@
                         cardVideo.load();
                         cardVideo.classList.remove("is-visible");
                     }
+                    if (videoFullscreenBtn) videoFullscreenBtn.classList.remove("is-visible");
                     if (cardPrompt) {
-                        if (cards.length === 0) {
-                            cardPrompt.textContent = "Aucune carte dans le paquet. Ouvrez l'éditeur pour en créer ou réinitialiser.";
-                        } else if (gameMode === "free") {
-                            const poolCount = getMatchingCards(activeFilter).length;
-                            if (poolCount === 0) {
-                                cardPrompt.textContent = "Aucune carte ne correspond au filtre « " + getFilterLabel(activeFilter) + " ».";
-                            } else {
-                                cardPrompt.textContent = "Cliquez sur « Carte suivante » pour tirer une carte.";
-                            }
-                        } else {
-                            const turnName = getTurnLabel(currentTurn);
-                            cardPrompt.textContent = "Aucune carte disponible pour le tour « " + turnName + " ». Ajoutez des cartes pour « " + turnName + " » ou « Les deux », ou passez en mode Libre.";
-                        }
+                        cardPrompt.textContent = cards.length === 0
+                            ? "Aucune carte dans le paquet. Ouvrez l'éditeur pour en créer ou réinitialiser."
+                            : "Aucune carte disponible pour cette sélection.";
                         cardPrompt.classList.remove("is-hidden");
                     }
                     applyFaceState();
@@ -2864,23 +2185,17 @@
                     if (currentCard.video) {
                         cardVideo.onerror = () => {
                             cardVideo.classList.remove("is-visible");
-                            if (videoFullscreenBtn) {
-                                videoFullscreenBtn.classList.remove("is-visible");
-                            }
+                            if (videoFullscreenBtn) videoFullscreenBtn.classList.remove("is-visible");
                         };
                         cardVideo.src = currentCard.video;
                         cardVideo.classList.add("is-visible");
-                        if (videoFullscreenBtn) {
-                            videoFullscreenBtn.classList.add("is-visible");
-                        }
+                        if (videoFullscreenBtn) videoFullscreenBtn.classList.add("is-visible");
                     } else {
                         cardVideo.onerror = null;
                         cardVideo.removeAttribute("src");
                         cardVideo.load();
                         cardVideo.classList.remove("is-visible");
-                        if (videoFullscreenBtn) {
-                            videoFullscreenBtn.classList.remove("is-visible");
-                        }
+                        if (videoFullscreenBtn) videoFullscreenBtn.classList.remove("is-visible");
                     }
                 }
 
@@ -2894,10 +2209,7 @@
                     }
                 }
 
-                if (cardScrollBody) {
-                    cardScrollBody.scrollTop = 0;
-                }
-
+                if (cardScrollBody) cardScrollBody.scrollTop = 0;
                 applyFaceState();
             }
 
@@ -2915,63 +2227,39 @@
                         setStageStatus("Tour : " + getTurnLabel(chosenTurn) + " • Aucune carte disponible");
                         return;
                     }
-
                     currentCard = drawResult.card;
                     activeTurnForCard = chosenTurn;
-                    lastPickedIdByPool[chosenTurn] = currentCard.id;
                     currentTurn = chosenTurn === "she" ? "he" : "she";
                     revealed = Boolean(revealNow);
                     renderCurrentCardContent();
-
-                    const turnLabel = getTurnLabel(chosenTurn);
-                    const nextTurnLabel = getTurnLabel(currentTurn);
-                    const posLabel = drawResult.position + "/" + drawResult.total;
-                    if (drawResult.cycled) {
-                        setStageStatus("Alterné • Tour : " + turnLabel + " (" + posLabel + ", reprise au début) • Prochain tour : " + nextTurnLabel);
-                    } else {
-                        setStageStatus("Alterné • Tour : " + turnLabel + " (" + posLabel + ") • Prochain tour : " + nextTurnLabel);
-                    }
+                    setStageStatus("Alterné • Tour : " + getTurnLabel(chosenTurn) + " (" + drawResult.position + "/" + drawResult.total + ")");
                     return;
                 }
 
                 if (gameMode === "random-turn") {
                     const sheCount = getPoolForTurn("she").length;
                     const heCount = getPoolForTurn("he").length;
-
                     if (sheCount === 0 && heCount === 0) {
                         currentCard = null;
                         activeTurnForCard = null;
                         revealed = true;
                         renderCurrentCardContent();
-                        setStageStatus("Aléatoire • Aucune carte disponible pour Elle ou Lui");
+                        setStageStatus("Aléatoire • Aucune carte disponible");
                         return;
                     }
-
-                    let chosenTurn;
-                    if (sheCount > 0 && heCount > 0) {
-                        chosenTurn = Math.random() < 0.5 ? "she" : "he";
-                    } else {
-                        chosenTurn = sheCount > 0 ? "she" : "he";
-                    }
-
+                    const chosenTurn = (sheCount > 0 && heCount > 0)
+                        ? (Math.random() < 0.5 ? "she" : "he")
+                        : (sheCount > 0 ? "she" : "he");
                     const drawResult = drawFromTurnPool(chosenTurn);
                     currentCard = drawResult.card;
                     activeTurnForCard = chosenTurn;
                     currentTurn = chosenTurn;
                     revealed = Boolean(revealNow);
                     renderCurrentCardContent();
-
-                    const turnLabel = getTurnLabel(chosenTurn);
-                    const posLabel = drawResult.position + "/" + drawResult.total;
-                    if (drawResult.cycled) {
-                        setStageStatus("Aléatoire • Tour : " + turnLabel + " (" + posLabel + ", reprise au début)");
-                    } else {
-                        setStageStatus("Aléatoire • Tour : " + turnLabel + " (" + posLabel + ")");
-                    }
+                    setStageStatus("Aléatoire • Tour : " + getTurnLabel(chosenTurn) + " (" + drawResult.position + "/" + drawResult.total + ")");
                     return;
                 }
 
-                // Mode Libre
                 activeTurnForCard = null;
                 const matching = getMatchingCards(activeFilter);
                 if (matching.length === 0) {
@@ -2979,47 +2267,34 @@
                     bag = [];
                     revealed = true;
                     renderCurrentCardContent();
-                    if (activeFilter === "all") {
-                        setStageStatus("0 carte restante");
-                    } else {
-                        setStageStatus("Aucune carte disponible pour le filtre « " + getFilterLabel(activeFilter) + " »");
-                    }
+                    setStageStatus("0 carte disponible");
                     return;
                 }
-
                 const matchingIds = new Set(matching.map((c) => c.id));
                 bag = bag.filter((id) => matchingIds.has(id));
-
                 let reshuffledNow = false;
                 if (bag.length === 0) {
                     rebuildBag();
                     reshuffledNow = true;
                 }
-
                 const nextId = bag.pop();
                 currentCard = matching.find((c) => c.id === nextId) || matching[0];
-                lastPickedIdByPool.free = currentCard.id;
                 revealed = Boolean(revealNow);
                 renderCurrentCardContent();
-
-                const leftCount = bag.length;
-                const filterPrefix = "Filtre " + getFilterLabel(activeFilter) + " (" + getFilterScopeDescription(activeFilter) + ") • ";
-                if (reshuffledNow) {
-                    setStageStatus(filterPrefix + "Paquet remélangé • " + leftCount + " restante(s)");
-                } else {
-                    setStageStatus(filterPrefix + leftCount + " carte(s) restante(s) dans le tirage");
-                }
+                setStageStatus(
+                    "Filtre " + getFilterLabel(activeFilter) + " • " +
+                    (reshuffledNow ? "Paquet remélangé • " : "") +
+                    bag.length + " restante(s)"
+                );
             }
 
-            function setGameMode(nextMode) {
+            function setGameMode(nextMode, collapseAfterChoice) {
                 gameMode = VALID_MODES.includes(nextMode) ? nextMode : "free";
-
                 modePills.forEach((pill) => {
                     const selected = pill.getAttribute("data-mode") === gameMode;
                     pill.classList.toggle("is-active", selected);
                     pill.setAttribute("aria-pressed", selected ? "true" : "false");
                 });
-
                 if (freeFilterBar) {
                     freeFilterBar.classList.toggle("is-hidden", gameMode !== "free");
                 }
@@ -3027,26 +2302,14 @@
                 if (gameMode === "free") {
                     activeTurnForCard = null;
                     rebuildBag();
-                    syncTargetBadges();
                     if (currentCard && !matchesFilter(currentCard, activeFilter)) {
                         pickNextCard(false);
                     } else if (!currentCard && getMatchingCards(activeFilter).length > 0) {
                         pickNextCard(false);
                     } else {
-                        const poolCount = getMatchingCards(activeFilter).length;
-                        if (poolCount === 0) {
-                            currentCard = null;
-                            revealed = true;
-                            renderCurrentCardContent();
-                            setStageStatus(activeFilter === "all" ? "0 carte restante" : "Aucune carte disponible pour le filtre « " + getFilterLabel(activeFilter) + " »");
-                        } else {
-                            setStageStatus("Mode Libre • Filtre " + getFilterLabel(activeFilter) + " (" + getFilterScopeDescription(activeFilter) + ") • " + bag.length + " carte(s) restante(s)");
-                        }
+                        syncTargetBadges();
                     }
-                    return;
-                }
-
-                if (gameMode === "alternating") {
+                } else if (gameMode === "alternating") {
                     currentTurn = "she";
                     activeTurnForCard = "she";
                     rebuildTurnBag("she");
@@ -3055,113 +2318,50 @@
                         pickNextCard(false);
                     } else {
                         syncTargetBadges();
-                        setStageStatus("Mode Alterné • Tour : " + getTurnLabel(currentTurn));
                     }
-                    return;
+                } else {
+                    rebuildTurnBag("she");
+                    rebuildTurnBag("he");
+                    if (!currentCard) {
+                        pickNextCard(false);
+                    } else {
+                        activeTurnForCard = activeTurnForCard || currentTurn;
+                        syncTargetBadges();
+                    }
                 }
 
-                // Mode Aléatoire (Elle ou Lui)
-                rebuildTurnBag("she");
-                rebuildTurnBag("he");
-                if (!currentCard) {
-                    pickNextCard(false);
-                } else {
-                    if (!activeTurnForCard) {
-                        activeTurnForCard = currentTurn;
-                    }
-                    syncTargetBadges();
-                    setStageStatus("Mode Aléatoire • Tour : " + getTurnLabel(activeTurnForCard));
+                if (collapseAfterChoice) {
+                    setOptionsCollapsed(true);
                 }
             }
 
             modePills.forEach((pill) => {
                 pill.addEventListener("click", () => {
-                    setGameMode(pill.getAttribute("data-mode"));
-                    setOptionsCollapsed(true);
+                    setGameMode(pill.getAttribute("data-mode"), true);
                 });
             });
 
-            function setOptionsCollapsed(collapsed) {
-                optionsCollapsed = Boolean(collapsed);
-                const appShell = document.querySelector(".app-shell");
-                if (appShell) {
-                    appShell.classList.toggle("options-collapsed", optionsCollapsed);
-                }
-                if (controlsStack) {
-                    controlsStack.classList.toggle("is-collapsed", optionsCollapsed);
-                }
-                if (topBarActions) {
-                    topBarActions.classList.toggle("is-hidden", optionsCollapsed);
-                }
-                if (toggleOptionsBtn) {
-                    toggleOptionsBtn.setAttribute("aria-expanded", optionsCollapsed ? "false" : "true");
-                }
-                if (toggleOptionsLabel) {
-                    const modeSummary = gameMode === "alternating"
-                        ? "Alterné"
-                        : (gameMode === "random-turn" ? "Aléatoire" : "Libre • " + getFilterLabel(activeFilter));
-                    toggleOptionsLabel.textContent = optionsCollapsed
-                        ? "▾ Options (" + modeSummary + ")"
-                        : "▴ Réduire les options";
-                }
-            }
-
-            if (toggleOptionsBtn) {
-                toggleOptionsBtn.addEventListener("click", () => {
-                    setOptionsCollapsed(!optionsCollapsed);
-                });
-            }
-
             function setActiveFilter(nextFilter) {
-                const normalized = VALID_FILTERS.includes(nextFilter) ? nextFilter : "all";
-                activeFilter = normalized;
-
+                activeFilter = VALID_FILTERS.includes(nextFilter) ? nextFilter : "all";
                 refreshCounters();
-
                 filterPills.forEach((pill) => {
                     const isSelected = pill.getAttribute("data-filter") === activeFilter;
                     pill.classList.toggle("is-active", isSelected);
                     pill.setAttribute("aria-pressed", isSelected ? "true" : "false");
                 });
-
                 rebuildBag();
                 const matching = getMatchingCards(activeFilter);
-                const filterName = getFilterLabel(activeFilter);
-                const scopeDesc = getFilterScopeDescription(activeFilter);
-
                 if (matching.length === 0) {
                     currentCard = null;
                     revealed = true;
                     renderCurrentCardContent();
-                    setStageStatus("Filtre « " + filterName + " » (" + scopeDesc + ") : 0 carte disponible");
+                    setStageStatus("Aucune carte pour le filtre « " + getFilterLabel(activeFilter) + " »");
                     return;
                 }
-
                 if (!currentCard || !matchesFilter(currentCard, activeFilter)) {
                     pickNextCard(false);
-                    setStageStatus(
-                        "Filtre « " +
-                            filterName +
-                            " » (" +
-                            scopeDesc +
-                            ") : " +
-                            matching.length +
-                            " carte(s) • " +
-                            bag.length +
-                            " restante(s)"
-                    );
                 } else {
-                    setStageStatus(
-                        "Filtre « " +
-                            filterName +
-                            " » (" +
-                            scopeDesc +
-                            ") : " +
-                            matching.length +
-                            " carte(s) • " +
-                            bag.length +
-                            " restante(s)"
-                    );
+                    setStageStatus("Filtre « " + getFilterLabel(activeFilter) + " » • " + bag.length + " restante(s)");
                 }
             }
 
@@ -3171,37 +2371,28 @@
                 });
             });
 
-            // Détection de défilement vertical pour ne pas retourner la carte pendant un scroll
             let pointerDownY = 0;
             let movedVertically = false;
-
             if (gameCard) {
                 gameCard.addEventListener("pointerdown", (e) => {
                     pointerDownY = e.clientY;
                     movedVertically = false;
                 }, { passive: true });
-
                 gameCard.addEventListener("pointermove", (e) => {
-                    if (Math.abs(e.clientY - pointerDownY) > 10) {
-                        movedVertically = true;
-                    }
+                    if (Math.abs(e.clientY - pointerDownY) > 10) movedVertically = true;
                 }, { passive: true });
-
                 gameCard.addEventListener("click", (e) => {
                     if (movedVertically) {
                         movedVertically = false;
                         return;
                     }
-                    if (!currentCard || !revealed) {
-                        if (!currentCard) return;
+                    if (!currentCard) return;
+                    if (!revealed) {
                         revealed = true;
                         applyFaceState();
                         return;
                     }
-                    // Les clics sur le lecteur vidéo ne doivent pas retourner la carte
-                    if (e.target && e.target.closest && e.target.closest("video")) {
-                        return;
-                    }
+                    if (e.target && e.target.closest && e.target.closest("video")) return;
                     revealed = false;
                     applyFaceState();
                 });
@@ -3215,39 +2406,14 @@
                 });
             }
 
-            async function requestCardVideoFullscreen() {
-                if (!cardVideo || !currentCard || !currentCard.video) return;
-                try {
-                    if (typeof cardVideo.requestFullscreen === "function") {
-                        await cardVideo.requestFullscreen();
-                        return;
-                    }
-                    if (typeof cardVideo.webkitRequestFullscreen === "function") {
-                        cardVideo.webkitRequestFullscreen();
-                        return;
-                    }
-                    if (typeof cardVideo.webkitEnterFullscreen === "function") {
-                        cardVideo.webkitEnterFullscreen();
-                        return;
-                    }
-                    setStageStatus("Plein écran non pris en charge dans cet environnement.");
-                } catch (_err) {
-                    if (typeof cardVideo.webkitEnterFullscreen === "function") {
-                        try {
-                            cardVideo.webkitEnterFullscreen();
-                            return;
-                        } catch (_iosErr) {
-                            // Ignorer et afficher le message ci-dessous
-                        }
-                    }
-                    setStageStatus("Impossible d'activer le plein écran vidéo ici.");
-                }
-            }
-
-            if (videoFullscreenBtn) {
-                videoFullscreenBtn.addEventListener("click", (e) => {
+            if (videoFullscreenBtn && cardVideo) {
+                videoFullscreenBtn.addEventListener("click", async (e) => {
                     e.stopPropagation();
-                    requestCardVideoFullscreen();
+                    try {
+                        if (typeof cardVideo.requestFullscreen === "function") await cardVideo.requestFullscreen();
+                        else if (typeof cardVideo.webkitRequestFullscreen === "function") await cardVideo.webkitRequestFullscreen();
+                        else if (typeof cardVideo.webkitEnterFullscreen === "function") cardVideo.webkitEnterFullscreen();
+                    } catch (_err) {}
                 });
             }
 
@@ -3261,64 +2427,28 @@
             function restartGameFromStart() {
                 stopCardVideo();
                 resetTimer();
-                lastPickedIdByPool = { free: null, she: null, he: null };
                 turnIndices = { she: 0, he: 0 };
                 currentCard = null;
                 activeTurnForCard = null;
                 revealed = false;
                 currentTurn = "she";
-
                 rebuildBag();
                 rebuildTurnBag("she");
                 rebuildTurnBag("he");
-
                 if (cards.length === 0) {
                     renderCurrentCardContent();
-                    setStageStatus("Partie réinitialisée • 0 carte disponible");
+                    setStageStatus("Partie réinitialisée • 0 carte");
                     return;
                 }
-
-                if (gameMode === "alternating") {
-                    activeTurnForCard = "she";
-                    pickNextCard(false);
-                    if (currentCard) {
-                        setStageStatus("Partie recommencée au début • Mode Alterné • Tour : Elle");
-                    }
-                    return;
-                }
-
-                if (gameMode === "random-turn") {
-                    pickNextCard(false);
-                    if (currentCard) {
-                        setStageStatus("Partie recommencée au début • Mode Aléatoire • Tour : " + getTurnLabel(activeTurnForCard || currentTurn));
-                    }
-                    return;
-                }
-
-                // Mode Libre
+                if (gameMode === "alternating") activeTurnForCard = "she";
                 pickNextCard(false);
-                if (currentCard) {
-                    setStageStatus(
-                        "Partie recommencée au début • Filtre " +
-                            getFilterLabel(activeFilter) +
-                            " • " +
-                            bag.length +
-                            " carte(s) restante(s)"
-                    );
-                }
             }
 
-            if (restartGameBtn) {
-                restartGameBtn.addEventListener("click", restartGameFromStart);
-            }
+            if (restartGameBtn) restartGameBtn.addEventListener("click", restartGameFromStart);
 
-            // Aperçus du formulaire de création
             function refreshDraftPreviews() {
                 if (draftPhotoPreview && draftPhotoThumb && draftPhotoName) {
                     if (pendingImage) {
-                        draftPhotoThumb.onerror = () => {
-                            draftPhotoThumb.style.display = "none";
-                        };
                         draftPhotoThumb.style.display = "block";
                         draftPhotoThumb.src = pendingImage;
                         draftPhotoName.textContent = pendingImageLabel || "Photo prête";
@@ -3329,7 +2459,6 @@
                         draftPhotoPreview.classList.remove("is-visible");
                     }
                 }
-
                 if (draftVideoPreview && draftVideoName) {
                     if (pendingVideo) {
                         draftVideoName.textContent = pendingVideoLabel || pendingVideo;
@@ -3342,15 +2471,12 @@
             }
 
             function clearDraftForm() {
-                if (pendingVideoIsBlob && pendingVideo) {
-                    releaseSessionBlobUrl(pendingVideo);
-                }
+                if (pendingVideoIsBlob && pendingVideo) releaseSessionBlobUrl(pendingVideo);
                 pendingImage = "";
                 pendingImageLabel = "";
                 pendingVideo = "";
                 pendingVideoLabel = "";
                 pendingVideoIsBlob = false;
-
                 if (draftText) draftText.value = "";
                 if (draftImageUrl) draftImageUrl.value = "";
                 if (draftTarget) draftTarget.value = "both";
@@ -3364,14 +2490,11 @@
                     draftPhotoInput.value = "";
                     draftPhotoInput.click();
                 });
-
                 draftPhotoInput.addEventListener("change", async (e) => {
                     const file = e.target.files && e.target.files[0];
                     e.target.value = "";
                     if (!file) return;
-
                     try {
-                        setEditorStatus("Compression de la photo...");
                         pendingImage = await compressPhotoToDataUrl(file);
                         pendingImageLabel = file.name || "Photo compressée";
                         if (draftImageUrl) draftImageUrl.value = "";
@@ -3383,23 +2506,11 @@
                 });
             }
 
-            if (draftImageUrl) {
-                draftImageUrl.addEventListener("change", () => {
-                    const v = draftImageUrl.value.trim();
-                    if (v && isValidUrl(v)) {
-                        pendingImage = v;
-                        pendingImageLabel = v;
-                        refreshDraftPreviews();
-                    }
-                });
-            }
-
             if (removeDraftPhotoBtn) {
                 removeDraftPhotoBtn.addEventListener("click", () => {
                     pendingImage = "";
                     pendingImageLabel = "";
                     if (draftImageUrl) draftImageUrl.value = "";
-                    if (draftPhotoInput) draftPhotoInput.value = "";
                     refreshDraftPreviews();
                 });
             }
@@ -3409,21 +2520,17 @@
                     draftVideoInput.value = "";
                     draftVideoInput.click();
                 });
-
                 draftVideoInput.addEventListener("change", (e) => {
                     const file = e.target.files && e.target.files[0];
                     e.target.value = "";
                     if (!file) return;
-
                     try {
-                        if (pendingVideoIsBlob && pendingVideo) {
-                            releaseSessionBlobUrl(pendingVideo);
-                        }
+                        if (pendingVideoIsBlob && pendingVideo) releaseSessionBlobUrl(pendingVideo);
                         pendingVideo = createSessionBlobUrl(file);
                         pendingVideoLabel = (file.name || "Vidéo locale") + " (session en cours)";
                         pendingVideoIsBlob = true;
                         refreshDraftPreviews();
-                        setEditorStatus("Vidéo locale prête pour cette session");
+                        setEditorStatus("Vidéo locale prête");
                     } catch (_err) {
                         setEditorStatus("Impossible de charger cette vidéo");
                     }
@@ -3432,13 +2539,10 @@
 
             if (removeDraftVideoBtn) {
                 removeDraftVideoBtn.addEventListener("click", () => {
-                    if (pendingVideoIsBlob && pendingVideo) {
-                        releaseSessionBlobUrl(pendingVideo);
-                    }
+                    if (pendingVideoIsBlob && pendingVideo) releaseSessionBlobUrl(pendingVideo);
                     pendingVideo = "";
                     pendingVideoLabel = "";
                     pendingVideoIsBlob = false;
-                    if (draftVideoInput) draftVideoInput.value = "";
                     refreshDraftPreviews();
                 });
             }
@@ -3449,7 +2553,6 @@
                     const textVal = draftText ? draftText.value.trim() : "";
                     const imgUrlVal = draftImageUrl ? draftImageUrl.value.trim() : "";
                     const targetVal = normalizeTarget(draftTarget ? draftTarget.value : "both");
-
                     let finalImage = pendingImage;
                     if (!finalImage && imgUrlVal) {
                         if (!isValidUrl(imgUrlVal)) {
@@ -3458,48 +2561,34 @@
                         }
                         finalImage = imgUrlVal;
                     }
-
-                    const finalVideo = pendingVideo;
-                    const finalVideoLabel = pendingVideoLabel;
-                    const finalIsBlob = pendingVideoIsBlob;
-
-                    if (!textVal && !finalImage && !finalVideo) {
+                    if (!textVal && !finalImage && !pendingVideo) {
                         setEditorStatus("Ajoutez au moins un texte, une photo ou une vidéo locale");
                         return;
                     }
-
                     const newCard = {
                         id: makeId(cards.length),
                         text: textVal,
                         target: targetVal,
                         image: finalImage,
-                        video: finalVideo,
-                        videoName: finalVideoLabel,
-                        isBlobVideo: finalIsBlob
+                        video: pendingVideo,
+                        videoName: pendingVideoLabel,
+                        isBlobVideo: pendingVideoIsBlob
                     };
-
-                    // Transférer le blob vers la carte créée sans le révoquer
                     pendingVideo = "";
                     pendingVideoLabel = "";
                     pendingVideoIsBlob = false;
 
                     cards.unshift(newCard);
-                    if (matchesFilter(newCard, activeFilter)) {
-                        bag.push(newCard.id);
-                    }
+                    if (matchesFilter(newCard, activeFilter)) bag.push(newCard.id);
                     rebuildTurnBag("she");
                     rebuildTurnBag("he");
                     clearDraftForm();
                     persistCards("Carte ajoutée", false);
                     renderEditorList();
-
-                    if (!currentCard) {
-                        pickNextCard(true);
-                    }
+                    if (!currentCard) pickNextCard(true);
                 });
             }
 
-            // Liste des cartes dans l'éditeur
             function clearDropIndicators() {
                 if (!deckListContainer) return;
                 deckListContainer.querySelectorAll(".deck-item").forEach((el) => {
@@ -3515,17 +2604,29 @@
 
                 const [movedCard] = cards.splice(fromIdx, 1);
                 let insertIdx = cards.findIndex((c) => c.id === targetId);
-                if (insertIdx === -1) {
-                    insertIdx = cards.length;
-                } else if (placeAfter) {
-                    insertIdx += 1;
-                }
+                if (insertIdx === -1) insertIdx = cards.length;
+                else if (placeAfter) insertIdx += 1;
 
                 cards.splice(insertIdx, 0, movedCard);
                 rebuildBag();
                 rebuildTurnBag("she");
                 rebuildTurnBag("he");
                 persistCards("Ordre des cartes enregistré", false);
+                return true;
+            }
+
+            function moveCardToIndex(cardId, newIndex) {
+                const fromIdx = cards.findIndex((c) => c.id === cardId);
+                if (fromIdx === -1) return false;
+                const clampedIdx = Math.max(0, Math.min(cards.length - 1, newIndex));
+                if (fromIdx === clampedIdx) return false;
+
+                const [movedCard] = cards.splice(fromIdx, 1);
+                cards.splice(clampedIdx, 0, movedCard);
+                rebuildBag();
+                rebuildTurnBag("she");
+                rebuildTurnBag("he");
+                persistCards("Position mise à jour (#" + (clampedIdx + 1) + ")", false);
                 return true;
             }
 
@@ -3538,10 +2639,8 @@
                 if (cards.length === 0) {
                     const emptyBox = document.createElement("div");
                     emptyBox.className = "empty-deck-box";
-
                     const msg = document.createElement("p");
                     msg.textContent = "Aucune carte dans le paquet actuellement.";
-
                     const restoreBtn = document.createElement("button");
                     restoreBtn.type = "button";
                     restoreBtn.className = "btn btn-save";
@@ -3554,7 +2653,6 @@
                         renderEditorList();
                         pickNextCard(false);
                     });
-
                     emptyBox.appendChild(msg);
                     emptyBox.appendChild(restoreBtn);
                     deckListContainer.appendChild(emptyBox);
@@ -3576,22 +2674,11 @@
                         }
                         draggedCardId = card.id;
                         row.classList.add("is-dragging");
-                        if (e.dataTransfer) {
-                            e.dataTransfer.effectAllowed = "move";
-                            try {
-                                e.dataTransfer.setData("text/plain", card.id);
-                            } catch (_err) {
-                                // Ignorer si restreint
-                            }
-                        }
                     });
 
                     row.addEventListener("dragover", (e) => {
                         if (!draggedCardId || draggedCardId === card.id) return;
                         e.preventDefault();
-                        if (e.dataTransfer) {
-                            e.dataTransfer.dropEffect = "move";
-                        }
                         const rect = row.getBoundingClientRect();
                         const after = e.clientY > rect.top + rect.height / 2;
                         row.classList.toggle("drag-over-top", !after);
@@ -3604,7 +2691,7 @@
 
                     row.addEventListener("drop", (e) => {
                         e.preventDefault();
-                        const sourceId = draggedCardId || (e.dataTransfer ? e.dataTransfer.getData("text/plain") : "");
+                        const sourceId = draggedCardId;
                         const rect = row.getBoundingClientRect();
                         const placeAfter = e.clientY > rect.top + rect.height / 2;
                         clearDropIndicators();
@@ -3629,19 +2716,11 @@
                     dragHandle.type = "button";
                     dragHandle.className = "drag-handle";
                     dragHandle.setAttribute("aria-label", "Déplacer la carte #" + (idx + 1));
-                    dragHandle.title = "Glisser pour déplacer";
                     dragHandle.textContent = "⋮⋮";
 
-                    dragHandle.addEventListener("touchstart", (e) => {
-                        const touch = e.touches && e.touches[0];
-                        if (!touch) return;
-                        touchDragState = {
-                            sourceId: card.id,
-                            targetId: null,
-                            placeAfter: false
-                        };
+                    dragHandle.addEventListener("touchstart", () => {
+                        touchDragState = { sourceId: card.id, targetId: null, placeAfter: false };
                         row.classList.add("is-dragging");
-                        setEditorStatus("Glissez vers la position souhaitée...");
                     }, { passive: true });
 
                     dragHandle.addEventListener("touchmove", (e) => {
@@ -3649,14 +2728,11 @@
                         const touch = e.touches && e.touches[0];
                         if (!touch) return;
                         e.preventDefault();
-
                         const overEl = document.elementFromPoint(touch.clientX, touch.clientY);
                         const targetRow = overEl && overEl.closest ? overEl.closest(".deck-item") : null;
-
                         deckListContainer.querySelectorAll(".deck-item").forEach((el) => {
                             el.classList.remove("drag-over-top", "drag-over-bottom");
                         });
-
                         if (targetRow && targetRow !== row) {
                             const targetId = targetRow.getAttribute("data-card-id");
                             const rect = targetRow.getBoundingClientRect();
@@ -3686,15 +2762,34 @@
                     const idxSpan = document.createElement("span");
                     idxSpan.textContent = "Carte #" + (idx + 1);
 
+                    const posSelect = document.createElement("select");
+                    posSelect.className = "select-control position-select";
+                    posSelect.setAttribute("aria-label", "Position de la carte #" + (idx + 1));
+                    for (let p = 0; p < cards.length; p++) {
+                        const opt = document.createElement("option");
+                        opt.value = String(p);
+                        opt.textContent = "#" + (p + 1);
+                        if (p === idx) opt.selected = true;
+                        posSelect.appendChild(opt);
+                    }
+                    posSelect.addEventListener("change", () => {
+                        const targetPos = parseInt(posSelect.value, 10);
+                        if (Number.isFinite(targetPos) && moveCardToIndex(card.id, targetPos)) {
+                            renderEditorList();
+                        }
+                    });
+
                     titleWrap.appendChild(dragHandle);
                     titleWrap.appendChild(idxSpan);
+                    titleWrap.appendChild(posSelect);
 
                     const tags = [getTargetBadgeLabel(card.target)];
                     if (card.text) tags.push("Texte");
                     if (card.image) tags.push("Photo");
-                    if (card.video) tags.push("Vidéo locale (session)");
+                    if (card.video) tags.push("Vidéo locale");
                     const kindSpan = document.createElement("span");
                     kindSpan.textContent = tags.join(" • ");
+
                     top.appendChild(titleWrap);
                     top.appendChild(kindSpan);
 
@@ -3703,23 +2798,17 @@
 
                     const targetSelect = document.createElement("select");
                     targetSelect.className = "select-control item-target-select";
-                    targetSelect.setAttribute("aria-label", "Attribuer la carte #" + (idx + 1) + " à");
-
-                    const targetOptions = [
+                    [
                         { value: "both", label: "Les deux" },
                         { value: "she", label: "Elle" },
                         { value: "he", label: "Lui" }
-                    ];
-                    targetOptions.forEach((opt) => {
+                    ].forEach((opt) => {
                         const optionEl = document.createElement("option");
                         optionEl.value = opt.value;
                         optionEl.textContent = opt.label;
-                        if (normalizeTarget(card.target) === opt.value) {
-                            optionEl.selected = true;
-                        }
+                        if (normalizeTarget(card.target) === opt.value) optionEl.selected = true;
                         targetSelect.appendChild(optionEl);
                     });
-
                     targetSelect.addEventListener("change", () => {
                         card.target = normalizeTarget(targetSelect.value);
                         rebuildBag();
@@ -3732,7 +2821,6 @@
                             renderCurrentCardContent();
                         }
                     });
-
                     controlsLine.appendChild(targetSelect);
 
                     const textarea = document.createElement("textarea");
@@ -3740,67 +2828,34 @@
                     textarea.rows = 3;
                     textarea.maxLength = 500;
                     textarea.value = card.text || "";
-                    textarea.placeholder = "Texte de la carte...";
-
-                    const saveStateSpan = document.createElement("span");
-                    saveStateSpan.className = "hint-note";
 
                     const commitTextChange = () => {
                         const trimmed = textarea.value.trim();
-                        if (!trimmed && !card.image && !card.video) {
-                            saveStateSpan.textContent = "Ajoutez du texte ou conservez un média";
-                            return;
-                        }
+                        if (!trimmed && !card.image && !card.video) return;
                         card.text = trimmed;
                         persistCards("Carte enregistrée", false);
-                        saveStateSpan.textContent = "Enregistré";
                         if (currentCard && currentCard.id === card.id) {
                             currentCard = card;
                             renderCurrentCardContent();
                         }
                     };
-
                     textarea.addEventListener("input", () => {
-                        fitTextareaHeight(textarea);
-                        commitTextChange();
-                    });
-                    textarea.addEventListener("blur", () => {
                         fitTextareaHeight(textarea);
                         commitTextChange();
                     });
 
                     const mediaLine = document.createElement("div");
                     mediaLine.className = "deck-item-media";
-
                     if (card.image) {
                         const thumb = document.createElement("img");
                         thumb.className = "deck-item-thumb";
                         thumb.alt = "Photo de la carte";
-                        thumb.onerror = () => {
-                            thumb.style.display = "none";
-                        };
                         thumb.src = card.image;
                         mediaLine.appendChild(thumb);
                     }
-
-                    if (card.video) {
-                        const pill = document.createElement("span");
-                        pill.className = "attachment-pill";
-                        pill.textContent = "VIDÉO";
-                        mediaLine.appendChild(pill);
-                    }
-
                     const mediaSummary = document.createElement("span");
                     mediaSummary.className = "deck-item-label";
-                    if (card.image && card.video) {
-                        mediaSummary.textContent = "Photo + " + (card.videoName || "Vidéo locale");
-                    } else if (card.image) {
-                        mediaSummary.textContent = "Photo jointe";
-                    } else if (card.video) {
-                        mediaSummary.textContent = card.videoName || "Vidéo locale";
-                    } else {
-                        mediaSummary.textContent = "Aucun média joint";
-                    }
+                    mediaSummary.textContent = card.image ? "Photo jointe" : (card.video ? (card.videoName || "Vidéo locale") : "Aucun média joint");
                     mediaLine.appendChild(mediaSummary);
 
                     const itemPhotoInput = document.createElement("input");
@@ -3816,15 +2871,6 @@
                     const actionsLine = document.createElement("div");
                     actionsLine.className = "deck-item-actions";
 
-                    const editFocusBtn = document.createElement("button");
-                    editFocusBtn.type = "button";
-                    editFocusBtn.className = "btn btn-ghost";
-                    editFocusBtn.textContent = "Modifier";
-                    editFocusBtn.addEventListener("click", () => {
-                        textarea.focus();
-                        commitTextChange();
-                    });
-
                     const photoBtn = document.createElement("button");
                     photoBtn.type = "button";
                     photoBtn.className = "btn btn-ghost";
@@ -3833,13 +2879,11 @@
                         itemPhotoInput.value = "";
                         itemPhotoInput.click();
                     });
-
                     itemPhotoInput.addEventListener("change", async (e) => {
                         const file = e.target.files && e.target.files[0];
                         e.target.value = "";
                         if (!file) return;
                         try {
-                            setEditorStatus("Compression de la photo...");
                             card.image = await compressPhotoToDataUrl(file);
                             persistCards("Photo mise à jour", false);
                             renderEditorList();
@@ -3860,19 +2904,16 @@
                         itemVideoInput.value = "";
                         itemVideoInput.click();
                     });
-
                     itemVideoInput.addEventListener("change", (e) => {
                         const file = e.target.files && e.target.files[0];
                         e.target.value = "";
                         if (!file) return;
                         try {
-                            if (card.isBlobVideo && card.video) {
-                                releaseSessionBlobUrl(card.video);
-                            }
+                            if (card.isBlobVideo && card.video) releaseSessionBlobUrl(card.video);
                             card.video = createSessionBlobUrl(file);
                             card.videoName = (file.name || "Vidéo locale") + " (session en cours)";
                             card.isBlobVideo = true;
-                            persistCards("Vidéo locale associée pour cette session", false);
+                            persistCards("Vidéo locale associée", false);
                             renderEditorList();
                             if (currentCard && currentCard.id === card.id) {
                                 currentCard = card;
@@ -3888,76 +2929,20 @@
                     deleteBtn.className = "btn btn-remove";
                     deleteBtn.textContent = "Supprimer";
                     deleteBtn.addEventListener("click", () => {
-                        if (!card.text && !card.image && !card.video) {
-                            return;
-                        }
-                        if (card.isBlobVideo && card.video) {
-                            releaseSessionBlobUrl(card.video);
-                        }
+                        if (card.isBlobVideo && card.video) releaseSessionBlobUrl(card.video);
                         cards = cards.filter((item) => item.id !== card.id);
-                        if (currentCard && currentCard.id === card.id) {
-                            currentCard = null;
-                        }
+                        if (currentCard && currentCard.id === card.id) currentCard = null;
                         rebuildBag();
                         rebuildTurnBag("she");
                         rebuildTurnBag("he");
                         persistCards("Carte supprimée", cards.length === 0);
                         renderEditorList();
-                        if (!currentCard && cards.length > 0) {
-                            pickNextCard(false);
-                        } else if (cards.length === 0) {
-                            renderCurrentCardContent();
-                        }
+                        if (!currentCard && cards.length > 0) pickNextCard(false);
+                        else if (cards.length === 0) renderCurrentCardContent();
                     });
 
-                    actionsLine.appendChild(editFocusBtn);
                     actionsLine.appendChild(photoBtn);
                     actionsLine.appendChild(videoBtn);
-                    if (card.image) {
-                        const removePhotoBtn = document.createElement("button");
-                        removePhotoBtn.type = "button";
-                        removePhotoBtn.className = "btn btn-remove";
-                        removePhotoBtn.textContent = "Retirer photo";
-                        removePhotoBtn.addEventListener("click", () => {
-                            if (!card.text && !card.video) {
-                                setEditorStatus("Ajoutez un texte ou une vidéo avant de retirer la photo");
-                                return;
-                            }
-                            card.image = "";
-                            persistCards("Photo retirée", false);
-                            renderEditorList();
-                            if (currentCard && currentCard.id === card.id) {
-                                currentCard = card;
-                                renderCurrentCardContent();
-                            }
-                        });
-                        actionsLine.appendChild(removePhotoBtn);
-                    }
-                    if (card.video) {
-                        const removeVideoBtn = document.createElement("button");
-                        removeVideoBtn.type = "button";
-                        removeVideoBtn.className = "btn btn-remove";
-                        removeVideoBtn.textContent = "Retirer vidéo";
-                        removeVideoBtn.addEventListener("click", () => {
-                            if (!card.text && !card.image) {
-                                setEditorStatus("Ajoutez un texte ou une photo avant de retirer la vidéo");
-                                return;
-                            }
-                            if (card.isBlobVideo && card.video) {
-                                releaseSessionBlobUrl(card.video);
-                            }
-                            card.video = "";
-                            card.videoName = "";
-                            card.isBlobVideo = false;
-                            persistCards("Vidéo retirée", false);
-                            renderEditorList();
-                            if (currentCard && currentCard.id === card.id) {
-                                currentCard = card;
-                                renderCurrentCardContent();
-                            }
-                        });
-                        actionsLine.appendChild(removeVideoBtn);
-                    }
                     actionsLine.appendChild(deleteBtn);
 
                     row.appendChild(top);
@@ -3967,161 +2952,41 @@
                     row.appendChild(itemPhotoInput);
                     row.appendChild(itemVideoInput);
                     row.appendChild(actionsLine);
-                    if (saveStateSpan.textContent) {
-                        row.appendChild(saveStateSpan);
-                    }
 
                     deckListContainer.appendChild(row);
                     requestAnimationFrame(() => fitTextareaHeight(textarea));
                 });
             }
 
-            function buildExportPayload(sourceCards) {
-                const exportedCards = sourceCards.map((c, idx) => {
-                    const hasLocalBlob = Boolean(c.isBlobVideo || (typeof c.video === "string" && c.video.startsWith("blob:")));
-                    const cleanVideo = hasLocalBlob ? "" : (c.video || "");
-                    return {
-                        id: c.id || makeId(idx),
-                        text: c.text || "",
-                        target: normalizeTarget(c.target),
-                        image: c.image || "",
-                        video: cleanVideo,
-                        videoName: hasLocalBlob ? (c.videoName || "Vidéo locale") : (c.videoName || ""),
-                        localVideoSessionOnly: hasLocalBlob
-                    };
-                });
-
-                return {
-                    app: "Soirée intime",
-                    version: 3,
-                    exportedAt: new Date().toISOString(),
-                    count: exportedCards.length,
-                    cards: exportedCards
-                };
-            }
-
-            function formatTimestampForFilename(dateObj) {
-                const pad = (n) => String(n).padStart(2, "0");
-                return (
-                    dateObj.getFullYear() +
-                    "-" +
-                    pad(dateObj.getMonth() + 1) +
-                    "-" +
-                    pad(dateObj.getDate()) +
-                    "_" +
-                    pad(dateObj.getHours()) +
-                    "-" +
-                    pad(dateObj.getMinutes()) +
-                    "-" +
-                    pad(dateObj.getSeconds())
-                );
-            }
-
             function exportCardsToJson() {
                 try {
-                    const payload = buildExportPayload(cards);
-                    const jsonText = JSON.stringify(payload, null, 2);
-                    const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+                    const payload = {
+                        app: "Soirée intime",
+                        version: 1,
+                        exportedAt: new Date().toISOString(),
+                        count: cards.length,
+                        cards: cards.map((c, idx) => ({
+                            id: c.id || makeId(idx),
+                            text: c.text || "",
+                            target: normalizeTarget(c.target),
+                            image: c.image || "",
+                            video: c.isBlobVideo ? "" : (c.video || ""),
+                            videoName: c.videoName || ""
+                        }))
+                    };
+                    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
                     const url = URL.createObjectURL(blob);
-
                     const link = document.createElement("a");
                     link.href = url;
-                    link.download = "soiree-intime_" + formatTimestampForFilename(new Date()) + ".json";
+                    link.download = "soiree-intime.json";
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
-
-                    setTimeout(() => {
-                        try {
-                            URL.revokeObjectURL(url);
-                        } catch (_e) {
-                            // Ignorer
-                        }
-                    }, 1200);
-
-                    const blobCount = cards.filter(
-                        (c) => Boolean(c.isBlobVideo || (typeof c.video === "string" && c.video.startsWith("blob:")))
-                    ).length;
-
-                    if (blobCount > 0) {
-                        setEditorStatus(
-                            "Export JSON réussi (" +
-                                payload.count +
-                                " carte(s)). Note : " +
-                                blobCount +
-                                " vidéo(s) locale(s) de session ne sont pas réimportables hors session."
-                        );
-                    } else {
-                        setEditorStatus("Export JSON réussi (" + payload.count + " carte(s) exportée(s)).");
-                    }
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    setEditorStatus("Export JSON réussi (" + payload.count + " carte(s)).");
                 } catch (_err) {
-                    setEditorStatus("Erreur lors de l'exportation du fichier JSON.");
+                    setEditorStatus("Erreur lors de l'exportation JSON.");
                 }
-            }
-
-            function extractRawEntriesFromJson(parsed) {
-                if (Array.isArray(parsed)) {
-                    return { entries: parsed, error: "" };
-                }
-                if (parsed && typeof parsed === "object" && Array.isArray(parsed.cards)) {
-                    return { entries: parsed.cards, error: "" };
-                }
-                return {
-                    entries: [],
-                    error: "Structure JSON invalide : un tableau de cartes ou un objet contenant « cards » est attendu."
-                };
-            }
-
-            function sanitizeImportedEntry(rawEntry, index) {
-                if (typeof rawEntry === "string") {
-                    const text = rawEntry.trim();
-                    if (!text) return null;
-                    return {
-                        id: makeId(index),
-                        text: text,
-                        target: "both",
-                        image: "",
-                        video: "",
-                        videoName: "",
-                        isBlobVideo: false
-                    };
-                }
-
-                if (!rawEntry || typeof rawEntry !== "object" || Array.isArray(rawEntry)) {
-                    return null;
-                }
-
-                const hasText = typeof rawEntry.text === "string";
-                const hasPrompt = typeof rawEntry.prompt === "string";
-                const rawText = hasText ? rawEntry.text.trim() : (hasPrompt ? rawEntry.prompt.trim() : "");
-
-                const rawTarget = typeof rawEntry.target === "string"
-                    ? rawEntry.target
-                    : (typeof rawEntry.forWho === "string" ? rawEntry.forWho : "both");
-                const target = normalizeTarget(rawTarget);
-
-                const rawImage = typeof rawEntry.image === "string" ? rawEntry.image.trim() : "";
-                const image = rawImage && isValidUrl(rawImage) ? rawImage : "";
-
-                const rawVideo = typeof rawEntry.video === "string" ? rawEntry.video.trim() : "";
-                const isBlob = rawVideo.startsWith("blob:") || Boolean(rawEntry.isBlobVideo);
-                const video = !isBlob && rawVideo && isValidUrl(rawVideo) ? rawVideo : "";
-                const videoName = video && typeof rawEntry.videoName === "string" ? rawEntry.videoName.trim() : "";
-
-                if (!rawText && !image && !video) {
-                    return null;
-                }
-
-                const rawId = typeof rawEntry.id === "string" ? rawEntry.id.trim() : "";
-                return {
-                    id: rawId || makeId(index),
-                    text: rawText,
-                    target: target,
-                    image: image,
-                    video: video,
-                    videoName: videoName,
-                    isBlobVideo: false
-                };
             }
 
             function setImportMode(nextMode) {
@@ -4133,156 +2998,59 @@
                 });
             }
 
-            function applyImportedCards(validEntries, ignoredCount, totalCount) {
-                const existingIds = new Set(cards.map((c) => c.id));
-                const normalizedIncoming = validEntries.map((entry, idx) => {
-                    let uniqueId = entry.id;
-                    if (importMode === "merge" && existingIds.has(uniqueId)) {
-                        uniqueId = makeId(idx + cards.length);
-                    }
-                    existingIds.add(uniqueId);
-                    return {
-                        ...entry,
-                        id: uniqueId
-                    };
-                });
-
-                if (importMode === "replace") {
-                    cards.forEach((c) => {
-                        if (c.isBlobVideo && c.video) {
-                            releaseSessionBlobUrl(c.video);
-                        }
-                    });
-                    cards = normalizedIncoming;
-                } else {
-                    cards = cards.concat(normalizedIncoming);
-                }
-
-                rebuildBag();
-                rebuildTurnBag("she");
-                rebuildTurnBag("he");
-
-                const modeLabel = importMode === "replace" ? "Remplacement" : "Fusion";
-                const isExplicitEmpty = cards.length === 0;
-                persistCards(
-                    modeLabel +
-                        " : " +
-                        normalizedIncoming.length +
-                        " carte(s) importée(s) sur " +
-                        totalCount +
-                        " (" +
-                        ignoredCount +
-                        " ignorée(s))",
-                    isExplicitEmpty
-                );
-
-                if (currentCard) {
-                    const updated = cards.find((c) => c.id === currentCard.id);
-                    currentCard = updated || null;
-                }
-                if (!currentCard && cards.length > 0) {
-                    pickNextCard(false);
-                } else {
-                    renderCurrentCardContent();
-                }
-
-                renderEditorList();
-            }
-
-            function handleJsonFileSelected(file) {
-                if (!file) return;
-                if (typeof FileReader === "undefined") {
-                    setEditorStatus("Lecture de fichier JSON impossible dans ce navigateur.");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onerror = () => {
-                    setEditorStatus("Erreur de lecture du fichier sélectionné.");
-                };
-                reader.onload = (ev) => {
-                    try {
-                        const content = typeof ev.target.result === "string" ? ev.target.result : "";
-                        const parsed = JSON.parse(content);
-                        const extracted = extractRawEntriesFromJson(parsed);
-                        if (extracted.error) {
-                            setEditorStatus(extracted.error);
-                            return;
-                        }
-
-                        const totalEntries = extracted.entries.length;
-                        const validEntries = [];
-                        let ignoredCount = 0;
-
-                        extracted.entries.forEach((item, idx) => {
-                            const clean = sanitizeImportedEntry(item, idx);
-                            if (clean) {
-                                validEntries.push(clean);
-                            } else {
-                                ignoredCount += 1;
-                            }
-                        });
-
-                        if (validEntries.length === 0 && importMode === "merge") {
-                            setEditorStatus(
-                                "Aucune carte valide trouvée dans le JSON (" +
-                                    ignoredCount +
-                                    " entrée(s) ignorée(s)). Paquet inchangé."
-                            );
-                            return;
-                        }
-
-                        applyImportedCards(validEntries, ignoredCount, totalEntries);
-                    } catch (_err) {
-                        setEditorStatus("Fichier JSON invalide : impossible d'analyser le contenu.");
-                    }
-                };
-                reader.readAsText(file, "utf-8");
-            }
-
-            if (exportJsonBtn) {
-                exportJsonBtn.addEventListener("click", exportCardsToJson);
-            }
-
             importModeBtns.forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    setImportMode(btn.getAttribute("data-import-mode"));
-                });
+                btn.addEventListener("click", () => setImportMode(btn.getAttribute("data-import-mode")));
             });
+
+            if (exportJsonBtn) exportJsonBtn.addEventListener("click", exportCardsToJson);
 
             if (importJsonBtn && importJsonInput) {
                 importJsonBtn.addEventListener("click", () => {
                     importJsonInput.value = "";
                     importJsonInput.click();
                 });
-
                 importJsonInput.addEventListener("change", (e) => {
                     const file = e.target.files && e.target.files[0];
                     e.target.value = "";
-                    handleJsonFileSelected(file);
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        try {
+                            const parsed = JSON.parse(String(ev.target.result || ""));
+                            const rawList = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.cards) ? parsed.cards : null);
+                            if (!rawList) {
+                                setEditorStatus("Format JSON non reconnu.");
+                                return;
+                            }
+                            const cleaned = rawList.map((item, idx) => sanitizeCard(item, idx)).filter(Boolean);
+                            if (importMode === "replace") {
+                                cards = cleaned;
+                            } else {
+                                cards = cards.concat(cleaned);
+                            }
+                            rebuildBag();
+                            rebuildTurnBag("she");
+                            rebuildTurnBag("he");
+                            persistCards(cleaned.length + " carte(s) importée(s)", cards.length === 0);
+                            renderEditorList();
+                            if (!currentCard && cards.length > 0) pickNextCard(false);
+                        } catch (_err) {
+                            setEditorStatus("Fichier JSON invalide.");
+                        }
+                    };
+                    reader.readAsText(file, "utf-8");
                 });
             }
 
-            // Réinitialisation par défaut en 2 clics
             if (resetDefaultBtn) {
                 resetDefaultBtn.addEventListener("click", () => {
                     if (!confirmResetStep) {
                         confirmResetStep = true;
                         resetDefaultBtn.textContent = "Confirmer la réinitialisation";
-                        setEditorStatus("Cliquez à nouveau sur « Confirmer la réinitialisation » pour restaurer le paquet.");
-                        if (resetTimerId) clearTimeout(resetTimerId);
-                        resetTimerId = setTimeout(() => {
-                            clearResetConfirmation();
-                        }, 4500);
+                        resetTimerId = setTimeout(clearResetConfirmation, 4500);
                         return;
                     }
-
                     clearResetConfirmation();
-                    cards.forEach((c) => {
-                        if (c.isBlobVideo && c.video) {
-                            releaseSessionBlobUrl(c.video);
-                        }
-                    });
                     clearDraftForm();
                     cards = getDefaultDeck();
                     rebuildBag();
@@ -4299,71 +3067,42 @@
                 clearResetConfirmation();
                 refreshCounters();
                 renderEditorList();
-                setEditorStatus(startupNotice ? startupNotice + " (" + activeStorageBackend + ")" : "Stockage : " + activeStorageBackend);
-                if (editorBackdrop) {
-                    editorBackdrop.classList.add("is-open");
-                }
-                if (draftText) {
-                    requestAnimationFrame(() => draftText.focus());
-                }
+                setEditorStatus("Stockage : " + activeStorageBackend);
+                if (editorBackdrop) editorBackdrop.classList.add("is-open");
             }
 
             function closeEditor() {
                 clearResetConfirmation();
-                if (editorBackdrop) {
-                    editorBackdrop.classList.remove("is-open");
-                }
+                if (editorBackdrop) editorBackdrop.classList.remove("is-open");
                 if (currentCard) {
-                    const stillThere = cards.find((c) => c.id === currentCard.id);
-                    currentCard = stillThere || cards[0] || null;
+                    currentCard = cards.find((c) => c.id === currentCard.id) || cards[0] || null;
                 } else if (cards.length > 0) {
                     currentCard = cards[0];
                 }
                 renderCurrentCardContent();
             }
 
-            if (openEditorBtn) {
-                openEditorBtn.addEventListener("click", openEditor);
-            }
-            if (closeEditorXBtn) {
-                closeEditorXBtn.addEventListener("click", closeEditor);
-            }
-            if (closeEditorBtn) {
-                closeEditorBtn.addEventListener("click", closeEditor);
-            }
+            if (openEditorBtn) openEditorBtn.addEventListener("click", openEditor);
+            if (closeEditorXBtn) closeEditorXBtn.addEventListener("click", closeEditor);
+            if (closeEditorBtn) closeEditorBtn.addEventListener("click", closeEditor);
             if (editorBackdrop) {
                 editorBackdrop.addEventListener("click", (e) => {
-                    if (e.target === editorBackdrop) {
-                        closeEditor();
-                    }
+                    if (e.target === editorBackdrop) closeEditor();
                 });
             }
             if (editorSheet) {
-                editorSheet.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                });
+                editorSheet.addEventListener("click", (e) => e.stopPropagation());
             }
 
-            document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape" && editorBackdrop && editorBackdrop.classList.contains("is-open")) {
-                    closeEditor();
-                }
-            });
-
-            // Démarrage initial
             resetTimer(30);
             setImportMode("merge");
             setActiveFilter("all");
-            setGameMode("free");
-            setOptionsCollapsed(false);
+            setGameMode("free", false);
             refreshCounters();
             rebuildBag();
             rebuildTurnBag("she");
             rebuildTurnBag("he");
             pickNextCard(false);
-            if (startupNotice) {
-                setStageStatus(startupNotice);
-            }
         })();
     </script>
 </body>
