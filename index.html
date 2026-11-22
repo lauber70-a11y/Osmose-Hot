@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Velours &amp; Secrets</title>
+    <title>Soirée intime</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
     <style>
         /* Palette sombre velours et or */
         :root {
@@ -53,25 +56,39 @@
             margin: 0 auto;
             padding: 18px 16px 24px 16px;
             display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: 16px;
+            grid-template-rows: auto auto 1fr auto;
+            gap: 14px;
             align-items: center;
         }
 
         .top-bar {
             width: 100%;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            text-align: center;
             gap: 12px;
         }
 
+        .top-bar-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
         .brand-title {
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: clamp(1.35rem, 4vw, 1.85rem);
-            font-weight: 600;
-            letter-spacing: 0.08em;
+            width: 100%;
+            text-align: center;
+            font-family: "Dancing Script", "Brush Script MT", cursive;
+            font-size: clamp(2.1rem, 5.5vw, 2.9rem);
+            font-weight: 700;
+            letter-spacing: 0.03em;
             color: var(--gold);
+            text-shadow: 0 4px 18px rgba(212, 175, 55, 0.24);
         }
 
         .btn {
@@ -120,6 +137,27 @@
             border-color: var(--gold);
             color: var(--gold);
             background: var(--card-elevated);
+        }
+
+        .btn-ambient {
+            background: var(--card-surface);
+            color: var(--text-secondary);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-ambient:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: var(--card-elevated);
+        }
+
+        .btn-ambient.is-playing {
+            background: var(--gold-soft);
+            color: var(--gold);
+            border-color: var(--gold);
+            box-shadow: 0 0 18px rgba(212, 175, 55, 0.2);
         }
 
         /* Sélecteur discret de filtre de tirage sur l'écran principal */
@@ -238,8 +276,8 @@
         .game-card {
             width: 100%;
             max-width: 460px;
-            min-height: 410px;
-            max-height: 64dvh;
+            min-height: 400px;
+            max-height: 62dvh;
             background: linear-gradient(160deg, var(--card-elevated) 0%, var(--card-surface) 100%);
             border: 1px solid var(--gold-line);
             border-radius: var(--radius-card);
@@ -299,9 +337,10 @@
         }
 
         .card-back-heading {
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 1.35rem;
-            letter-spacing: 0.08em;
+            font-family: "Dancing Script", "Brush Script MT", cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
             color: var(--gold);
         }
 
@@ -494,6 +533,114 @@
             color: var(--text-secondary);
             text-align: center;
             min-height: 1.15em;
+        }
+
+        /* Petit minuteur discret avec cloche de fin */
+        .timer-dock {
+            width: 100%;
+            max-width: 460px;
+            padding: 8px 12px;
+            border-radius: var(--radius-control);
+            background: rgba(27, 17, 22, 0.78);
+            border: 1px solid rgba(212, 175, 55, 0.24);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .timer-presets {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .timer-preset-btn {
+            min-height: 32px;
+            padding: 4px 9px;
+            border-radius: var(--radius-small);
+            border: 1px solid transparent;
+            background: rgba(11, 7, 9, 0.55);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .timer-preset-btn:hover {
+            color: var(--text-primary);
+            border-color: rgba(212, 175, 55, 0.28);
+        }
+
+        .timer-preset-btn.is-active {
+            background: var(--gold-soft);
+            color: var(--gold);
+            border-color: var(--gold-line);
+        }
+
+        .timer-readout {
+            min-width: 58px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--gold);
+            padding: 3px 8px;
+            border-radius: var(--radius-small);
+            background: rgba(11, 7, 9, 0.68);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+        }
+
+        .timer-readout.is-finished {
+            color: #140b0f;
+            background: var(--gold);
+            border-color: var(--gold-bright);
+            animation: pulseBell 0.5s ease-in-out 2;
+        }
+
+        @keyframes pulseBell {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.07);
+            }
+        }
+
+        .timer-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-timer {
+            min-height: 34px;
+            padding: 5px 11px;
+            border-radius: var(--radius-small);
+            border: 1px solid var(--gold-line);
+            background: var(--card-surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .btn-timer:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .btn-timer-start {
+            background: var(--gold-soft);
+            color: var(--gold);
         }
 
         /* Éditeur / gestionnaire spacieux */
@@ -753,6 +900,57 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            transition: border-color 0.14s ease, opacity 0.14s ease, box-shadow 0.14s ease;
+        }
+
+        .deck-item.is-dragging {
+            opacity: 0.55;
+            border-color: var(--gold);
+        }
+
+        .deck-item.drag-over-top {
+            border-top: 3px solid var(--gold);
+            box-shadow: 0 -6px 0 -3px var(--gold);
+        }
+
+        .deck-item.drag-over-bottom {
+            border-bottom: 3px solid var(--gold);
+            box-shadow: 0 6px 0 -3px var(--gold);
+        }
+
+        .drag-handle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            min-height: 36px;
+            padding: 4px 8px;
+            border-radius: var(--radius-small);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            background: rgba(11, 7, 9, 0.65);
+            color: var(--gold);
+            font-size: 1rem;
+            line-height: 1;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            flex-shrink: 0;
+        }
+
+        .drag-handle:hover {
+            border-color: var(--gold);
+            background: var(--gold-soft);
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .deck-item-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
         }
 
         .deck-item-top {
@@ -915,6 +1113,24 @@
                 gap: 12px;
             }
 
+            .top-bar {
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .brand-title {
+                width: 100%;
+                text-align: center;
+            }
+
+            .top-bar-actions {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
             .create-row {
                 grid-template-columns: 1fr;
             }
@@ -958,8 +1174,11 @@
 <body>
     <div class="app-shell">
         <header class="top-bar">
-            <h1 class="brand-title">Velours &amp; Secrets</h1>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <h1 class="brand-title">Soirée intime</h1>
+            <div class="top-bar-actions">
+                <button type="button" class="btn btn-ambient" id="ambientToggleBtn" aria-pressed="false" aria-label="Activer ou couper la musique d'ambiance douce">
+                    ♪ Ambiance : Off
+                </button>
                 <button type="button" class="btn btn-restart" id="restartGameBtn" aria-label="Recommencer la partie au début">
                     Recommencer
                 </button>
@@ -988,7 +1207,7 @@
             <article class="game-card" id="gameCard" aria-label="Carte active">
                 <div class="card-face card-back is-active" id="cardBack">
                     <div class="card-emblem" aria-hidden="true">✦</div>
-                    <div class="card-back-heading">Velours &amp; Secrets</div>
+                    <div class="card-back-heading">Soirée intime</div>
                     <span class="turn-indicator is-hidden" id="backTurnIndicator">Tour : Elle</span>
                     <span class="target-badge is-hidden" id="backTargetBadge">Pour les deux</span>
                     <p class="card-back-tip">Touchez la carte ou cliquez sur « Retourner » pour révéler</p>
@@ -1017,6 +1236,20 @@
             <div class="controls-row">
                 <button type="button" class="btn btn-flip" id="flipCardBtn">Retourner</button>
                 <button type="button" class="btn btn-next" id="nextCardBtn">Carte suivante</button>
+            </div>
+            <div class="timer-dock" aria-label="Minuteur manuel">
+                <div class="timer-presets" role="group" aria-label="Durée du minuteur">
+                    <button type="button" class="timer-preset-btn is-active" data-seconds="30">30 s</button>
+                    <button type="button" class="timer-preset-btn" data-seconds="60">1 min</button>
+                    <button type="button" class="timer-preset-btn" data-seconds="120">2 min</button>
+                    <button type="button" class="timer-preset-btn" data-seconds="180">3 min</button>
+                    <button type="button" class="timer-preset-btn" data-seconds="300">5 min</button>
+                </div>
+                <span class="timer-readout" id="timerDisplay" aria-live="off">00:30</span>
+                <div class="timer-actions">
+                    <button type="button" class="btn-timer btn-timer-start" id="timerToggleBtn">Démarrer</button>
+                    <button type="button" class="btn-timer" id="timerResetBtn" aria-label="Réinitialiser le minuteur">Reset</button>
+                </div>
             </div>
             <p class="status-caption" id="stageStatus" aria-live="polite"></p>
         </footer>
@@ -1481,6 +1714,7 @@
 
             // Références DOM
             const deckCountText = document.getElementById("deckCountText");
+            const ambientToggleBtn = document.getElementById("ambientToggleBtn");
             const restartGameBtn = document.getElementById("restartGameBtn");
             const openEditorBtn = document.getElementById("openEditorBtn");
             const modePills = Array.from(document.querySelectorAll(".mode-pill"));
@@ -1503,6 +1737,10 @@
             const flipCardBtn = document.getElementById("flipCardBtn");
             const nextCardBtn = document.getElementById("nextCardBtn");
             const stageStatus = document.getElementById("stageStatus");
+            const timerPresetBtns = Array.from(document.querySelectorAll(".timer-preset-btn"));
+            const timerDisplay = document.getElementById("timerDisplay");
+            const timerToggleBtn = document.getElementById("timerToggleBtn");
+            const timerResetBtn = document.getElementById("timerResetBtn");
 
             const editorBackdrop = document.getElementById("editorBackdrop");
             const editorSheet = document.getElementById("editorSheet");
@@ -1543,7 +1781,7 @@
             let currentTurn = "she";
             let activeTurnForCard = null;
             let bag = [];
-            let turnBags = { she: [], he: [] };
+            let turnIndices = { she: 0, he: 0 };
             let lastPickedIdByPool = { free: null, she: null, he: null };
             let currentCard = null;
             let revealed = false;
@@ -1552,6 +1790,261 @@
             let confirmResetStep = false;
             let resetTimerId = null;
             let importMode = "merge";
+            let draggedCardId = null;
+            let touchDragState = null;
+
+            // État du minuteur manuel
+            let timerDurationSec = 30;
+            let timerRemainingSec = 30;
+            let timerIntervalId = null;
+            let sharedAudioCtx = null;
+
+            // Générateur de musique d'ambiance douce (nappe harmonique feutrée via Web Audio)
+            let ambientEngine = null;
+            let isAmbientPlaying = false;
+
+            function ensureAudioContext() {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return null;
+                if (!sharedAudioCtx) {
+                    sharedAudioCtx = new AudioCtx();
+                }
+                if (sharedAudioCtx.state === "suspended") {
+                    sharedAudioCtx.resume();
+                }
+                return sharedAudioCtx;
+            }
+
+            function updateAmbientButtonUI() {
+                if (!ambientToggleBtn) return;
+                ambientToggleBtn.classList.toggle("is-playing", isAmbientPlaying);
+                ambientToggleBtn.setAttribute("aria-pressed", isAmbientPlaying ? "true" : "false");
+                ambientToggleBtn.textContent = isAmbientPlaying ? "♪ Ambiance : On" : "♪ Ambiance : Off";
+            }
+
+            function startAmbientMusic() {
+                const ctx = ensureAudioContext();
+                if (!ctx) {
+                    setStageStatus("Audio non pris en charge par ce navigateur.");
+                    return;
+                }
+                if (isAmbientPlaying && ambientEngine) return;
+
+                const now = ctx.currentTime;
+                const masterGain = ctx.createGain();
+                masterGain.gain.setValueAtTime(0.0001, now);
+                masterGain.gain.exponentialRampToValueAtTime(0.11, now + 2.2);
+
+                const lowpass = ctx.createBiquadFilter();
+                lowpass.type = "lowpass";
+                lowpass.frequency.setValueAtTime(520, now);
+                lowpass.Q.setValueAtTime(0.8, now);
+
+                // Modulation lente du filtre pour un effet de respiration velouté
+                const lfo = ctx.createOscillator();
+                const lfoGain = ctx.createGain();
+                lfo.type = "sine";
+                lfo.frequency.setValueAtTime(0.07, now);
+                lfoGain.gain.setValueAtTime(160, now);
+                lfo.connect(lfoGain);
+                lfoGain.connect(lowpass.frequency);
+                lfo.start(now);
+
+                lowpass.connect(masterGain);
+                masterGain.connect(ctx.destination);
+
+                // Accords doux (Ré mineur 9 -> Sib majeur 7 -> Fa majeur 9 -> Do sus2)
+                const chordProgression = [
+                    [146.83, 220.0, 261.63, 329.63],
+                    [116.54, 174.61, 220.0, 293.66],
+                    [174.61, 220.0, 261.63, 329.63],
+                    [130.81, 196.0, 293.66, 329.63]
+                ];
+
+                let chordIndex = 0;
+                const voices = chordProgression[0].map((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const voiceGain = ctx.createGain();
+                    osc.type = idx % 2 === 0 ? "sine" : "triangle";
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc.detune.setValueAtTime((idx - 1.5) * 4, now);
+                    voiceGain.gain.setValueAtTime(idx === 0 ? 0.34 : 0.22, now);
+                    osc.connect(voiceGain);
+                    voiceGain.connect(lowpass);
+                    osc.start(now);
+                    return osc;
+                });
+
+                const chordTimer = setInterval(() => {
+                    if (!sharedAudioCtx || !isAmbientPlaying) return;
+                    chordIndex = (chordIndex + 1) % chordProgression.length;
+                    const nextChord = chordProgression[chordIndex];
+                    const t = sharedAudioCtx.currentTime;
+                    voices.forEach((osc, i) => {
+                        const targetFreq = nextChord[i] || nextChord[0];
+                        osc.frequency.cancelScheduledValues(t);
+                        osc.frequency.setTargetAtTime(targetFreq, t, 1.4);
+                    });
+                }, 8000);
+
+                ambientEngine = { masterGain, lfo, voices, chordTimer };
+                isAmbientPlaying = true;
+                updateAmbientButtonUI();
+                setStageStatus("Musique d'ambiance douce activée");
+            }
+
+            function stopAmbientMusic(silent) {
+                if (!ambientEngine) {
+                    isAmbientPlaying = false;
+                    updateAmbientButtonUI();
+                    return;
+                }
+                const engine = ambientEngine;
+                ambientEngine = null;
+                isAmbientPlaying = false;
+                updateAmbientButtonUI();
+                clearInterval(engine.chordTimer);
+
+                if (sharedAudioCtx) {
+                    const t = sharedAudioCtx.currentTime;
+                    try {
+                        engine.masterGain.gain.cancelScheduledValues(t);
+                        engine.masterGain.gain.setValueAtTime(Math.max(0.0001, engine.masterGain.gain.value), t);
+                        engine.masterGain.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+                    } catch (_e) {
+                        // Ignorer
+                    }
+                    setTimeout(() => {
+                        try {
+                            engine.lfo.stop();
+                            engine.voices.forEach((osc) => osc.stop());
+                            engine.masterGain.disconnect();
+                        } catch (_e) {
+                            // Ignorer
+                        }
+                    }, 1300);
+                }
+
+                if (!silent) {
+                    setStageStatus("Musique d'ambiance coupée");
+                }
+            }
+
+            if (ambientToggleBtn) {
+                ambientToggleBtn.addEventListener("click", () => {
+                    if (isAmbientPlaying) {
+                        stopAmbientMusic(false);
+                    } else {
+                        startAmbientMusic();
+                    }
+                });
+            }
+
+            function playBellChime() {
+                try {
+                    const ctx = ensureAudioContext();
+                    if (!ctx) return;
+
+                    const now = ctx.currentTime;
+                    const harmonics = [
+                        { freq: 880, gain: 0.22, decay: 1.45 },
+                        { freq: 1318.5, gain: 0.11, decay: 1.05 },
+                        { freq: 1760, gain: 0.06, decay: 0.75 }
+                    ];
+
+                    harmonics.forEach((h) => {
+                        const osc = ctx.createOscillator();
+                        const amp = ctx.createGain();
+                        osc.type = "sine";
+                        osc.frequency.setValueAtTime(h.freq, now);
+
+                        amp.gain.setValueAtTime(0.0001, now);
+                        amp.gain.exponentialRampToValueAtTime(h.gain, now + 0.015);
+                        amp.gain.exponentialRampToValueAtTime(0.0001, now + h.decay);
+
+                        osc.connect(amp);
+                        amp.connect(ctx.destination);
+                        osc.start(now);
+                        osc.stop(now + h.decay + 0.05);
+                    });
+                } catch (_e) {
+                    // Ignorer si l'audio est bloqué par le navigateur
+                }
+            }
+
+            function formatTimerSeconds(totalSec) {
+                const safeSec = Math.max(0, Math.floor(totalSec));
+                const mins = Math.floor(safeSec / 60);
+                const secs = safeSec % 60;
+                return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+            }
+
+            function renderTimerDisplay() {
+                if (timerDisplay) {
+                    timerDisplay.textContent = formatTimerSeconds(timerRemainingSec);
+                    timerDisplay.classList.toggle("is-finished", timerRemainingSec === 0);
+                }
+                if (timerToggleBtn) {
+                    timerToggleBtn.textContent = timerIntervalId ? "Pause" : "Démarrer";
+                }
+            }
+
+            function stopTimerInterval() {
+                if (timerIntervalId) {
+                    clearInterval(timerIntervalId);
+                    timerIntervalId = null;
+                }
+                renderTimerDisplay();
+            }
+
+            function resetTimer(newDuration) {
+                stopTimerInterval();
+                if (typeof newDuration === "number" && newDuration > 0) {
+                    timerDurationSec = newDuration;
+                }
+                timerRemainingSec = timerDurationSec;
+                renderTimerDisplay();
+            }
+
+            function toggleTimer() {
+                if (timerIntervalId) {
+                    stopTimerInterval();
+                    return;
+                }
+                if (timerRemainingSec <= 0) {
+                    timerRemainingSec = timerDurationSec;
+                }
+                renderTimerDisplay();
+                timerIntervalId = setInterval(() => {
+                    timerRemainingSec -= 1;
+                    if (timerRemainingSec <= 0) {
+                        timerRemainingSec = 0;
+                        stopTimerInterval();
+                        playBellChime();
+                        setStageStatus("Temps écoulé !");
+                    } else {
+                        renderTimerDisplay();
+                    }
+                }, 1000);
+                renderTimerDisplay();
+            }
+
+            timerPresetBtns.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const sec = parseInt(btn.getAttribute("data-seconds"), 10);
+                    if (!Number.isFinite(sec) || sec <= 0) return;
+                    timerPresetBtns.forEach((b) => b.classList.remove("is-active"));
+                    btn.classList.add("is-active");
+                    resetTimer(sec);
+                });
+            });
+
+            if (timerToggleBtn) {
+                timerToggleBtn.addEventListener("click", toggleTimer);
+            }
+            if (timerResetBtn) {
+                timerResetBtn.addEventListener("click", () => resetTimer());
+            }
 
             // Brouillon de création
             let pendingImage = "";
@@ -1659,41 +2152,49 @@
             function rebuildTurnBag(turn) {
                 const normalizedTurn = turn === "he" ? "he" : "she";
                 const pool = getPoolForTurn(normalizedTurn);
-                const avoidId = lastPickedIdByPool[normalizedTurn] || (currentCard ? currentCard.id : null);
-                turnBags[normalizedTurn] = shuffleIds(pool.map((c) => c.id), avoidId);
+                if (pool.length === 0) {
+                    turnIndices[normalizedTurn] = 0;
+                    return;
+                }
+                if (turnIndices[normalizedTurn] >= pool.length || turnIndices[normalizedTurn] < 0) {
+                    turnIndices[normalizedTurn] = 0;
+                }
             }
 
             function pruneBagsToCards() {
                 const validIds = new Set(cards.map((c) => c.id));
                 bag = bag.filter((id) => validIds.has(id));
-                turnBags.she = turnBags.she.filter((id) => validIds.has(id));
-                turnBags.he = turnBags.he.filter((id) => validIds.has(id));
+                rebuildTurnBag("she");
+                rebuildTurnBag("he");
             }
 
             function drawFromTurnPool(turn) {
                 const normalizedTurn = turn === "he" ? "he" : "she";
                 const pool = getPoolForTurn(normalizedTurn);
                 if (pool.length === 0) {
-                    return { card: null, remaining: 0, reshuffled: false };
+                    turnIndices[normalizedTurn] = 0;
+                    return { card: null, remaining: 0, cycled: false, position: 0, total: 0 };
                 }
 
-                const validPoolIds = new Set(pool.map((c) => c.id));
-                turnBags[normalizedTurn] = turnBags[normalizedTurn].filter((id) => validPoolIds.has(id));
-
-                let reshuffled = false;
-                if (turnBags[normalizedTurn].length === 0) {
-                    rebuildTurnBag(normalizedTurn);
-                    reshuffled = true;
+                let cycled = false;
+                if (turnIndices[normalizedTurn] >= pool.length || turnIndices[normalizedTurn] < 0) {
+                    turnIndices[normalizedTurn] = 0;
+                    cycled = true;
                 }
 
-                const nextId = turnBags[normalizedTurn].pop();
-                const drawnCard = pool.find((c) => c.id === nextId) || pool[0];
+                const currentIndex = turnIndices[normalizedTurn];
+                const drawnCard = pool[currentIndex];
+                const nextIndex = currentIndex + 1;
+                const willWrapNext = nextIndex >= pool.length;
+                turnIndices[normalizedTurn] = willWrapNext ? 0 : nextIndex;
                 lastPickedIdByPool[normalizedTurn] = drawnCard.id;
 
                 return {
                     card: drawnCard,
-                    remaining: turnBags[normalizedTurn].length,
-                    reshuffled: reshuffled
+                    remaining: willWrapNext ? pool.length : (pool.length - nextIndex),
+                    cycled: cycled,
+                    position: currentIndex + 1,
+                    total: pool.length
                 };
             }
 
@@ -1868,10 +2369,11 @@
 
                     const turnLabel = getTurnLabel(chosenTurn);
                     const nextTurnLabel = getTurnLabel(currentTurn);
-                    if (drawResult.reshuffled) {
-                        setStageStatus("Alterné • Tour : " + turnLabel + " (pool remélangé) • Prochain tour : " + nextTurnLabel);
+                    const posLabel = drawResult.position + "/" + drawResult.total;
+                    if (drawResult.cycled) {
+                        setStageStatus("Alterné • Tour : " + turnLabel + " (" + posLabel + ", reprise au début) • Prochain tour : " + nextTurnLabel);
                     } else {
-                        setStageStatus("Alterné • Tour : " + turnLabel + " • " + drawResult.remaining + " restante(s) • Prochain tour : " + nextTurnLabel);
+                        setStageStatus("Alterné • Tour : " + turnLabel + " (" + posLabel + ") • Prochain tour : " + nextTurnLabel);
                     }
                     return;
                 }
@@ -1904,10 +2406,11 @@
                     renderCurrentCardContent();
 
                     const turnLabel = getTurnLabel(chosenTurn);
-                    if (drawResult.reshuffled) {
-                        setStageStatus("Aléatoire • Tour : " + turnLabel + " (pool remélangé) • " + drawResult.remaining + " restante(s)");
+                    const posLabel = drawResult.position + "/" + drawResult.total;
+                    if (drawResult.cycled) {
+                        setStageStatus("Aléatoire • Tour : " + turnLabel + " (" + posLabel + ", reprise au début)");
                     } else {
-                        setStageStatus("Aléatoire • Tour : " + turnLabel + " • " + drawResult.remaining + " restante(s)");
+                        setStageStatus("Aléatoire • Tour : " + turnLabel + " (" + posLabel + ")");
                     }
                     return;
                 }
@@ -2162,13 +2665,16 @@
 
             if (nextCardBtn) {
                 nextCardBtn.addEventListener("click", () => {
+                    resetTimer();
                     pickNextCard(true);
                 });
             }
 
             function restartGameFromStart() {
                 stopCardVideo();
+                resetTimer();
                 lastPickedIdByPool = { free: null, she: null, he: null };
+                turnIndices = { she: 0, he: 0 };
                 currentCard = null;
                 activeTurnForCard = null;
                 revealed = false;
@@ -2393,12 +2899,8 @@
                     if (matchesFilter(newCard, activeFilter)) {
                         bag.push(newCard.id);
                     }
-                    if (matchesFilter(newCard, "she")) {
-                        turnBags.she.push(newCard.id);
-                    }
-                    if (matchesFilter(newCard, "he")) {
-                        turnBags.he.push(newCard.id);
-                    }
+                    rebuildTurnBag("she");
+                    rebuildTurnBag("he");
                     clearDraftForm();
                     persistCards("Carte ajoutée", false);
                     renderEditorList();
@@ -2410,9 +2912,40 @@
             }
 
             // Liste des cartes dans l'éditeur
+            function clearDropIndicators() {
+                if (!deckListContainer) return;
+                deckListContainer.querySelectorAll(".deck-item").forEach((el) => {
+                    el.classList.remove("is-dragging", "drag-over-top", "drag-over-bottom");
+                });
+            }
+
+            function reorderCardsById(sourceId, targetId, placeAfter) {
+                if (!sourceId || !targetId || sourceId === targetId) return false;
+                const fromIdx = cards.findIndex((c) => c.id === sourceId);
+                const targetIdx = cards.findIndex((c) => c.id === targetId);
+                if (fromIdx === -1 || targetIdx === -1) return false;
+
+                const [movedCard] = cards.splice(fromIdx, 1);
+                let insertIdx = cards.findIndex((c) => c.id === targetId);
+                if (insertIdx === -1) {
+                    insertIdx = cards.length;
+                } else if (placeAfter) {
+                    insertIdx += 1;
+                }
+
+                cards.splice(insertIdx, 0, movedCard);
+                rebuildBag();
+                rebuildTurnBag("she");
+                rebuildTurnBag("he");
+                persistCards("Ordre des cartes enregistré", false);
+                return true;
+            }
+
             function renderEditorList() {
                 if (!deckListContainer) return;
                 deckListContainer.innerHTML = "";
+                draggedCardId = null;
+                touchDragState = null;
 
                 if (cards.length === 0) {
                     const emptyBox = document.createElement("div");
@@ -2445,18 +2978,136 @@
 
                     const row = document.createElement("div");
                     row.className = "deck-item";
+                    row.setAttribute("data-card-id", card.id);
+                    row.setAttribute("draggable", "true");
+
+                    row.addEventListener("dragstart", (e) => {
+                        if (e.target && e.target.closest && e.target.closest("textarea, select, input, button")) {
+                            e.preventDefault();
+                            return;
+                        }
+                        draggedCardId = card.id;
+                        row.classList.add("is-dragging");
+                        if (e.dataTransfer) {
+                            e.dataTransfer.effectAllowed = "move";
+                            try {
+                                e.dataTransfer.setData("text/plain", card.id);
+                            } catch (_err) {
+                                // Ignorer si restreint
+                            }
+                        }
+                    });
+
+                    row.addEventListener("dragover", (e) => {
+                        if (!draggedCardId || draggedCardId === card.id) return;
+                        e.preventDefault();
+                        if (e.dataTransfer) {
+                            e.dataTransfer.dropEffect = "move";
+                        }
+                        const rect = row.getBoundingClientRect();
+                        const after = e.clientY > rect.top + rect.height / 2;
+                        row.classList.toggle("drag-over-top", !after);
+                        row.classList.toggle("drag-over-bottom", after);
+                    });
+
+                    row.addEventListener("dragleave", () => {
+                        row.classList.remove("drag-over-top", "drag-over-bottom");
+                    });
+
+                    row.addEventListener("drop", (e) => {
+                        e.preventDefault();
+                        const sourceId = draggedCardId || (e.dataTransfer ? e.dataTransfer.getData("text/plain") : "");
+                        const rect = row.getBoundingClientRect();
+                        const placeAfter = e.clientY > rect.top + rect.height / 2;
+                        clearDropIndicators();
+                        draggedCardId = null;
+                        if (reorderCardsById(sourceId, card.id, placeAfter)) {
+                            renderEditorList();
+                        }
+                    });
+
+                    row.addEventListener("dragend", () => {
+                        clearDropIndicators();
+                        draggedCardId = null;
+                    });
 
                     const top = document.createElement("div");
                     top.className = "deck-item-top";
+
+                    const titleWrap = document.createElement("div");
+                    titleWrap.className = "deck-item-title-wrap";
+
+                    const dragHandle = document.createElement("button");
+                    dragHandle.type = "button";
+                    dragHandle.className = "drag-handle";
+                    dragHandle.setAttribute("aria-label", "Déplacer la carte #" + (idx + 1));
+                    dragHandle.title = "Glisser pour déplacer";
+                    dragHandle.textContent = "⋮⋮";
+
+                    dragHandle.addEventListener("touchstart", (e) => {
+                        const touch = e.touches && e.touches[0];
+                        if (!touch) return;
+                        touchDragState = {
+                            sourceId: card.id,
+                            targetId: null,
+                            placeAfter: false
+                        };
+                        row.classList.add("is-dragging");
+                        setEditorStatus("Glissez vers la position souhaitée...");
+                    }, { passive: true });
+
+                    dragHandle.addEventListener("touchmove", (e) => {
+                        if (!touchDragState) return;
+                        const touch = e.touches && e.touches[0];
+                        if (!touch) return;
+                        e.preventDefault();
+
+                        const overEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                        const targetRow = overEl && overEl.closest ? overEl.closest(".deck-item") : null;
+
+                        deckListContainer.querySelectorAll(".deck-item").forEach((el) => {
+                            el.classList.remove("drag-over-top", "drag-over-bottom");
+                        });
+
+                        if (targetRow && targetRow !== row) {
+                            const targetId = targetRow.getAttribute("data-card-id");
+                            const rect = targetRow.getBoundingClientRect();
+                            const placeAfter = touch.clientY > rect.top + rect.height / 2;
+                            targetRow.classList.toggle("drag-over-top", !placeAfter);
+                            targetRow.classList.toggle("drag-over-bottom", placeAfter);
+                            touchDragState.targetId = targetId;
+                            touchDragState.placeAfter = placeAfter;
+                        } else {
+                            touchDragState.targetId = null;
+                        }
+                    }, { passive: false });
+
+                    const finishTouchDrag = () => {
+                        if (!touchDragState) return;
+                        const { sourceId, targetId, placeAfter } = touchDragState;
+                        touchDragState = null;
+                        clearDropIndicators();
+                        if (targetId && reorderCardsById(sourceId, targetId, placeAfter)) {
+                            renderEditorList();
+                        }
+                    };
+
+                    dragHandle.addEventListener("touchend", finishTouchDrag);
+                    dragHandle.addEventListener("touchcancel", finishTouchDrag);
+
                     const idxSpan = document.createElement("span");
                     idxSpan.textContent = "Carte #" + (idx + 1);
+
+                    titleWrap.appendChild(dragHandle);
+                    titleWrap.appendChild(idxSpan);
+
                     const tags = [getTargetBadgeLabel(card.target)];
                     if (card.text) tags.push("Texte");
                     if (card.image) tags.push("Photo");
                     if (card.video) tags.push("Vidéo locale (session)");
                     const kindSpan = document.createElement("span");
                     kindSpan.textContent = tags.join(" • ");
-                    top.appendChild(idxSpan);
+                    top.appendChild(titleWrap);
                     top.appendChild(kindSpan);
 
                     const controlsLine = document.createElement("div");
@@ -2753,7 +3404,7 @@
                 });
 
                 return {
-                    app: "Velours & Secrets",
+                    app: "Soirée intime",
                     version: 3,
                     exportedAt: new Date().toISOString(),
                     count: exportedCards.length,
@@ -2787,7 +3438,7 @@
 
                     const link = document.createElement("a");
                     link.href = url;
-                    link.download = "velours-et-secrets_" + formatTimestampForFilename(new Date()) + ".json";
+                    link.download = "soiree-intime_" + formatTimestampForFilename(new Date()) + ".json";
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -3112,6 +3763,7 @@
             });
 
             // Démarrage initial
+            resetTimer(30);
             setImportMode("merge");
             setActiveFilter("all");
             setGameMode("free");
