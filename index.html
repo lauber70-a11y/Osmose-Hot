@@ -277,7 +277,58 @@
     }
 
     /* =========================================================================
-       FENÊTRE FLOTTANTE CAMÉRA LIVE (PiP AU-DESSUS DES CARTES SUR PC)
+       MODE TÉLÉPHONE ÉPURÉ : DIFFUSION VIDÉO UNIQUEMENT
+       ========================================================================= */
+    .phone-broadcast-shell {
+      background: linear-gradient(158deg, var(--bg-card-top) 0%, var(--bg-card-bot) 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 22px 50px -12px rgba(0, 0, 0, 0.88), 0 0 30px -10px rgba(225, 29, 72, 0.28);
+    }
+
+    .phone-status-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.42);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .phone-video-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 58vh;
+      background: #000000;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-strong);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .phone-video-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .phone-actions-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 8px;
+    }
+
+    /* =========================================================================
+       FENÊTRE VIDÉO LIVE PC POSITIONNÉE DIRECTEMENT AU-DESSUS DES CARTES
        ========================================================================= */
     .pc-pip-wrapper {
       position: relative;
@@ -290,35 +341,21 @@
       transition: box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
-    .pc-pip-wrapper.floating-mode {
-      position: fixed;
-      top: 68px;
-      right: 18px;
-      width: 288px;
-      max-width: calc(100vw - 24px);
-      z-index: 38;
-    }
-
     .pc-pip-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
-      padding: 7px 10px;
+      gap: 8px;
+      padding: 8px 12px;
       background: rgba(25, 11, 17, 0.95);
       border-bottom: 1px solid rgba(244, 63, 94, 0.24);
-      cursor: grab;
       user-select: none;
-    }
-
-    .pc-pip-header:active {
-      cursor: grabbing;
     }
 
     .pc-pip-title-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       min-width: 0;
     }
 
@@ -335,6 +372,7 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      flex-shrink: 0;
     }
 
     .pc-pip-live-dot {
@@ -345,7 +383,7 @@
     }
 
     .pc-pip-caption {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 700;
       color: #fecdd3;
       white-space: nowrap;
@@ -356,18 +394,20 @@
     .pc-pip-controls {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       flex-shrink: 0;
     }
 
     .pc-pip-btn {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      min-height: 28px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(244, 63, 94, 0.25);
       color: #fecdd3;
-      font-size: 0.7rem;
+      font-size: 0.74rem;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
@@ -384,7 +424,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 205px;
+      max-height: 230px;
       background: #000000;
       overflow: hidden;
     }
@@ -1324,7 +1364,7 @@
         </svg>
       </div>
       <h2 style="font-size:1rem;font-weight:700;margin-bottom:6px;">Zone Rouge — En pause</h2>
-      <p style="font-size:0.76rem;color:var(--text-soft);margin-bottom:16px;">Écran discret actif (touche H). Touchez le bouton ci-dessous pour revenir à la partie.</p>
+      <p style="font-size:0.76rem;color:var(--text-soft);margin-bottom:16px;">Écran discret actif (touche H). Touchez le bouton ci-dessous pour revenir à la session.</p>
       <button id="btnResumeDiscreet" type="button" class="btn-draw-main" style="width:100%;padding:10px 14px;font-size:0.82rem;">
         Reprendre la session
       </button>
@@ -1369,7 +1409,7 @@
         </div>
         <div>
           <h1 class="brand-title">ZONE <span>ROUGE</span></h1>
-          <p class="brand-subtitle">Soft → Hard · <strong id="headerCardCounter">0 / 120</strong></p>
+          <p class="brand-subtitle" id="headerSubtitleText">Soft → Hard · <strong id="headerCardCounter">0 / 120</strong></p>
         </div>
       </div>
 
@@ -1398,9 +1438,43 @@
     </header>
 
     <!-- =========================================================================
+         VUE DÉDIÉE TÉLÉPHONE : DIFFUSION CAMÉRA UNIQUEMENT (#room=... ou ZR-XXXX)
+         ========================================================================= -->
+    <section id="phoneBroadcastView" class="phone-broadcast-shell sensitive-blur hidden" aria-label="Diffusion vidéo téléphone">
+      <div class="phone-status-banner">
+        <div>
+          <span class="section-label" style="display:block;">Mode Téléphone · Vidéo uniquement</span>
+          <strong id="phoneBroadcastRoomBadge" style="font-family:ui-monospace,monospace;font-size:0.9rem;color:#ffffff;">Salon ZR-4829</strong>
+        </div>
+        <span id="phoneBroadcastStatusPill" class="timer-pill">Prêt</span>
+      </div>
+
+      <div class="phone-video-box">
+        <video id="phoneBroadcastVideo" autoplay playsinline muted></video>
+        <div id="phoneBroadcastPlaceholder" class="webrtc-placeholder">
+          Appuyez sur « Lancer la diffusion » pour envoyer la vidéo vers le PC.
+        </div>
+      </div>
+
+      <div class="phone-actions-row">
+        <button id="btnPhoneStartBroadcast" type="button" class="btn-draw-main" style="padding:13px 14px;font-size:0.86rem;">
+          Lancer la diffusion
+        </button>
+        <button id="btnPhoneSwitchCam" type="button" class="btn-draw-skip" style="padding:13px 10px;font-size:0.78rem;">
+          🔄 Caméra
+        </button>
+      </div>
+
+      <div class="panel-row-between" style="padding-top:4px;">
+        <button id="btnPhoneStopBroadcast" type="button" class="link-action-btn">Arrêter la diffusion</button>
+        <button id="btnPhoneExitToGame" type="button" class="link-action-btn">Ouvrir le jeu complet</button>
+      </div>
+    </section>
+
+    <!-- =========================================================================
          ZONE DE JEU PRINCIPALE (FLOUTÉE EN MODE DISCRET)
          ========================================================================= -->
-    <main class="sensitive-blur" style="display:flex;flex-direction:column;gap:12px;">
+    <main id="gameMainView" class="sensitive-blur" style="display:flex;flex-direction:column;gap:12px;">
 
       <!-- Bandeau compact affiché lorsque les options de départ sont masquées -->
       <section id="collapsedSetupBar" class="panel-box panel-row-between hidden">
@@ -1496,18 +1570,16 @@
 
       </div>
 
-      <!-- Fenêtre flottante PiP Caméra Live au-dessus des cartes sur PC -->
+      <!-- Fenêtre vidéo PC placée directement au-dessus de la zone des cartes tirées -->
       <section id="pcPipOverlay" class="pc-pip-wrapper hidden" aria-label="Retour vidéo caméra live">
-        <div id="pcPipDragHandle" class="pc-pip-header" title="Glisser pour déplacer la fenêtre vidéo">
+        <div class="pc-pip-header">
           <div class="pc-pip-title-row">
             <span class="pc-pip-live-badge"><span class="pc-pip-live-dot"></span>Live</span>
             <span id="pcPipRoomLabel" class="pc-pip-caption">Caméra Chambre · ZR-4829</span>
           </div>
           <div class="pc-pip-controls">
             <button type="button" id="btnPipSnapToCard" title="Capturer un instantané sur la carte active" aria-label="Capturer un instantané sur la carte" class="pc-pip-btn">📸</button>
-            <button type="button" id="btnPipFloatToggle" title="Ancrer dans la page / Fenêtre flottante" aria-label="Ancrer ou détacher" class="pc-pip-btn">📌</button>
             <button type="button" id="btnPipMinimize" title="Réduire / Agrandir la vidéo" aria-label="Réduire ou agrandir" class="pc-pip-btn">－</button>
-            <button type="button" id="btnPipFullscreen" title="Plein écran vidéo" aria-label="Plein écran" class="pc-pip-btn">⛶</button>
             <button type="button" id="btnPipHide" title="Masquer la fenêtre vidéo" aria-label="Masquer la fenêtre vidéo" class="pc-pip-btn">✕</button>
           </div>
         </div>
@@ -1516,10 +1588,10 @@
         </div>
       </section>
 
-      <!-- Bouton discret pour rouvrir la fenêtre PiP si masquée alors qu'un flux est actif -->
+      <!-- Barre de réaffichage rapide si la fenêtre vidéo PC a été masquée -->
       <div id="pcPipRestoreBar" class="panel-box panel-row-between hidden" style="padding:8px 12px;">
-        <span style="font-size:0.72rem;font-weight:700;color:#a7f3d0;">● Flux caméra smartphone actif en arrière-plan</span>
-        <button type="button" id="btnRestorePipOverlay" class="link-action-btn">Afficher fenêtre vidéo</button>
+        <span style="font-size:0.72rem;font-weight:700;color:#a7f3d0;">● Flux caméra smartphone actif</span>
+        <button type="button" id="btnRestorePipOverlay" class="link-action-btn">Afficher vidéo</button>
       </div>
 
       <!-- 3. Carte tirée grand format -->
@@ -1696,7 +1768,7 @@
               <div class="media-toolbar">
                 <button type="button" id="btnEditorSnapshot" title="Prendre un instantané photo" aria-label="Prendre un instantané photo" class="media-icon-btn snap-active">
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 48.774 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                   </svg>
                 </button>
@@ -1799,10 +1871,10 @@
           </div>
           <div class="room-code-box">
             <input type="text" id="roomCodeInput" maxlength="12" value="ZR-4829" class="field-control room-code-input" />
-            <span id="signalingChannelPill" class="timer-pill">Signalisation auto</span>
+            <button id="btnOpenPhoneBroadcastMode" type="button" class="btn-timer-reset">📱 Vue téléphone</button>
           </div>
           <p class="media-hint-text">
-            Posez le smartphone dans la chambre en mode <strong>Émetteur</strong> avec le même code que le <strong>Récepteur (PC)</strong> : la vidéo s’affiche automatiquement au-dessus de vos cartes sur PC.
+            Ouvrez le lien sur le smartphone pour lancer la vue caméra dédiée, ou choisissez <strong>Émetteur</strong> / <strong>Récepteur (PC)</strong> avec le même code.
           </p>
         </div>
 
@@ -1822,7 +1894,6 @@
           </div>
           <div id="webrtcOverlayControls" class="webrtc-overlay-btns hidden">
             <button id="btnSwitchWebrtcCam" type="button" class="btn-timer-reset" style="background:rgba(15,10,12,0.85);">🔄 Caméra</button>
-            <button id="btnFullscreenWebrtc" type="button" class="btn-timer-reset" style="background:rgba(15,10,12,0.85);">⛶ Plein écran</button>
             <button id="stopWebrtcBtn" type="button" class="btn-timer-primary">Couper</button>
           </div>
         </div>
@@ -2098,6 +2169,7 @@
       let editorVideoRecorder = null;
       let editorRecordStream = null;
       const sessionOnlyMediaMap = {};
+      let phoneBroadcastOnlyMode = false;
       let gameState = {
         alternationMode: 'femme-first', // 'femme-first' ou 'homme-first'
         nextTurnTarget: 'femme',         // 'femme' ou 'homme'
@@ -2121,6 +2193,10 @@
 
       function getOppositeTarget(target) {
         return target === 'homme' ? 'femme' : 'homme';
+      }
+
+      function isMobileDevice() {
+        return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '') || window.innerWidth <= 600;
       }
 
       // =======================================================================
@@ -2430,12 +2506,12 @@
         }
 
         const hashMatch = (window.location.hash || '').match(/room=([A-Za-z0-9_-]{3,16})/i);
-        if (hashMatch && hashMatch[1]) {
+        const hasRoomParam = Boolean(hashMatch && hashMatch[1]);
+        if (hasRoomParam) {
           document.getElementById('roomCodeInput').value = hashMatch[1].toUpperCase();
         }
 
         bindEvents();
-        initPipDragBehavior();
         updateSetupVisibilityUI();
         updateAlternationUI();
         updateFilterUI();
@@ -2446,6 +2522,12 @@
         if (gameState.currentCardId) {
           const existing = deck.find(c => c.id === gameState.currentCardId);
           if (existing) renderActiveCard(existing, false);
+        }
+
+        if (hasRoomParam && isMobileDevice()) {
+          setPhoneBroadcastMode(true);
+        } else {
+          setPhoneBroadcastMode(false);
         }
       }
 
@@ -3388,7 +3470,7 @@
       }
 
       // =======================================================================
-      // 9. LIAISON CAMÉRA LIVE P2P PAR CODE DE SALON & FENÊTRE PiP SUR PC
+      // 9. LIAISON CAMÉRA LIVE P2P, VUE TÉLÉPHONE ÉPURÉE & FENÊTRE VIDÉO PC
       // =======================================================================
       let rtcPeer = null;
       let localStream = null;
@@ -3399,9 +3481,40 @@
       let relayPollTimer = null;
       let pipHiddenByUser = false;
       let pipMinimized = false;
-      let pipFloating = false;
       const seenSignalIds = new Set();
       const clientInstanceId = 'zr_' + Math.random().toString(36).slice(2, 9);
+
+      function setPhoneBroadcastMode(enabled) {
+        phoneBroadcastOnlyMode = Boolean(enabled);
+        const phoneView = document.getElementById('phoneBroadcastView');
+        const mainView = document.getElementById('gameMainView');
+        const editorBtn = document.getElementById('btnOpenEditorDrawer');
+        const rtcBtn = document.getElementById('btnOpenWebrtcDrawer');
+        const subtitleEl = document.getElementById('headerSubtitleText');
+        const roomBadge = document.getElementById('phoneBroadcastRoomBadge');
+
+        if (!phoneView || !mainView) return;
+
+        if (phoneBroadcastOnlyMode) {
+          closeDrawer('editorDrawer');
+          closeDrawer('webrtcDrawer');
+          phoneView.classList.remove('hidden');
+          mainView.classList.add('hidden');
+          if (editorBtn) editorBtn.classList.add('hidden');
+          if (rtcBtn) rtcBtn.classList.add('hidden');
+          if (subtitleEl) subtitleEl.innerHTML = '<strong>Caméra uniquement</strong>';
+          if (roomBadge) roomBadge.textContent = `Salon ${getNormalizedRoomCode()}`;
+        } else {
+          phoneView.classList.add('hidden');
+          mainView.classList.remove('hidden');
+          if (editorBtn) editorBtn.classList.remove('hidden');
+          if (rtcBtn) rtcBtn.classList.remove('hidden');
+          if (subtitleEl) {
+            const totalDrawn = Object.values(gameState.stageDrawnIds || {}).reduce((acc, arr) => acc + (arr ? arr.length : 0), 0);
+            subtitleEl.innerHTML = `Soft → Hard · <strong id="headerCardCounter">${totalDrawn} / ${deck.length}</strong>`;
+          }
+        }
+      }
 
       function syncPcPipOverlay(stream, roomCode = '') {
         const pipWrapper = document.getElementById('pcPipOverlay');
@@ -3443,20 +3556,6 @@
         if (btn) btn.textContent = pipMinimized ? '＋' : '－';
       }
 
-      function togglePipFloatingMode() {
-        pipFloating = !pipFloating;
-        const wrapper = document.getElementById('pcPipOverlay');
-        if (!wrapper) return;
-        wrapper.classList.toggle('floating-mode', pipFloating);
-        if (!pipFloating) {
-          wrapper.style.left = '';
-          wrapper.style.top = '';
-          wrapper.style.right = '';
-          wrapper.style.bottom = '';
-        }
-        showToast(pipFloating ? 'Fenêtre vidéo détachée (glissable).' : 'Fenêtre vidéo ancrée au-dessus des cartes.', 'info');
-      }
-
       function hidePipOverlay() {
         if (!remoteStream) return;
         pipHiddenByUser = true;
@@ -3467,58 +3566,6 @@
         if (!remoteStream) return;
         pipHiddenByUser = false;
         syncPcPipOverlay(remoteStream);
-      }
-
-      function togglePipFullscreen() {
-        const body = document.getElementById('pcPipBody');
-        if (!body) return;
-        if (!document.fullscreenElement) {
-          if (body.requestFullscreen) body.requestFullscreen().catch(() => {});
-        } else if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
-        }
-      }
-
-      function initPipDragBehavior() {
-        const handle = document.getElementById('pcPipDragHandle');
-        const wrapper = document.getElementById('pcPipOverlay');
-        if (!handle || !wrapper) return;
-
-        let dragging = false;
-        let offsetX = 0;
-        let offsetY = 0;
-
-        handle.addEventListener('pointerdown', (e) => {
-          if (e.target.closest('button')) return;
-          if (!pipFloating) {
-            pipFloating = true;
-            wrapper.classList.add('floating-mode');
-          }
-          const rect = wrapper.getBoundingClientRect();
-          offsetX = e.clientX - rect.left;
-          offsetY = e.clientY - rect.top;
-          dragging = true;
-          handle.setPointerCapture(e.pointerId);
-        });
-
-        handle.addEventListener('pointermove', (e) => {
-          if (!dragging) return;
-          const maxX = Math.max(8, window.innerWidth - wrapper.offsetWidth - 8);
-          const maxY = Math.max(8, window.innerHeight - wrapper.offsetHeight - 8);
-          const left = Math.max(8, Math.min(maxX, e.clientX - offsetX));
-          const top = Math.max(8, Math.min(maxY, e.clientY - offsetY));
-          wrapper.style.left = `${left}px`;
-          wrapper.style.top = `${top}px`;
-          wrapper.style.right = 'auto';
-        });
-
-        const endDrag = (e) => {
-          if (!dragging) return;
-          dragging = false;
-          try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
-        };
-        handle.addEventListener('pointerup', endDrag);
-        handle.addEventListener('pointercancel', endDrag);
       }
 
       function getNormalizedRoomCode() {
@@ -3645,7 +3692,9 @@
         rtcRole = 'sender';
         const roomCode = getNormalizedRoomCode();
         const statusBadge = document.getElementById('webrtcStatusBadge');
+        const phonePill = document.getElementById('phoneBroadcastStatusPill');
         statusBadge.textContent = `Salon ${roomCode} · Caméra...`;
+        if (phonePill) phonePill.textContent = 'Caméra...';
 
         try {
           localStream = await navigator.mediaDevices.getUserMedia({
@@ -3659,15 +3708,26 @@
           document.getElementById('webrtcPlaceholder').classList.add('hidden');
           document.getElementById('webrtcOverlayControls').classList.remove('hidden');
 
+          const phoneVid = document.getElementById('phoneBroadcastVideo');
+          const phonePh = document.getElementById('phoneBroadcastPlaceholder');
+          if (phoneVid) {
+            phoneVid.srcObject = localStream;
+            phoneVid.muted = true;
+          }
+          if (phonePh) phonePh.classList.add('hidden');
+
           rtcPeer = createPeerConnectionWithIce(roomCode);
           localStream.getTracks().forEach(track => rtcPeer.addTrack(track, localStream));
 
           rtcPeer.oniceconnectionstatechange = () => {
             const st = rtcPeer ? rtcPeer.iceConnectionState : 'closed';
             statusBadge.textContent = `État : ${st}`;
+            if (phonePill) {
+              phonePill.textContent = (st === 'connected' || st === 'completed') ? 'En diffusion' : st;
+            }
             if (st === 'connected' || st === 'completed') {
               document.getElementById('liveDotHeader').classList.remove('hidden');
-              showToast('Caméra Smartphone connectée au PC !', 'success');
+              showToast('Vidéo diffusée vers le PC !', 'success');
             }
           };
 
@@ -3690,16 +3750,18 @@
 
           await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
           statusBadge.textContent = `Salon ${roomCode} · En attente du PC`;
-          showToast(`Émetteur actif sur le salon ${roomCode}.`, 'info');
+          if (phonePill) phonePill.textContent = 'Diffusion active';
+          showToast(`Diffusion active sur ${roomCode}.`, 'info');
         } catch (_) {
           statusBadge.textContent = 'Erreur caméra';
+          if (phonePill) phonePill.textContent = 'Caméra refusée';
           showToast('Accès caméra refusé ou contexte non sécurisé (HTTPS requis).', 'error');
         }
       }
 
       async function switchWebrtcCamera() {
         if (!localStream || rtcRole !== 'sender') {
-          showToast('Disponible uniquement sur le smartphone émetteur.', 'info');
+          showToast('Disponible uniquement pendant la diffusion caméra.', 'info');
           return;
         }
         facingMode = facingMode === 'environment' ? 'user' : 'environment';
@@ -3714,6 +3776,8 @@
 
           localStream = newStream;
           document.getElementById('webrtcVideo').srcObject = newStream;
+          const phoneVid = document.getElementById('phoneBroadcastVideo');
+          if (phoneVid) phoneVid.srcObject = newStream;
 
           if (rtcPeer && newTrack) {
             const sender = rtcPeer.getSenders().find(s => s.track && s.track.kind === 'video');
@@ -3722,15 +3786,6 @@
           showToast(`Caméra ${facingMode === 'user' ? 'avant' : 'arrière'} activée.`, 'info');
         } catch (_) {
           showToast('Impossible de basculer la caméra.', 'error');
-        }
-      }
-
-      function toggleWebrtcFullscreen() {
-        const container = document.getElementById('webrtcVideoContainer');
-        if (!document.fullscreenElement) {
-          if (container.requestFullscreen) container.requestFullscreen().catch(() => {});
-        } else if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
         }
       }
 
@@ -3856,12 +3911,19 @@
         }
         const videoEl = document.getElementById('webrtcVideo');
         videoEl.srcObject = null;
+        const phoneVid = document.getElementById('phoneBroadcastVideo');
+        const phonePh = document.getElementById('phoneBroadcastPlaceholder');
+        const phonePill = document.getElementById('phoneBroadcastStatusPill');
+        if (phoneVid) phoneVid.srcObject = null;
+        if (phonePh) phonePh.classList.remove('hidden');
+        if (phonePill) phonePill.textContent = 'Arrêté';
+
         syncPcPipOverlay(null);
         document.getElementById('webrtcPlaceholder').classList.remove('hidden');
         document.getElementById('webrtcOverlayControls').classList.add('hidden');
         document.getElementById('liveDotHeader').classList.add('hidden');
         document.getElementById('webrtcStatusBadge').textContent = 'Hors ligne';
-        if (!silent) showToast('Liaison caméra coupée.', 'info');
+        if (!silent) showToast('Diffusion caméra coupée.', 'info');
       }
 
       // =======================================================================
@@ -3921,11 +3983,18 @@
         document.getElementById('btnOpenWebrtcDrawer').addEventListener('click', () => openDrawer('webrtcDrawer'));
         document.getElementById('btnCloseWebrtcDrawer').addEventListener('click', () => closeDrawer('webrtcDrawer'));
 
-        // Fenêtre flottante PiP Caméra Live sur PC
+        // Vue Téléphone caméra uniquement & Fenêtre vidéo PC au-dessus des cartes
+        document.getElementById('btnOpenPhoneBroadcastMode').addEventListener('click', () => {
+          setPhoneBroadcastMode(true);
+          startWebrtcSender();
+        });
+        document.getElementById('btnPhoneStartBroadcast').addEventListener('click', startWebrtcSender);
+        document.getElementById('btnPhoneSwitchCam').addEventListener('click', switchWebrtcCamera);
+        document.getElementById('btnPhoneStopBroadcast').addEventListener('click', () => stopWebrtc(false));
+        document.getElementById('btnPhoneExitToGame').addEventListener('click', () => setPhoneBroadcastMode(false));
+
         document.getElementById('btnPipSnapToCard').addEventListener('click', captureSnapshotForCard);
-        document.getElementById('btnPipFloatToggle').addEventListener('click', togglePipFloatingMode);
         document.getElementById('btnPipMinimize').addEventListener('click', togglePipMinimize);
-        document.getElementById('btnPipFullscreen').addEventListener('click', togglePipFullscreen);
         document.getElementById('btnPipHide').addEventListener('click', hidePipOverlay);
         document.getElementById('btnRestorePipOverlay').addEventListener('click', restorePipOverlay);
 
@@ -4038,8 +4107,6 @@
         });
         document.getElementById('btnWebrtcSender').addEventListener('click', startWebrtcSender);
         document.getElementById('btnWebrtcReceiver').addEventListener('click', startWebrtcReceiver);
-        document.getElementById('btnSwitchWebrtcCam').addEventListener('click', switchWebrtcCamera);
-        document.getElementById('btnFullscreenWebrtc').addEventListener('click', toggleWebrtcFullscreen);
         document.getElementById('stopWebrtcBtn').addEventListener('click', () => stopWebrtc(false));
         document.getElementById('btnCopyLocalSdp').addEventListener('click', copyLocalSdp);
         document.getElementById('btnApplyRemoteSdp').addEventListener('click', applyRemoteSdp);
