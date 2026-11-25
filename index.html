@@ -6,7 +6,7 @@
   <title>Zone Rouge — Jeu de Cartes Couple (120 Cartes)</title>
   <style>
     /* =========================================================================
-       VARIABLES & THÈME SOMBRE VELOURS / ROUGE INCANDESCENT (SANS DÉPENDANCE)
+       VARIABLES & THÈME SOMBRE VELOURS / ROUGE INCANDESCENT (AUTONOME)
        ========================================================================= */
     :root {
       --bg-base: #0a0507;
@@ -147,8 +147,8 @@
       position: fixed;
       inset: 0;
       z-index: 60;
-      background: rgba(5, 3, 4, 0.84);
-      backdrop-filter: blur(10px);
+      background: rgba(5, 3, 4, 0.86);
+      backdrop-filter: blur(12px);
       display: none;
       align-items: center;
       justify-content: center;
@@ -302,6 +302,18 @@
       color: var(--text-soft);
     }
 
+    .link-action-btn {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fda4af;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .link-action-btn:hover {
+      color: #ffffff;
+    }
+
     /* Sélecteur d'alternance stricte (Femme -> Homme / Homme -> Femme) */
     .alternation-bar {
       display: flex;
@@ -316,7 +328,7 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 6px;
       flex: 1;
-      min-width: 220px;
+      min-width: 210px;
       max-width: 340px;
     }
 
@@ -791,6 +803,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
 
     .btn-timer-primary {
@@ -852,7 +865,7 @@
     }
 
     /* =========================================================================
-       BOUTONS PRINCIPAUX DE TIRAGE
+       BOUTONS PRINCIPAUX DE TIRAGE & RECOMMANDER
        ========================================================================= */
     .draw-actions-grid {
       display: grid;
@@ -903,8 +916,30 @@
     .btn-draw-skip:hover { background: #26131c; border-color: var(--border-strong); }
     .btn-draw-skip:active { transform: scale(0.985); }
 
+    .btn-restart-game {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: #fecdd3;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.16s ease;
+    }
+
+    .btn-restart-game:hover {
+      background: rgba(225, 29, 72, 0.18);
+      border-color: var(--border-strong);
+      color: #ffffff;
+    }
+
     /* =========================================================================
-       TIROIRS / MODALES (ÉDITEUR DE CARTES & CAMÉRA LIVE WEBRTC)
+       TIROIRS / MODALES (ÉDITEUR DE CARTES & CAMÉRA LIVE P2P SALON)
        ========================================================================= */
     .drawer-backdrop {
       position: fixed;
@@ -1000,6 +1035,23 @@
 
     .field-control:focus {
       border-color: var(--crimson-500);
+    }
+
+    .room-code-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .room-code-input {
+      flex: 1;
+      min-width: 120px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
     .editor-item {
@@ -1147,8 +1199,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
         </svg>
       </div>
-      <h2 style="font-size:1rem;font-weight:700;margin-bottom:6px;">Session en pause</h2>
-      <p style="font-size:0.76rem;color:var(--text-soft);margin-bottom:16px;">Contenu masqué (raccourci clavier H). Appuyez ci-dessous pour reprendre la partie.</p>
+      <h2 style="font-size:1rem;font-weight:700;margin-bottom:6px;">Zone Rouge — En pause</h2>
+      <p style="font-size:0.76rem;color:var(--text-soft);margin-bottom:16px;">Écran discret actif (touche H). Touchez le bouton ci-dessous pour revenir à la partie.</p>
       <button id="btnResumeDiscreet" type="button" class="btn-draw-main" style="width:100%;padding:10px 14px;font-size:0.82rem;">
         Reprendre la session
       </button>
@@ -1212,7 +1264,7 @@
           <span id="deckCountBadge">120</span>
         </button>
 
-        <button id="btnOpenWebrtcDrawer" type="button" title="Caméra Live WebRTC (Smartphone → PC)" class="icon-pill-btn">
+        <button id="btnOpenWebrtcDrawer" type="button" title="Caméra Live P2P (Smartphone → PC)" class="icon-pill-btn">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
           </svg>
@@ -1226,82 +1278,99 @@
          ========================================================================= -->
     <main class="sensitive-blur" style="display:flex;flex-direction:column;gap:12px;">
 
-      <!-- 1. Progression en 4 niveaux marqués (Soft -> Hard) -->
-      <section class="panel-box">
-        <div class="panel-row-between">
-          <span class="section-label">Crescendo · 4 Niveaux (22 tirages / palier)</span>
-          <button id="btnResetProgress" type="button" style="font-size:0.68rem;color:#fb7185;text-decoration:underline;">Réinitialiser</button>
+      <!-- Bandeau compact affiché lorsque les options de départ sont masquées -->
+      <section id="collapsedSetupBar" class="panel-box panel-row-between hidden">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="compactSetupSummary" style="font-size:0.72rem;font-weight:700;color:#fecdd3;">Niv. 1 — Soft · Femme → Homme · Toutes</span>
+          <span id="compactNextTurnBadge" class="next-turn-pill turn-femme">Tour suivant : Femme</span>
         </div>
-
-        <div class="stages-grid" id="stageSelector">
-          <button type="button" data-stage="1" id="stageBtn1" class="stage-btn">
-            <span class="st-lvl">Niv. 1</span>
-            <span class="st-name">Soft</span>
-            <span class="st-count" id="stageCount1">0/22</span>
-          </button>
-          <button type="button" data-stage="2" id="stageBtn2" class="stage-btn">
-            <span class="st-lvl">Niv. 2</span>
-            <span class="st-name">Montée</span>
-            <span class="st-count" id="stageCount2">0/22</span>
-          </button>
-          <button type="button" data-stage="3" id="stageBtn3" class="stage-btn">
-            <span class="st-lvl">Niv. 3</span>
-            <span class="st-name">Chaud</span>
-            <span class="st-count" id="stageCount3">0/22</span>
-          </button>
-          <button type="button" data-stage="4" id="stageBtn4" class="stage-btn">
-            <span class="st-lvl">Niv. 4</span>
-            <span class="st-name">Hard</span>
-            <span class="st-count" id="stageCount4">0/22</span>
-          </button>
-        </div>
-
-        <div class="stage-meta-row">
-          <span id="stageDescriptionLabel">Niveau 1 — Soft : Éveil, caresses, baisers & frissons (sans pénétration ni gode)</span>
-          <strong id="stageProgressText">0 / 22</strong>
-        </div>
-
-        <div class="gauge-track" id="intensityGaugeSegments">
-          <div class="gauge-seg fill-1" data-seg="1"></div>
-          <div class="gauge-seg" data-seg="2"></div>
-          <div class="gauge-seg" data-seg="3"></div>
-          <div class="gauge-seg" data-seg="4"></div>
-        </div>
+        <button id="btnShowSetupPanel" type="button" class="link-action-btn">Options</button>
       </section>
 
-      <!-- 2. Alternance stricte Femme <-> Homme & Filtres rapides -->
-      <section class="panel-box" style="display:flex;flex-direction:column;gap:9px;">
-        <div class="alternation-bar">
-          <div>
-            <span class="section-label" style="display:block;">Alternance de pioche :</span>
-          </div>
-          <div class="alternation-switch" id="alternationModeGroup">
-            <button type="button" data-alt="femme-first" id="altBtnFemmeFirst" class="alt-mode-btn active-f2h">
-              Femme → Homme
-            </button>
-            <button type="button" data-alt="homme-first" id="altBtnHommeFirst" class="alt-mode-btn">
-              Homme → Femme
-            </button>
-          </div>
-          <span id="nextTurnBadge" class="next-turn-pill turn-femme">Tour suivant : Femme</span>
-        </div>
+      <!-- Panneau repliable des options de jeu (Alternance, 4 Niveaux, Filtres) -->
+      <div id="setupOptionsContainer" style="display:flex;flex-direction:column;gap:12px;">
 
-        <div class="panel-row-between" style="padding-top:8px;border-top:1px solid rgba(244,63,94,0.14);">
-          <div class="filter-group" id="targetFilterGroup">
-            <button type="button" data-target="all" class="chip-btn active">Alternance (F/H)</button>
-            <button type="button" data-target="femme" class="chip-btn">Femme</button>
-            <button type="button" data-target="homme" class="chip-btn">Homme</button>
+        <!-- 1. Progression en 4 niveaux marqués (Soft -> Hard) -->
+        <section class="panel-box">
+          <div class="panel-row-between">
+            <span class="section-label">Crescendo · 4 Niveaux (22 tirages / palier)</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button id="btnHideSetupPanel" type="button" class="link-action-btn">Masquer options</button>
+              <button id="btnResetProgress" type="button" class="link-action-btn">Réinitialiser</button>
+            </div>
           </div>
 
-          <div class="filter-group" id="suitFilterGroup">
-            <button type="button" data-suit="all" class="chip-btn active">Toutes</button>
-            <button type="button" data-suit="♥" class="chip-btn suit-chip suit-red">♥</button>
-            <button type="button" data-suit="♠" class="chip-btn suit-chip suit-light">♠</button>
-            <button type="button" data-suit="♦" class="chip-btn suit-chip suit-red">♦</button>
-            <button type="button" data-suit="♣" class="chip-btn suit-chip suit-light">♣</button>
+          <div class="stages-grid" id="stageSelector">
+            <button type="button" data-stage="1" id="stageBtn1" class="stage-btn">
+              <span class="st-lvl">Niv. 1</span>
+              <span class="st-name">Soft</span>
+              <span class="st-count" id="stageCount1">0/22</span>
+            </button>
+            <button type="button" data-stage="2" id="stageBtn2" class="stage-btn">
+              <span class="st-lvl">Niv. 2</span>
+              <span class="st-name">Montée</span>
+              <span class="st-count" id="stageCount2">0/22</span>
+            </button>
+            <button type="button" data-stage="3" id="stageBtn3" class="stage-btn">
+              <span class="st-lvl">Niv. 3</span>
+              <span class="st-name">Chaud</span>
+              <span class="st-count" id="stageCount3">0/22</span>
+            </button>
+            <button type="button" data-stage="4" id="stageBtn4" class="stage-btn">
+              <span class="st-lvl">Niv. 4</span>
+              <span class="st-name">Hard</span>
+              <span class="st-count" id="stageCount4">0/22</span>
+            </button>
           </div>
-        </div>
-      </section>
+
+          <div class="stage-meta-row">
+            <span id="stageDescriptionLabel">Niveau 1 — Soft : Éveil, caresses, baisers & frissons (sans pénétration ni gode)</span>
+            <strong id="stageProgressText">0 / 22</strong>
+          </div>
+
+          <div class="gauge-track" id="intensityGaugeSegments">
+            <div class="gauge-seg fill-1" data-seg="1"></div>
+            <div class="gauge-seg" data-seg="2"></div>
+            <div class="gauge-seg" data-seg="3"></div>
+            <div class="gauge-seg" data-seg="4"></div>
+          </div>
+        </section>
+
+        <!-- 2. Alternance stricte Femme <-> Homme & Filtres rapides -->
+        <section class="panel-box" style="display:flex;flex-direction:column;gap:9px;">
+          <div class="alternation-bar">
+            <div>
+              <span class="section-label" style="display:block;">Alternance de pioche :</span>
+            </div>
+            <div class="alternation-switch" id="alternationModeGroup">
+              <button type="button" data-alt="femme-first" id="altBtnFemmeFirst" class="alt-mode-btn active-f2h">
+                Femme → Homme
+              </button>
+              <button type="button" data-alt="homme-first" id="altBtnHommeFirst" class="alt-mode-btn">
+                Homme → Femme
+              </button>
+            </div>
+            <span id="nextTurnBadge" class="next-turn-pill turn-femme">Tour suivant : Femme</span>
+          </div>
+
+          <div class="panel-row-between" style="padding-top:8px;border-top:1px solid rgba(244,63,94,0.14);">
+            <div class="filter-group" id="targetFilterGroup">
+              <button type="button" data-target="all" class="chip-btn active">Alternance (F/H)</button>
+              <button type="button" data-target="femme" class="chip-btn">Femme</button>
+              <button type="button" data-target="homme" class="chip-btn">Homme</button>
+            </div>
+
+            <div class="filter-group" id="suitFilterGroup">
+              <button type="button" data-suit="all" class="chip-btn active">Toutes</button>
+              <button type="button" data-suit="♥" class="chip-btn suit-chip suit-red">♥</button>
+              <button type="button" data-suit="♠" class="chip-btn suit-chip suit-light">♠</button>
+              <button type="button" data-suit="♦" class="chip-btn suit-chip suit-red">♦</button>
+              <button type="button" data-suit="♣" class="chip-btn suit-chip suit-light">♣</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
 
       <!-- 3. Carte tirée grand format -->
       <section id="activeCardContainer" class="velvet-card">
@@ -1369,6 +1438,7 @@
             </div>
             <div class="timer-controls">
               <button id="btnTimerMain" type="button" class="btn-timer-primary">Démarrer 2 min</button>
+              <button id="btnTimerNewSeries" type="button" class="btn-timer-reset">Nouvelle série</button>
               <button id="btnTimerReset" type="button" class="btn-timer-reset">Reset</button>
             </div>
           </div>
@@ -1384,7 +1454,7 @@
         </div>
       </section>
 
-      <!-- 4. Boutons d'action principaux -->
+      <!-- 4. Boutons d'action principaux & Recommencer le jeu -->
       <section class="draw-actions-grid">
         <button id="btnDrawAdvance" type="button" class="btn-draw-main">
           <span>Tirer la carte suivante</span>
@@ -1400,6 +1470,13 @@
           <span>Autre carte (sans avancer)</span>
         </button>
       </section>
+
+      <button id="btnRestartGame" type="button" class="btn-restart-game">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Recommencer le jeu</span>
+      </button>
 
     </main>
   </div>
@@ -1548,22 +1625,36 @@
   </div>
 
   <!-- =========================================================================
-       TIROIR / MODALE 2 : CAMÉRA LIVE WEBRTC (SMARTPHONE -> PC)
+       TIROIR / MODALE 2 : CAMÉRA LIVE P2P PAR CODE DE SALON (SMARTPHONE -> PC)
        ========================================================================= -->
   <div id="webrtcDrawer" class="drawer-backdrop" role="dialog" aria-modal="true" aria-labelledby="webrtcDrawerTitle">
     <div class="drawer-panel sensitive-blur">
       <div class="drawer-header">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <h2 id="webrtcDrawerTitle" class="drawer-title">Caméra Live WebRTC (Smartphone → PC)</h2>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <h2 id="webrtcDrawerTitle" class="drawer-title">Caméra Live P2P (Smartphone → PC)</h2>
           <span id="webrtcStatusBadge" class="timer-pill">Hors ligne</span>
         </div>
         <button id="btnCloseWebrtcDrawer" type="button" class="btn-timer-reset">Fermer</button>
       </div>
 
       <div class="drawer-body">
-        <p style="font-size:0.74rem;color:var(--text-soft);">
-          Connexion vidéo P2P directe sans serveur externe : activez <strong>Émetteur</strong> sur le smartphone, copiez l’offre SDP vers <strong>Récepteur</strong> sur le PC, puis renvoyez la réponse SDP.
-        </p>
+        <!-- Code de salon court + lien partageable -->
+        <div class="panel-box" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="panel-row-between">
+            <label for="roomCodeInput" class="field-label" style="margin:0;color:#fecdd3;">Code de salon rapide (P2P direct)</label>
+            <div style="display:flex;gap:8px;">
+              <button id="btnNewRoomCode" type="button" class="link-action-btn">Nouveau code</button>
+              <button id="btnCopyRoomLink" type="button" class="link-action-btn">Copier lien</button>
+            </div>
+          </div>
+          <div class="room-code-box">
+            <input type="text" id="roomCodeInput" maxlength="12" value="ZR-4829" class="field-control room-code-input" />
+            <span id="signalingChannelPill" class="timer-pill">Canal local + relais</span>
+          </div>
+          <p class="media-hint-text">
+            Saisissez le même code sur le PC et le smartphone (ou ouvrez le lien copié) pour appairer la vidéo P2P automatiquement sans copier de longs blocs techniques.
+          </p>
+        </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <button id="btnWebrtcSender" type="button" class="btn-timer-primary" style="padding:10px;">
@@ -1577,7 +1668,7 @@
         <div id="webrtcVideoContainer" class="webrtc-stage">
           <video id="webrtcVideo" autoplay playsinline></video>
           <div id="webrtcPlaceholder" class="webrtc-placeholder">
-            Sélectionnez Émetteur (Smartphone) ou Récepteur (PC) pour démarrer la liaison vidéo directe.
+            Entrez un code de salon puis choisissez Émetteur (Smartphone) ou Récepteur (PC).
           </div>
           <div id="webrtcOverlayControls" class="webrtc-overlay-btns hidden">
             <button id="btnSwitchWebrtcCam" type="button" class="btn-timer-reset" style="background:rgba(15,10,12,0.85);">🔄 Caméra</button>
@@ -1586,21 +1677,29 @@
           </div>
         </div>
 
-        <div id="webrtcSignalingBox" class="hidden" style="display:flex;flex-direction:column;gap:10px;">
-          <div>
-            <div class="panel-row-between" style="margin-bottom:4px;">
-              <label id="localSdpLabel" for="localSdpText" class="field-label" style="margin:0;">1. Code SDP généré à copier :</label>
-              <button id="btnCopyLocalSdp" type="button" style="font-size:0.7rem;color:#fcd34d;font-weight:700;">Copier le code</button>
-            </div>
-            <textarea id="localSdpText" readonly rows="3" class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+        <!-- Secours manuel SDP repliable en cas de réseau restrictif -->
+        <div class="panel-box" style="display:flex;flex-direction:column;gap:8px;">
+          <div class="panel-row-between">
+            <span class="section-label">Secours manuel SDP (si besoin)</span>
+            <button id="btnToggleManualSdp" type="button" class="link-action-btn">Afficher / Masquer</button>
           </div>
 
-          <div>
-            <label id="remoteSdpLabel" for="remoteSdpText" class="field-label">2. Collez le code SDP reçu de l'autre appareil :</label>
-            <textarea id="remoteSdpText" rows="3" placeholder="Collez ici le code SDP..." class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
-            <button id="btnApplyRemoteSdp" type="button" class="btn-timer-primary" style="width:100%;margin-top:8px;padding:9px;background:#059669;">
-              Valider la connexion P2P
-            </button>
+          <div id="webrtcSignalingBox" class="hidden" style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <div class="panel-row-between" style="margin-bottom:4px;">
+                <label id="localSdpLabel" for="localSdpText" class="field-label" style="margin:0;">1. Code SDP généré à copier :</label>
+                <button id="btnCopyLocalSdp" type="button" style="font-size:0.7rem;color:#fcd34d;font-weight:700;">Copier le code</button>
+              </div>
+              <textarea id="localSdpText" readonly rows="2" class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+            </div>
+
+            <div>
+              <label id="remoteSdpLabel" for="remoteSdpText" class="field-label">2. Collez le code SDP reçu de l'autre appareil :</label>
+              <textarea id="remoteSdpText" rows="2" placeholder="Collez ici le code SDP..." class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+              <button id="btnApplyRemoteSdp" type="button" class="btn-timer-primary" style="width:100%;margin-top:8px;padding:8px;background:#059669;">
+                Valider la connexion P2P
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1615,7 +1714,7 @@
       'use strict';
 
       // =======================================================================
-      // 1. CONSTANTES & CLÉ LOCALSTORAGE 'zone_rouge_v11_120'
+      // 1. CONSTANTES & CLÉS DE STOCKAGE 'zone_rouge_v12_120'
       // =======================================================================
       const CARDS_PER_STAGE = 22;
       const TIMER_SECONDS = 120; // 02:00
@@ -1623,18 +1722,16 @@
       const MAX_IDB_VIDEO_BYTES = 35000000;  // ~35 Mo max conseillé en IndexedDB
       const IDB_NAME = 'ZoneRougePermanentDB';
       const IDB_STORE = 'cardMediaStore';
-      const STORAGE_KEY_DECK = 'zone_rouge_v11_120_deck';
-      const STORAGE_KEY_STATE = 'zone_rouge_v11_120_state';
-      const STORAGE_KEY_MEDIA = 'zone_rouge_v11_120_media';
+      const STORAGE_KEY_DECK = 'zone_rouge_v12_120_deck';
+      const STORAGE_KEY_STATE = 'zone_rouge_v12_120_state';
+      const STORAGE_KEY_MEDIA = 'zone_rouge_v12_120_media';
+      const SIGNALING_RELAY_ENDPOINT = 'https://ntfy.sh';
 
       const LEGACY_KEYS = [
+        'zone_rouge_v11_120_deck', 'zone_rouge_v11_120_state', 'zone_rouge_v11_120_media',
         'zone_rouge_v10_120_deck', 'zone_rouge_v10_120_state', 'zone_rouge_v10_120_media',
         'zone_rouge_v9_120_deck', 'zone_rouge_v9_120_state', 'zone_rouge_v9_120_media',
-        'zone_rouge_v8_clean_deck', 'zone_rouge_v8_clean_state', 'zone_rouge_v8_clean_media',
-        'v_zr_120_v7_deck', 'v_zr_120_v7_state', 'v_zr_120_v7_media',
-        'v_zr_120_clean_deck', 'v_zr_120_clean_state', 'v_zr_120_clean_media',
-        'zone_rouge_deck_120_v1', 'zone_rouge_state_120_v1', 'zone_rouge_media_120_v1',
-        'zone_rouge_deck_v3', 'zone_rouge_state_v3', 'zone_rouge_media_v3'
+        'zone_rouge_v8_clean_deck', 'zone_rouge_v8_clean_state', 'zone_rouge_v8_clean_media'
       ];
 
       const STAGE_META = {
@@ -1779,7 +1876,7 @@
         { id: 312, suit: '♦', level: 2, target: 'homme', title: 'Baisers lents et profonds les yeux ouverts', text: 'Embrasse la bouche, la gorge et la poitrine de ta partenaire en gardant les yeux ouverts pour observer chaque frisson.' },
         { id: 313, suit: '♦', level: 2, target: 'homme', title: 'Exploration digitale douce et progressive', text: 'Avec un doigt bien lubrifié de salive, explore lentement l’entrée du sexe de ta partenaire avec une pression douce.' },
         { id: 314, suit: '♦', level: 2, target: 'femme', title: 'Jeu de souffle chaud et baisers lents', text: 'Reçois le souffle chaud et des baisers lents de ton partenaire sur ta poitrine, ton ventre et l’intérieur de tes cuisses.' },
-        { id: 315, suit: '♦', level: 2, target: 'homme', title: 'Pose du préservatif et caresses préliminaires', text: 'Déroule le préservatif avec soin, puis fais monter l’excitation par des baisers et caresses douces avant toute pénétration.' },
+        { id: 315, suit: '♦', level: 2, target: 'homme', title: 'Pose lente du préservatif et baisers préliminaires', text: 'Déroule le préservatif avec soin, puis fais monter l’excitation par des baisers et caresses douces avant toute pénétration.' },
 
         // ♦ Niveau 3 — Chaud (4 femme, 4 homme) — entrée du gode & pénétration
         { id: 316, suit: '♦', level: 3, target: 'femme', title: 'Fellation frontale sur le gode regard levé', text: 'À genoux face à ton partenaire, prends le gode en bouche avec salive à un rythme soutenu et profond en gardant les yeux levés.' },
@@ -1850,15 +1947,16 @@
       let editorDraftMedia = null;
       let editorVideoRecorder = null;
       let editorRecordStream = null;
-      const sessionOnlyMediaMap = {}; // Repli mémoire vive si un fichier est trop lourd pour LocalStorage
+      const sessionOnlyMediaMap = {};
       let gameState = {
-        alternationMode: 'femme-first', // 'femme-first' (F, H, F, H...) ou 'homme-first' (H, F, H, F...)
-        nextTurnTarget: 'femme',         // Prochain joueur attendu dans l'alternance ('femme' ou 'homme')
+        alternationMode: 'femme-first', // 'femme-first' ou 'homme-first'
+        nextTurnTarget: 'femme',         // 'femme' ou 'homme'
         currentStage: 1,
         stageDrawnIds: { 1: [], 2: [], 3: [], 4: [] },
         currentCardId: null,
         filterTarget: 'all',             // 'all' = alternance stricte F/H ; 'femme' ou 'homme' = ciblé unique
         filterSuit: 'all',
+        setupCollapsed: false,
         discreet: false
       };
 
@@ -1910,6 +2008,14 @@
         renderTimerUI();
       }
 
+      function startNextTimerSeries() {
+        timerState.series += 1;
+        timerState.remaining = TIMER_SECONDS;
+        timerState.expired = false;
+        startTimerLoop();
+        showToast(`Série ${timerState.series} (02:00) démarrée`, 'info');
+      }
+
       function startTimerLoop() {
         stopTimerInterval();
         if (timerState.remaining <= 0) {
@@ -1938,11 +2044,7 @@
 
       function handleTimerMainAction() {
         if (timerState.expired) {
-          timerState.series += 1;
-          timerState.remaining = TIMER_SECONDS;
-          timerState.expired = false;
-          startTimerLoop();
-          showToast(`Série ${timerState.series} (02:00) démarrée`, 'info');
+          startNextTimerSeries();
           return;
         }
         if (timerState.running) {
@@ -2028,7 +2130,7 @@
       }
 
       // =======================================================================
-      // 5. INITIALISATION & STOCKAGE LOCALSTORAGE ('zone_rouge_v11_120')
+      // 5. INITIALISATION & PERSISTANCE (INDEXEDDB + LOCALSTORAGE)
       // =======================================================================
       function cloneDeck(list) {
         return JSON.parse(JSON.stringify(list));
@@ -2069,21 +2171,6 @@
           return true;
         } catch (_) {
           return false;
-        }
-      }
-
-      async function getMediaFromIdb(cardId) {
-        try {
-          const db = await openPermanentMediaDb();
-          return await new Promise((resolve, reject) => {
-            const tx = db.transaction(IDB_STORE, 'readonly');
-            const store = tx.objectStore(IDB_STORE);
-            const req = store.get(Number(cardId));
-            req.onsuccess = () => resolve(req.result ? req.result.media : null);
-            req.onerror = () => reject(req.error);
-          });
-        } catch (_) {
-          return null;
         }
       }
 
@@ -2171,6 +2258,7 @@
               currentCardId: parsedState?.currentCardId || null,
               filterTarget: ['all', 'femme', 'homme'].includes(parsedState?.filterTarget) ? parsedState.filterTarget : 'all',
               filterSuit: ['all', '♥', '♠', '♦', '♣'].includes(parsedState?.filterSuit) ? parsedState.filterSuit : 'all',
+              setupCollapsed: Boolean(parsedState?.setupCollapsed),
               discreet: Boolean(parsedState?.discreet)
             };
           }
@@ -2191,7 +2279,13 @@
           document.body.classList.add('discreet-mode');
         }
 
+        const hashMatch = (window.location.hash || '').match(/room=([A-Za-z0-9_-]{3,16})/i);
+        if (hashMatch && hashMatch[1]) {
+          document.getElementById('roomCodeInput').value = hashMatch[1].toUpperCase();
+        }
+
         bindEvents();
+        updateSetupVisibilityUI();
         updateAlternationUI();
         updateFilterUI();
         updateStageUI();
@@ -2260,12 +2354,48 @@
       }
 
       // =======================================================================
-      // 6. ALTERNANCE STRICTE, PROGRESSION 4 NIVEAUX & TIRAGE DE CARTES
+      // 6. OPTIONS REPLIABLES, "RECOMMENCER LE JEU", ALTERNANCE STRICTE & TIRAGE
       // =======================================================================
       function toggleDiscreetMode() {
         gameState.discreet = !gameState.discreet;
         document.body.classList.toggle('discreet-mode', gameState.discreet);
         persistState();
+      }
+
+      function setSetupCollapsed(collapsed, save = true) {
+        gameState.setupCollapsed = Boolean(collapsed);
+        updateSetupVisibilityUI();
+        if (save) persistState();
+      }
+
+      function updateSetupVisibilityUI() {
+        const optionsEl = document.getElementById('setupOptionsContainer');
+        const compactBar = document.getElementById('collapsedSetupBar');
+        if (!optionsEl || !compactBar) return;
+
+        if (gameState.setupCollapsed) {
+          optionsEl.classList.add('hidden');
+          compactBar.classList.remove('hidden');
+        } else {
+          optionsEl.classList.remove('hidden');
+          compactBar.classList.add('hidden');
+        }
+        syncCompactSummary();
+      }
+
+      function syncCompactSummary() {
+        const summaryEl = document.getElementById('compactSetupSummary');
+        const compactBadge = document.getElementById('compactNextTurnBadge');
+        if (!summaryEl || !compactBadge) return;
+
+        const lvlShort = STAGE_META[gameState.currentStage]?.short || `Niv. ${gameState.currentStage}`;
+        const altLabel = gameState.alternationMode === 'homme-first' ? 'Homme → Femme' : 'Femme → Homme';
+        const suitLabel = gameState.filterSuit === 'all' ? 'Toutes' : gameState.filterSuit;
+        summaryEl.textContent = `Niv. ${gameState.currentStage} — ${lvlShort} · ${altLabel} · ${suitLabel}`;
+
+        const expected = getExpectedTargetForDraw();
+        compactBadge.textContent = `Tour suivant : ${expected === 'homme' ? 'Homme' : 'Femme'}`;
+        compactBadge.className = `next-turn-pill ${expected === 'homme' ? 'turn-homme' : 'turn-femme'}`;
       }
 
       function setAlternationMode(mode) {
@@ -2292,6 +2422,7 @@
         const label = expected === 'homme' ? 'Homme' : 'Femme';
         badge.textContent = `Tour suivant : ${label}`;
         badge.className = `next-turn-pill ${expected === 'homme' ? 'turn-homme' : 'turn-femme'}`;
+        syncCompactSummary();
       }
 
       function getExpectedTargetForDraw() {
@@ -2310,25 +2441,33 @@
         showToast(STAGE_META[stageNum].desc, 'info');
       }
 
-      function resetSessionProgress() {
+      function resetSessionProgress(restoreSetup = false) {
+        gameState.currentStage = 1;
+        gameState.stageDrawnIds = { 1: [], 2: [], 3: [], 4: [] };
+        gameState.currentCardId = null;
+        gameState.nextTurnTarget = gameState.alternationMode === 'homme-first' ? 'homme' : 'femme';
+        if (restoreSetup) {
+          gameState.setupCollapsed = false;
+        }
+        resetTimerForNewCard();
+        persistState();
+        updateSetupVisibilityUI();
+        updateAlternationUI();
+        updateStageUI();
+        document.getElementById('cardTitle').textContent = 'Prêts à recommencer la partie ?';
+        document.getElementById('cardText').textContent = `Partie réinitialisée au début. Prochain tour : ${gameState.nextTurnTarget === 'homme' ? 'Homme' : 'Femme'}.`;
+        document.getElementById('cardMediaToolbar').classList.add('hidden');
+        document.getElementById('cardMediaPreview').classList.add('hidden');
+        document.getElementById('cardIdLabel').textContent = `Paquet ${deck.length}`;
+      }
+
+      function handleRestartGameButton() {
         openConfirm(
-          'Réinitialiser la progression ?',
-          'Les 4 paliers reviendront à 0/22 et l’alternance repartira selon votre choix initial.',
+          'Recommencer le jeu depuis le début ?',
+          'L’alternance repartira du début, l’historique de tirage sera remis à zéro et le minuteur repassera à 02:00 (Série 1).',
           () => {
-            gameState.currentStage = 1;
-            gameState.stageDrawnIds = { 1: [], 2: [], 3: [], 4: [] };
-            gameState.currentCardId = null;
-            gameState.nextTurnTarget = gameState.alternationMode === 'homme-first' ? 'homme' : 'femme';
-            resetTimerForNewCard();
-            persistState();
-            updateAlternationUI();
-            updateStageUI();
-            document.getElementById('cardTitle').textContent = 'Nouvelle session prête';
-            document.getElementById('cardText').textContent = `Progression remise à zéro. Prochain tour : ${gameState.nextTurnTarget === 'homme' ? 'Homme' : 'Femme'}.`;
-            document.getElementById('cardMediaToolbar').classList.add('hidden');
-            document.getElementById('cardMediaPreview').classList.add('hidden');
-            document.getElementById('cardIdLabel').textContent = `Paquet ${deck.length}`;
-            showToast('Progression et alternance réinitialisées.', 'success');
+            resetSessionProgress(true);
+            showToast('Partie relancée depuis le début.', 'success');
           }
         );
       }
@@ -2361,6 +2500,7 @@
         document.querySelectorAll('#suitFilterGroup .chip-btn').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.suit === gameState.filterSuit);
         });
+        syncCompactSummary();
       }
 
       function getFilteredPool(stageNum, targetFilter = gameState.filterTarget, suitFilter = gameState.filterSuit) {
@@ -2407,6 +2547,7 @@
         const targetPool = getFilteredPool(stage, expected, gameState.filterSuit);
         document.getElementById('cardPoolInfo').textContent = `${targetPool.length} carte(s) ${expected === 'homme' ? 'Homme' : 'Femme'} au Niv. ${stage}`;
         document.getElementById('headerCardCounter').textContent = `${totalDrawn} / ${deck.length}`;
+        syncCompactSummary();
       }
 
       function pickFromPool(pool, stage) {
@@ -2541,17 +2682,15 @@
         const cardId = gameState.currentCardId;
         const rtcVideo = document.getElementById('webrtcVideo');
 
-        // 1. Si un flux vidéo WebRTC (caméra smartphone ou flux reçu) est déjà actif, capturer directement depuis lui
         if (rtcVideo && rtcVideo.srcObject && rtcVideo.readyState >= 2 && rtcVideo.videoWidth > 0) {
           const dataUrl = captureFrameFromVideoElement(rtcVideo, 960);
           if (dataUrl) {
-            saveMediaForCard(cardId, { type: 'image', dataUrl, name: `instantane-carte-${cardId}.jpg` });
+            await saveMediaForCard(cardId, { type: 'image', dataUrl, name: `instantane-carte-${cardId}.jpg` });
             renderCardMediaPreview(cardId);
             return;
           }
         }
 
-        // 2. Sinon, ouvrir brièvement la caméra locale de l'appareil pour capturer un instantané
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           triggerMediaInput('inputPhoto');
           return;
@@ -2577,7 +2716,7 @@
           tempStream = null;
 
           if (dataUrl) {
-            saveMediaForCard(cardId, { type: 'image', dataUrl, name: `instantane-carte-${cardId}.jpg` });
+            await saveMediaForCard(cardId, { type: 'image', dataUrl, name: `instantane-carte-${cardId}.jpg` });
             renderCardMediaPreview(cardId);
           } else {
             showToast('Impossible de capturer l’image.', 'error');
@@ -2640,15 +2779,15 @@
 
         if (file.type.startsWith('image/')) {
           const compressedUrl = await compressImageFileToDataUrl(file, 1024);
-          saveMediaForCard(cardId, { type: 'image', dataUrl: compressedUrl, name: file.name });
+          await saveMediaForCard(cardId, { type: 'image', dataUrl: compressedUrl, name: file.name });
           renderCardMediaPreview(cardId);
           return;
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           const type = file.type.startsWith('video/') ? 'video' : 'image';
-          saveMediaForCard(cardId, { type, dataUrl: e.target.result, name: file.name });
+          await saveMediaForCard(cardId, { type, dataUrl: e.target.result, name: file.name });
           renderCardMediaPreview(cardId);
         };
         reader.readAsDataURL(file);
@@ -3086,18 +3225,142 @@
       }
 
       // =======================================================================
-      // 9. LIAISON CAMÉRA LIVE WEBRTC (SMARTPHONE -> PC SANS SERVEUR EXTERNE)
+      // 9. LIAISON CAMÉRA LIVE P2P PAR CODE DE SALON (BROADCASTCHANNEL + RELAIS)
       // =======================================================================
       let rtcPeer = null;
       let localStream = null;
       let rtcRole = null;
       let facingMode = 'environment';
+      let broadcastChannel = null;
+      let relayPollTimer = null;
+      const seenSignalIds = new Set();
+      const clientInstanceId = 'zr_' + Math.random().toString(36).slice(2, 9);
+
+      function getNormalizedRoomCode() {
+        const input = document.getElementById('roomCodeInput');
+        const cleaned = (input.value || 'ZR-4829').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12) || 'ZR-4829';
+        input.value = cleaned;
+        return cleaned;
+      }
+
+      function generateShortRoomCode() {
+        const num = Math.floor(1000 + Math.random() * 9000);
+        const code = `ZR-${num}`;
+        document.getElementById('roomCodeInput').value = code;
+        try {
+          window.history.replaceState(null, '', `#room=${encodeURIComponent(code)}`);
+        } catch (_) {}
+        showToast(`Nouveau code de salon : ${code}`, 'info');
+      }
+
+      function copyRoomShareLink() {
+        const code = getNormalizedRoomCode();
+        const baseUrl = `${window.location.origin}${window.location.pathname}`;
+        const shareUrl = `${baseUrl}#room=${encodeURIComponent(code)}`;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).catch(() => {});
+          }
+          const helper = document.createElement('textarea');
+          helper.value = shareUrl;
+          document.body.appendChild(helper);
+          helper.select();
+          document.execCommand('copy');
+          document.body.removeChild(helper);
+          showToast(`Lien du salon (${code}) copié.`, 'success');
+        } catch (_) {
+          showToast(`Code du salon : ${code}`, 'info');
+        }
+      }
+
+      function cleanupSignalingChannels() {
+        if (broadcastChannel) {
+          try { broadcastChannel.close(); } catch (_) {}
+          broadcastChannel = null;
+        }
+        if (relayPollTimer !== null) {
+          clearInterval(relayPollTimer);
+          relayPollTimer = null;
+        }
+      }
+
+      function setupRoomSignaling(roomCode, onSignalMessage) {
+        cleanupSignalingChannels();
+        seenSignalIds.clear();
+        const topic = `zr-p2p-${roomCode.toLowerCase()}`;
+
+        if ('BroadcastChannel' in window) {
+          try {
+            broadcastChannel = new BroadcastChannel(topic);
+            broadcastChannel.onmessage = (ev) => {
+              const msg = ev.data;
+              if (!msg || msg.senderId === clientInstanceId || seenSignalIds.has(msg.msgId)) return;
+              seenSignalIds.add(msg.msgId);
+              onSignalMessage(msg);
+            };
+          } catch (_) {}
+        }
+
+        const pollRelay = async () => {
+          try {
+            const res = await fetch(`${SIGNALING_RELAY_ENDPOINT}/${topic}/json?poll=1&since=30s`, { cache: 'no-store' });
+            if (!res.ok) return;
+            const rawText = await res.text();
+            const lines = rawText.trim().split('\n').filter(Boolean);
+            for (const line of lines) {
+              try {
+                const envelope = JSON.parse(line);
+                if (!envelope || !envelope.message) continue;
+                const msg = JSON.parse(envelope.message);
+                if (!msg || msg.senderId === clientInstanceId || seenSignalIds.has(msg.msgId)) continue;
+                seenSignalIds.add(msg.msgId);
+                onSignalMessage(msg);
+              } catch (_) {}
+            }
+          } catch (_) {}
+        };
+
+        pollRelay();
+        relayPollTimer = setInterval(pollRelay, 1600);
+      }
+
+      async function publishRoomSignal(roomCode, payload) {
+        const topic = `zr-p2p-${roomCode.toLowerCase()}`;
+        const msg = {
+          msgId: 'm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+          senderId: clientInstanceId,
+          ...payload
+        };
+        seenSignalIds.add(msg.msgId);
+
+        if (broadcastChannel) {
+          try { broadcastChannel.postMessage(msg); } catch (_) {}
+        }
+
+        try {
+          await fetch(`${SIGNALING_RELAY_ENDPOINT}/${topic}`, {
+            method: 'POST',
+            body: JSON.stringify(msg)
+          });
+        } catch (_) {}
+      }
+
+      function createPeerConnectionWithIce(roomCode) {
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            publishRoomSignal(roomCode, { kind: 'ice', candidate: event.candidate });
+          }
+        };
+        return pc;
+      }
 
       async function startWebrtcSender() {
         stopWebrtc(true);
         rtcRole = 'sender';
+        const roomCode = getNormalizedRoomCode();
         const statusBadge = document.getElementById('webrtcStatusBadge');
-        statusBadge.textContent = 'Ouverture caméra...';
+        statusBadge.textContent = `Salon ${roomCode} · Caméra...`;
 
         try {
           localStream = await navigator.mediaDevices.getUserMedia({
@@ -3111,7 +3374,7 @@
           document.getElementById('webrtcPlaceholder').classList.add('hidden');
           document.getElementById('webrtcOverlayControls').classList.remove('hidden');
 
-          rtcPeer = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+          rtcPeer = createPeerConnectionWithIce(roomCode);
           localStream.getTracks().forEach(track => rtcPeer.addTrack(track, localStream));
 
           rtcPeer.oniceconnectionstatechange = () => {
@@ -3125,13 +3388,24 @@
 
           const offer = await rtcPeer.createOffer();
           await rtcPeer.setLocalDescription(offer);
-          await waitIceComplete(rtcPeer);
-
-          document.getElementById('webrtcSignalingBox').classList.remove('hidden');
-          document.getElementById('localSdpLabel').textContent = '1. Code Offre (Smartphone) à copier vers le PC :';
-          document.getElementById('remoteSdpLabel').textContent = '2. Collez ici le Code Réponse généré par le PC :';
+          document.getElementById('localSdpLabel').textContent = '1. Offre SDP (secours manuel) :';
+          document.getElementById('remoteSdpLabel').textContent = '2. Réponse SDP (secours manuel) :';
           document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
-          statusBadge.textContent = 'Offre prête';
+
+          setupRoomSignaling(roomCode, async (msg) => {
+            if (!rtcPeer) return;
+            if (msg.kind === 'answer' && msg.sdp) {
+              await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp)).catch(() => {});
+            } else if (msg.kind === 'ice' && msg.candidate) {
+              await rtcPeer.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {});
+            } else if (msg.kind === 'receiver-ready' && rtcPeer.localDescription) {
+              await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
+            }
+          });
+
+          await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
+          statusBadge.textContent = `Salon ${roomCode} · En attente du PC`;
+          showToast(`Émetteur actif sur le salon ${roomCode}.`, 'info');
         } catch (_) {
           statusBadge.textContent = 'Erreur caméra';
           showToast('Accès caméra refusé ou contexte non sécurisé (HTTPS requis).', 'error');
@@ -3175,13 +3449,14 @@
         }
       }
 
-      function startWebrtcReceiver() {
+      async function startWebrtcReceiver() {
         stopWebrtc(true);
         rtcRole = 'receiver';
+        const roomCode = getNormalizedRoomCode();
         const statusBadge = document.getElementById('webrtcStatusBadge');
-        statusBadge.textContent = 'Récepteur prêt';
+        statusBadge.textContent = `Salon ${roomCode} · Connexion...`;
 
-        rtcPeer = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        rtcPeer = createPeerConnectionWithIce(roomCode);
         rtcPeer.ontrack = (event) => {
           const videoEl = document.getElementById('webrtcVideo');
           if (event.streams && event.streams[0]) {
@@ -3199,10 +3474,30 @@
           statusBadge.textContent = `État : ${st}`;
         };
 
-        document.getElementById('webrtcSignalingBox').classList.remove('hidden');
-        document.getElementById('localSdpLabel').textContent = '2. Code Réponse (PC) à renvoyer au Smartphone :';
-        document.getElementById('remoteSdpLabel').textContent = '1. Collez ici le Code Offre du Smartphone puis validez :';
+        document.getElementById('localSdpLabel').textContent = '2. Réponse SDP (secours manuel) :';
+        document.getElementById('remoteSdpLabel').textContent = '1. Offre SDP (secours manuel) :';
         document.getElementById('localSdpText').value = '';
+
+        let handledOffer = false;
+        setupRoomSignaling(roomCode, async (msg) => {
+          if (!rtcPeer) return;
+          if (msg.kind === 'offer' && msg.sdp && !handledOffer) {
+            handledOffer = true;
+            try {
+              await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+              const answer = await rtcPeer.createAnswer();
+              await rtcPeer.setLocalDescription(answer);
+              document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
+              await publishRoomSignal(roomCode, { kind: 'answer', sdp: rtcPeer.localDescription });
+              statusBadge.textContent = `Salon ${roomCode} · Liaison P2P établie`;
+            } catch (_) {}
+          } else if (msg.kind === 'ice' && msg.candidate) {
+            await rtcPeer.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {});
+          }
+        });
+
+        await publishRoomSignal(roomCode, { kind: 'receiver-ready' });
+        showToast(`Récepteur en écoute sur le salon ${roomCode}.`, 'info');
       }
 
       async function applyRemoteSdp() {
@@ -3263,6 +3558,7 @@
       }
 
       function stopWebrtc(silent = false) {
+        cleanupSignalingChannels();
         if (localStream) {
           localStream.getTracks().forEach(t => t.stop());
           localStream = null;
@@ -3275,7 +3571,6 @@
         videoEl.srcObject = null;
         document.getElementById('webrtcPlaceholder').classList.remove('hidden');
         document.getElementById('webrtcOverlayControls').classList.add('hidden');
-        document.getElementById('webrtcSignalingBox').classList.add('hidden');
         document.getElementById('liveDotHeader').classList.add('hidden');
         document.getElementById('webrtcStatusBadge').textContent = 'Hors ligne';
         if (!silent) showToast('Liaison caméra coupée.', 'info');
@@ -3338,6 +3633,10 @@
         document.getElementById('btnOpenWebrtcDrawer').addEventListener('click', () => openDrawer('webrtcDrawer'));
         document.getElementById('btnCloseWebrtcDrawer').addEventListener('click', () => closeDrawer('webrtcDrawer'));
 
+        // Masquer / Afficher le panneau d'options de jeu
+        document.getElementById('btnHideSetupPanel').addEventListener('click', () => setSetupCollapsed(true, true));
+        document.getElementById('btnShowSetupPanel').addEventListener('click', () => setSetupCollapsed(false, true));
+
         // Fermeture tiroirs au clic extérieur
         ['editorDrawer', 'webrtcDrawer'].forEach(id => {
           const el = document.getElementById(id);
@@ -3359,7 +3658,16 @@
         document.querySelectorAll('#stageSelector .stage-btn').forEach(btn => {
           btn.addEventListener('click', () => jumpToStage(Number(btn.dataset.stage)));
         });
-        document.getElementById('btnResetProgress').addEventListener('click', resetSessionProgress);
+        document.getElementById('btnResetProgress').addEventListener('click', () => {
+          openConfirm(
+            'Réinitialiser la progression ?',
+            'Les 4 paliers reviendront à 0/22 et l’alternance repartira selon votre choix initial.',
+            () => {
+              resetSessionProgress(false);
+              showToast('Progression et alternance réinitialisées.', 'success');
+            }
+          );
+        });
 
         // Alternance stricte Femme <-> Homme & Filtres
         document.querySelectorAll('#alternationModeGroup .alt-mode-btn').forEach(btn => {
@@ -3374,11 +3682,13 @@
 
         // Minuteur manuel 02:00
         document.getElementById('btnTimerMain').addEventListener('click', handleTimerMainAction);
+        document.getElementById('btnTimerNewSeries').addEventListener('click', startNextTimerSeries);
         document.getElementById('btnTimerReset').addEventListener('click', resetTimerCurrentSeries);
 
-        // Tirage de cartes
+        // Tirage de cartes & Recommencer le jeu
         document.getElementById('btnDrawAdvance').addEventListener('click', () => drawNextCard(true));
         document.getElementById('btnDrawSkip').addEventListener('click', () => drawNextCard(false));
+        document.getElementById('btnRestartGame').addEventListener('click', handleRestartGameButton);
 
         // Médias compacts 28x28px : Instantané photo, Photo, Petite vidéo, Supprimer
         document.getElementById('btnMediaSnapshot').addEventListener('click', captureSnapshotForCard);
@@ -3424,7 +3734,12 @@
           else if (btn.dataset.action === 'delete') deleteCardById(id);
         });
 
-        // Caméra Live WebRTC
+        // Caméra Live P2P par code de salon
+        document.getElementById('btnNewRoomCode').addEventListener('click', generateShortRoomCode);
+        document.getElementById('btnCopyRoomLink').addEventListener('click', copyRoomShareLink);
+        document.getElementById('btnToggleManualSdp').addEventListener('click', () => {
+          document.getElementById('webrtcSignalingBox').classList.toggle('hidden');
+        });
         document.getElementById('btnWebrtcSender').addEventListener('click', startWebrtcSender);
         document.getElementById('btnWebrtcReceiver').addEventListener('click', startWebrtcReceiver);
         document.getElementById('btnSwitchWebrtcCam').addEventListener('click', switchWebrtcCamera);
