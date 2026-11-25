@@ -277,6 +277,130 @@
     }
 
     /* =========================================================================
+       FENÊTRE FLOTTANTE CAMÉRA LIVE (PiP AU-DESSUS DES CARTES SUR PC)
+       ========================================================================= */
+    .pc-pip-wrapper {
+      position: relative;
+      z-index: 12;
+      background: linear-gradient(145deg, rgba(34, 16, 24, 0.96), rgba(14, 7, 11, 0.98));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.75), 0 0 22px rgba(225, 29, 72, 0.22);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pc-pip-wrapper.floating-mode {
+      position: fixed;
+      top: 68px;
+      right: 18px;
+      width: 288px;
+      max-width: calc(100vw - 24px);
+      z-index: 38;
+    }
+
+    .pc-pip-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 7px 10px;
+      background: rgba(25, 11, 17, 0.95);
+      border-bottom: 1px solid rgba(244, 63, 94, 0.24);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .pc-pip-header:active {
+      cursor: grabbing;
+    }
+
+    .pc-pip-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .pc-pip-live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      color: #a7f3d0;
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pc-pip-live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+    }
+
+    .pc-pip-caption {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fecdd3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pc-pip-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .pc-pip-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      color: #fecdd3;
+      font-size: 0.7rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .pc-pip-btn:hover {
+      background: rgba(225, 29, 72, 0.32);
+      color: #ffffff;
+    }
+
+    .pc-pip-body {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 205px;
+      background: #000000;
+      overflow: hidden;
+    }
+
+    .pc-pip-body.minimized {
+      display: none;
+    }
+
+    .pc-pip-body video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* =========================================================================
        PANNEAUX & CONTRÔLES DU JEU
        ========================================================================= */
     .panel-box {
@@ -1372,6 +1496,32 @@
 
       </div>
 
+      <!-- Fenêtre flottante PiP Caméra Live au-dessus des cartes sur PC -->
+      <section id="pcPipOverlay" class="pc-pip-wrapper hidden" aria-label="Retour vidéo caméra live">
+        <div id="pcPipDragHandle" class="pc-pip-header" title="Glisser pour déplacer la fenêtre vidéo">
+          <div class="pc-pip-title-row">
+            <span class="pc-pip-live-badge"><span class="pc-pip-live-dot"></span>Live</span>
+            <span id="pcPipRoomLabel" class="pc-pip-caption">Caméra Chambre · ZR-4829</span>
+          </div>
+          <div class="pc-pip-controls">
+            <button type="button" id="btnPipSnapToCard" title="Capturer un instantané sur la carte active" aria-label="Capturer un instantané sur la carte" class="pc-pip-btn">📸</button>
+            <button type="button" id="btnPipFloatToggle" title="Ancrer dans la page / Fenêtre flottante" aria-label="Ancrer ou détacher" class="pc-pip-btn">📌</button>
+            <button type="button" id="btnPipMinimize" title="Réduire / Agrandir la vidéo" aria-label="Réduire ou agrandir" class="pc-pip-btn">－</button>
+            <button type="button" id="btnPipFullscreen" title="Plein écran vidéo" aria-label="Plein écran" class="pc-pip-btn">⛶</button>
+            <button type="button" id="btnPipHide" title="Masquer la fenêtre vidéo" aria-label="Masquer la fenêtre vidéo" class="pc-pip-btn">✕</button>
+          </div>
+        </div>
+        <div id="pcPipBody" class="pc-pip-body">
+          <video id="pcPipVideo" autoplay playsinline></video>
+        </div>
+      </section>
+
+      <!-- Bouton discret pour rouvrir la fenêtre PiP si masquée alors qu'un flux est actif -->
+      <div id="pcPipRestoreBar" class="panel-box panel-row-between hidden" style="padding:8px 12px;">
+        <span style="font-size:0.72rem;font-weight:700;color:#a7f3d0;">● Flux caméra smartphone actif en arrière-plan</span>
+        <button type="button" id="btnRestorePipOverlay" class="link-action-btn">Afficher fenêtre vidéo</button>
+      </div>
+
       <!-- 3. Carte tirée grand format -->
       <section id="activeCardContainer" class="velvet-card">
         <div id="cardWatermark" class="card-watermark">♥</div>
@@ -1649,10 +1799,10 @@
           </div>
           <div class="room-code-box">
             <input type="text" id="roomCodeInput" maxlength="12" value="ZR-4829" class="field-control room-code-input" />
-            <span id="signalingChannelPill" class="timer-pill">Canal local + relais</span>
+            <span id="signalingChannelPill" class="timer-pill">Signalisation auto</span>
           </div>
           <p class="media-hint-text">
-            Saisissez le même code sur le PC et le smartphone (ou ouvrez le lien copié) pour appairer la vidéo P2P automatiquement sans copier de longs blocs techniques.
+            Posez le smartphone dans la chambre en mode <strong>Émetteur</strong> avec le même code que le <strong>Récepteur (PC)</strong> : la vidéo s’affiche automatiquement au-dessus de vos cartes sur PC.
           </p>
         </div>
 
@@ -2285,6 +2435,7 @@
         }
 
         bindEvents();
+        initPipDragBehavior();
         updateSetupVisibilityUI();
         updateAlternationUI();
         updateFilterUI();
@@ -2673,6 +2824,18 @@
         }
       }
 
+      function getBestLiveVideoSource() {
+        const pipVideo = document.getElementById('pcPipVideo');
+        if (pipVideo && pipVideo.srcObject && pipVideo.readyState >= 2 && pipVideo.videoWidth > 0) {
+          return pipVideo;
+        }
+        const rtcVideo = document.getElementById('webrtcVideo');
+        if (rtcVideo && rtcVideo.srcObject && rtcVideo.readyState >= 2 && rtcVideo.videoWidth > 0) {
+          return rtcVideo;
+        }
+        return null;
+      }
+
       async function captureSnapshotForCard() {
         if (!gameState.currentCardId) {
           showToast('Tirez d’abord une carte pour prendre un instantané.', 'warn');
@@ -2680,10 +2843,10 @@
         }
 
         const cardId = gameState.currentCardId;
-        const rtcVideo = document.getElementById('webrtcVideo');
+        const liveVideo = getBestLiveVideoSource();
 
-        if (rtcVideo && rtcVideo.srcObject && rtcVideo.readyState >= 2 && rtcVideo.videoWidth > 0) {
-          const dataUrl = captureFrameFromVideoElement(rtcVideo, 960);
+        if (liveVideo) {
+          const dataUrl = captureFrameFromVideoElement(liveVideo, 960);
           if (dataUrl) {
             await saveMediaForCard(cardId, { type: 'image', dataUrl, name: `instantane-carte-${cardId}.jpg` });
             renderCardMediaPreview(cardId);
@@ -2870,9 +3033,9 @@
       }
 
       async function captureEditorSnapshot() {
-        const rtcVideo = document.getElementById('webrtcVideo');
-        if (rtcVideo && rtcVideo.srcObject && rtcVideo.readyState >= 2 && rtcVideo.videoWidth > 0) {
-          const dataUrl = captureFrameFromVideoElement(rtcVideo, 960);
+        const liveVideo = getBestLiveVideoSource();
+        if (liveVideo) {
+          const dataUrl = captureFrameFromVideoElement(liveVideo, 960);
           if (dataUrl) {
             setEditorDraftMedia({ type: 'image', dataUrl, name: `carte-photo-${Date.now()}.jpg` }, 'Instantané photo capturé depuis la caméra live.');
             return;
@@ -3225,16 +3388,138 @@
       }
 
       // =======================================================================
-      // 9. LIAISON CAMÉRA LIVE P2P PAR CODE DE SALON (BROADCASTCHANNEL + RELAIS)
+      // 9. LIAISON CAMÉRA LIVE P2P PAR CODE DE SALON & FENÊTRE PiP SUR PC
       // =======================================================================
       let rtcPeer = null;
       let localStream = null;
+      let remoteStream = null;
       let rtcRole = null;
       let facingMode = 'environment';
       let broadcastChannel = null;
       let relayPollTimer = null;
+      let pipHiddenByUser = false;
+      let pipMinimized = false;
+      let pipFloating = false;
       const seenSignalIds = new Set();
       const clientInstanceId = 'zr_' + Math.random().toString(36).slice(2, 9);
+
+      function syncPcPipOverlay(stream, roomCode = '') {
+        const pipWrapper = document.getElementById('pcPipOverlay');
+        const pipVideo = document.getElementById('pcPipVideo');
+        const restoreBar = document.getElementById('pcPipRestoreBar');
+        const roomLabel = document.getElementById('pcPipRoomLabel');
+
+        if (!pipWrapper || !pipVideo || !restoreBar) return;
+
+        if (!stream) {
+          remoteStream = null;
+          pipHiddenByUser = false;
+          pipVideo.srcObject = null;
+          pipWrapper.classList.add('hidden');
+          restoreBar.classList.add('hidden');
+          return;
+        }
+
+        remoteStream = stream;
+        pipVideo.srcObject = stream;
+        if (roomLabel) {
+          roomLabel.textContent = `Caméra Chambre · ${roomCode || getNormalizedRoomCode()}`;
+        }
+
+        if (pipHiddenByUser) {
+          pipWrapper.classList.add('hidden');
+          restoreBar.classList.remove('hidden');
+        } else {
+          pipWrapper.classList.remove('hidden');
+          restoreBar.classList.add('hidden');
+        }
+      }
+
+      function togglePipMinimize() {
+        pipMinimized = !pipMinimized;
+        const body = document.getElementById('pcPipBody');
+        const btn = document.getElementById('btnPipMinimize');
+        if (body) body.classList.toggle('minimized', pipMinimized);
+        if (btn) btn.textContent = pipMinimized ? '＋' : '－';
+      }
+
+      function togglePipFloatingMode() {
+        pipFloating = !pipFloating;
+        const wrapper = document.getElementById('pcPipOverlay');
+        if (!wrapper) return;
+        wrapper.classList.toggle('floating-mode', pipFloating);
+        if (!pipFloating) {
+          wrapper.style.left = '';
+          wrapper.style.top = '';
+          wrapper.style.right = '';
+          wrapper.style.bottom = '';
+        }
+        showToast(pipFloating ? 'Fenêtre vidéo détachée (glissable).' : 'Fenêtre vidéo ancrée au-dessus des cartes.', 'info');
+      }
+
+      function hidePipOverlay() {
+        if (!remoteStream) return;
+        pipHiddenByUser = true;
+        syncPcPipOverlay(remoteStream);
+      }
+
+      function restorePipOverlay() {
+        if (!remoteStream) return;
+        pipHiddenByUser = false;
+        syncPcPipOverlay(remoteStream);
+      }
+
+      function togglePipFullscreen() {
+        const body = document.getElementById('pcPipBody');
+        if (!body) return;
+        if (!document.fullscreenElement) {
+          if (body.requestFullscreen) body.requestFullscreen().catch(() => {});
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      function initPipDragBehavior() {
+        const handle = document.getElementById('pcPipDragHandle');
+        const wrapper = document.getElementById('pcPipOverlay');
+        if (!handle || !wrapper) return;
+
+        let dragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        handle.addEventListener('pointerdown', (e) => {
+          if (e.target.closest('button')) return;
+          if (!pipFloating) {
+            pipFloating = true;
+            wrapper.classList.add('floating-mode');
+          }
+          const rect = wrapper.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+          dragging = true;
+          handle.setPointerCapture(e.pointerId);
+        });
+
+        handle.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const maxX = Math.max(8, window.innerWidth - wrapper.offsetWidth - 8);
+          const maxY = Math.max(8, window.innerHeight - wrapper.offsetHeight - 8);
+          const left = Math.max(8, Math.min(maxX, e.clientX - offsetX));
+          const top = Math.max(8, Math.min(maxY, e.clientY - offsetY));
+          wrapper.style.left = `${left}px`;
+          wrapper.style.top = `${top}px`;
+          wrapper.style.right = 'auto';
+        });
+
+        const endDrag = (e) => {
+          if (!dragging) return;
+          dragging = false;
+          try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+        };
+        handle.addEventListener('pointerup', endDrag);
+        handle.addEventListener('pointercancel', endDrag);
+      }
 
       function getNormalizedRoomCode() {
         const input = document.getElementById('roomCodeInput');
@@ -3465,7 +3750,9 @@
             document.getElementById('webrtcOverlayControls').classList.remove('hidden');
             document.getElementById('liveDotHeader').classList.remove('hidden');
             statusBadge.textContent = 'En direct';
-            showToast('Flux vidéo en direct reçu !', 'success');
+            syncPcPipOverlay(event.streams[0], roomCode);
+            closeDrawer('webrtcDrawer');
+            showToast('Flux vidéo en direct affiché au-dessus des cartes !', 'success');
           }
         };
 
@@ -3569,6 +3856,7 @@
         }
         const videoEl = document.getElementById('webrtcVideo');
         videoEl.srcObject = null;
+        syncPcPipOverlay(null);
         document.getElementById('webrtcPlaceholder').classList.remove('hidden');
         document.getElementById('webrtcOverlayControls').classList.add('hidden');
         document.getElementById('liveDotHeader').classList.add('hidden');
@@ -3632,6 +3920,14 @@
         document.getElementById('btnCloseEditorDrawer').addEventListener('click', () => closeDrawer('editorDrawer'));
         document.getElementById('btnOpenWebrtcDrawer').addEventListener('click', () => openDrawer('webrtcDrawer'));
         document.getElementById('btnCloseWebrtcDrawer').addEventListener('click', () => closeDrawer('webrtcDrawer'));
+
+        // Fenêtre flottante PiP Caméra Live sur PC
+        document.getElementById('btnPipSnapToCard').addEventListener('click', captureSnapshotForCard);
+        document.getElementById('btnPipFloatToggle').addEventListener('click', togglePipFloatingMode);
+        document.getElementById('btnPipMinimize').addEventListener('click', togglePipMinimize);
+        document.getElementById('btnPipFullscreen').addEventListener('click', togglePipFullscreen);
+        document.getElementById('btnPipHide').addEventListener('click', hidePipOverlay);
+        document.getElementById('btnRestorePipOverlay').addEventListener('click', restorePipOverlay);
 
         // Masquer / Afficher le panneau d'options de jeu
         document.getElementById('btnHideSetupPanel').addEventListener('click', () => setSetupCollapsed(true, true));
