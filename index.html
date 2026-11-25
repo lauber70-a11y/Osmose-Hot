@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Zone Rouge — Jeu de Cartes Couple (120 Cartes)</title>
+  <title>Zone Rouge — Jeu de Cartes Couple (120 Cartes &amp; Caméra Live)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* =========================================================================
-       VARIABLES & THÈME VELOURS ROUGE INCANDESCENT & OBSIDIENNE (#09070a / #130b10 / #d92648)
+       1. VARIABLES & IDENTITÉ VISUELLE VELOURS ROUGE & CHARBON
        ========================================================================= */
     :root {
       --bg-base: #09070a;
       --bg-surface: #130b10;
-      --bg-card-top: #211018;
+      --bg-card-top: #221019;
       --bg-card-bot: #11080d;
-      --bg-input: rgba(0, 0, 0, 0.5);
+      --bg-input: rgba(0, 0, 0, 0.55);
 
       --text-main: #f8fafc;
       --text-muted: #fda4af;
-      --text-soft: rgba(254, 205, 211, 0.74);
+      --text-soft: rgba(254, 205, 211, 0.76);
 
       --crimson-400: #fb7185;
       --crimson-500: #d92648;
@@ -38,11 +39,11 @@
       --lvl3-border: rgba(251, 113, 133, 0.5);
 
       --lvl4-color: #ff4d6d;
-      --lvl4-bg: rgba(217, 38, 72, 0.3);
+      --lvl4-bg: rgba(217, 38, 72, 0.32);
       --lvl4-border: rgba(255, 77, 109, 0.68);
 
       --border-subtle: rgba(217, 38, 72, 0.24);
-      --border-strong: rgba(217, 38, 72, 0.48);
+      --border-strong: rgba(217, 38, 72, 0.52);
       --radius-sm: 10px;
       --radius-md: 14px;
       --radius-lg: 18px;
@@ -58,7 +59,7 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-base);
       background-image:
         radial-gradient(circle at 18% 0%, rgba(217, 38, 72, 0.22) 0%, transparent 45%),
@@ -183,19 +184,19 @@
     }
 
     .discreet-return-btn {
-      padding: 7px 12px;
+      padding: 8px 14px;
       border-radius: 8px;
-      background: rgba(148, 163, 184, 0.1);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      color: #94a3b8;
-      font-size: 0.74rem;
-      font-weight: 500;
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      color: #e2e8f0;
+      font-size: 0.76rem;
+      font-weight: 600;
       transition: background 0.15s ease, color 0.15s ease;
     }
 
     .discreet-return-btn:hover {
-      background: rgba(148, 163, 184, 0.18);
-      color: #e2e8f0;
+      background: rgba(148, 163, 184, 0.22);
+      color: #ffffff;
     }
 
     /* =========================================================================
@@ -203,6 +204,7 @@
        ========================================================================= */
     .app-shell {
       max-width: 680px;
+      width: 100%;
       margin: 0 auto;
       padding: 12px 14px 44px;
       display: flex;
@@ -273,6 +275,7 @@
 
     .icon-pill-btn {
       height: 36px;
+      min-width: 36px;
       padding: 0 11px;
       border-radius: 11px;
       background: rgba(255, 255, 255, 0.05);
@@ -333,7 +336,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 4 / 3;
-      max-height: 58vh;
+      max-height: 54vh;
       background: #000000;
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-strong);
@@ -356,26 +359,31 @@
     }
 
     /* =========================================================================
-       FENÊTRE VIDÉO LIVE PC POSITIONNÉE DIRECTEMENT AU-DESSUS DES CARTES
+       FENÊTRE RETOUR VIDÉO PC TOUJOURS VISIBLE AU-DESSUS DES CARTES
        ========================================================================= */
     .pc-pip-wrapper {
       position: relative;
       z-index: 12;
-      background: linear-gradient(145deg, rgba(33, 16, 24, 0.97), rgba(13, 7, 11, 0.99));
+      background: linear-gradient(145deg, rgba(34, 16, 25, 0.98), rgba(13, 7, 11, 0.99));
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78), 0 0 22px rgba(217, 38, 72, 0.24);
-      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.14s ease;
+    }
+
+    .pc-pip-wrapper.dragging {
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.9), 0 0 28px rgba(217, 38, 72, 0.42);
+      border-color: rgba(251, 113, 133, 0.85);
     }
 
     .pc-pip-wrapper.state-connected {
-      border-color: rgba(52, 211, 153, 0.55);
-      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78), 0 0 22px rgba(16, 185, 129, 0.22);
+      border-color: rgba(52, 211, 153, 0.58);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78), 0 0 22px rgba(16, 185, 129, 0.24);
     }
 
     .pc-pip-wrapper.state-error {
-      border-color: rgba(248, 113, 113, 0.65);
+      border-color: rgba(248, 113, 113, 0.7);
     }
 
     .pc-pip-header {
@@ -388,6 +396,11 @@
       border-bottom: 1px solid rgba(217, 38, 72, 0.25);
       user-select: none;
       flex-wrap: wrap;
+      cursor: grab;
+    }
+
+    .pc-pip-header:active {
+      cursor: grabbing;
     }
 
     .pc-pip-title-row {
@@ -481,7 +494,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      max-height: 230px;
+      max-height: 235px;
       background: #050304;
       overflow: hidden;
       display: flex;
@@ -503,14 +516,14 @@
     .pc-pip-diagnostic-overlay {
       position: absolute;
       inset: 0;
-      padding: 14px 16px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      gap: 8px;
-      background: radial-gradient(circle at 50% 40%, rgba(76, 5, 25, 0.28), rgba(5, 3, 4, 0.88));
+      gap: 7px;
+      background: radial-gradient(circle at 50% 40%, rgba(76, 5, 25, 0.32), rgba(5, 3, 4, 0.9));
     }
 
     .pc-pip-diag-title {
@@ -520,15 +533,15 @@
     }
 
     .pc-pip-diag-desc {
-      font-size: 0.7rem;
+      font-size: 0.69rem;
       color: var(--text-soft);
-      max-width: 440px;
+      max-width: 470px;
     }
 
     .pc-pip-diag-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
       justify-content: center;
       margin-top: 2px;
@@ -566,6 +579,7 @@
       color: #fda4af;
       text-decoration: underline;
       text-underline-offset: 2px;
+      padding: 4px 2px;
     }
 
     .link-action-btn:hover {
@@ -753,7 +767,8 @@
     }
 
     .chip-btn {
-      padding: 5px 9px;
+      padding: 6px 10px;
+      min-height: 30px;
       border-radius: 9px;
       background: rgba(255, 255, 255, 0.05);
       color: #fecdd3;
@@ -768,8 +783,8 @@
     }
 
     .suit-chip {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       padding: 0;
       display: inline-flex;
       align-items: center;
@@ -1065,7 +1080,8 @@
     }
 
     .btn-timer-primary {
-      padding: 6px 12px;
+      padding: 7px 12px;
+      min-height: 32px;
       border-radius: 10px;
       background: var(--crimson-500);
       color: #ffffff;
@@ -1079,7 +1095,8 @@
     .btn-timer-primary.expired-state { background: var(--crimson-500); box-shadow: 0 0 12px rgba(217, 38, 72, 0.6); }
 
     .btn-timer-reset {
-      padding: 6px 10px;
+      padding: 7px 10px;
+      min-height: 32px;
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border-subtle);
@@ -1176,7 +1193,7 @@
 
     .btn-restart-game {
       width: 100%;
-      padding: 10px 14px;
+      padding: 11px 14px;
       border-radius: var(--radius-md);
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border-subtle);
@@ -1331,7 +1348,7 @@
     }
 
     .mini-action-btn {
-      padding: 4px 8px;
+      padding: 5px 9px;
       border-radius: 7px;
       font-size: 0.68rem;
       font-weight: 600;
@@ -1520,7 +1537,7 @@
           <span>Discret</span>
         </button>
 
-        <button id="btnOpenEditorDrawer" type="button" title="Gestionnaire & Éditeur de cartes" class="icon-pill-btn">
+        <button id="btnOpenEditorDrawer" type="button" title="Gestionnaire &amp; Éditeur de cartes" class="icon-pill-btn">
           <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
           </svg>
@@ -1537,7 +1554,7 @@
     </header>
 
     <!-- =========================================================================
-         VUE DÉDIÉE TÉLÉPHONE : DIFFUSION CAMÉRA UNIQUEMENT (#room=... ou ZR-XXXX)
+         VUE DÉDIÉE TÉLÉPHONE : DIFFUSION CAMÉRA UNIQUEMENT (?cam=1 / #cam=...)
          ========================================================================= -->
     <section id="phoneBroadcastView" class="phone-broadcast-shell sensitive-blur hidden" aria-label="Diffusion vidéo téléphone">
       <div class="phone-status-banner">
@@ -1551,7 +1568,7 @@
       <div class="phone-video-box">
         <video id="phoneBroadcastVideo" autoplay playsinline muted></video>
         <div id="phoneBroadcastPlaceholder" class="webrtc-placeholder">
-          Appuyez sur « Lancer la diffusion » pour envoyer la vidéo vers le PC via le code de salon.
+          Appuyez sur « Lancer la diffusion » pour envoyer la vidéo vers le PC (auto + repli manuel 2 étapes).
         </div>
       </div>
 
@@ -1560,14 +1577,33 @@
           Lancer la diffusion
         </button>
         <button id="btnPhoneSwitchCam" type="button" class="btn-draw-skip" style="padding:13px 10px;font-size:0.78rem;">
-          🔄 Caméra
+          🔄 Avant / Arrière
         </button>
       </div>
 
       <div class="panel-row-between" style="padding-top:4px;">
-        <button id="btnPhoneStopBroadcast" type="button" class="link-action-btn">Arrêter la diffusion</button>
-        <button id="btnPhoneWakeHint" type="button" class="link-action-btn">Garder l'écran éveillé</button>
-        <button id="btnPhoneExitToGame" type="button" class="link-action-btn">Ouvrir le jeu complet</button>
+        <button id="btnPhoneStopBroadcast" type="button" class="link-action-btn">Arrêter caméra</button>
+        <button id="btnPhoneToggleManual" type="button" class="link-action-btn">Liaison manuelle (2 étapes)</button>
+        <button id="btnPhoneExitToGame" type="button" class="link-action-btn">Jeu complet</button>
+      </div>
+
+      <!-- Secours manuel 2 étapes directement accessible sur le smartphone -->
+      <div id="phoneManualSignalingBox" class="panel-box hidden" style="display:flex;flex-direction:column;gap:8px;background:rgba(0,0,0,0.45);">
+        <span class="section-label" style="color:#fcd34d;">Secours manuel smartphone (si relais bloqué)</span>
+        <div>
+          <label for="phoneOfferInput" class="field-label">1. Collez le code Offre du PC :</label>
+          <textarea id="phoneOfferInput" rows="2" placeholder="Collez ici l'offre SDP du PC..." class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+          <button id="btnPhoneGenerateAnswer" type="button" class="btn-timer-primary" style="width:100%;margin-top:6px;padding:7px;background:#059669;">
+            Générer le code Réponse du téléphone
+          </button>
+        </div>
+        <div>
+          <div class="panel-row-between" style="margin-bottom:4px;">
+            <label for="phoneAnswerOutput" class="field-label" style="margin:0;">2. Copiez ce code Réponse vers le PC :</label>
+            <button id="btnPhoneCopyAnswer" type="button" style="font-size:0.7rem;color:#fcd34d;font-weight:700;">Copier</button>
+          </div>
+          <textarea id="phoneAnswerOutput" readonly rows="2" class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+        </div>
       </div>
     </section>
 
@@ -1582,7 +1618,7 @@
           <span id="compactSetupSummary" style="font-size:0.72rem;font-weight:700;color:#fecdd3;">Niv. 1 — Soft · Femme → Homme · Toutes</span>
           <span id="compactNextTurnBadge" class="next-turn-pill turn-femme">Tour suivant : Femme</span>
         </div>
-        <button id="btnShowSetupPanel" type="button" class="link-action-btn">Options</button>
+        <button id="btnShowSetupPanel" type="button" class="link-action-btn">Afficher options</button>
       </section>
 
       <!-- Panneau repliable des options de jeu (Alternance, 4 Niveaux, Filtres) -->
@@ -1606,7 +1642,7 @@
             </button>
             <button type="button" data-stage="2" id="stageBtn2" class="stage-btn">
               <span class="st-lvl">Niv. 2</span>
-              <span class="st-name">Montée</span>
+              <span class="st-name">Sensuel</span>
               <span class="st-count" id="stageCount2">0/22</span>
             </button>
             <button type="button" data-stage="3" id="stageBtn3" class="stage-btn">
@@ -1622,7 +1658,7 @@
           </div>
 
           <div class="stage-meta-row">
-            <span id="stageDescriptionLabel">Niveau 1 — Soft : Éveil, caresses, baisers & frissons (sans pénétration ni gode)</span>
+            <span id="stageDescriptionLabel">Niveau 1 — Soft : Éveil, caresses, baisers &amp; frissons (sans pénétration ni gode)</span>
             <strong id="stageProgressText">0 / 22</strong>
           </div>
 
@@ -1670,15 +1706,18 @@
 
       </div>
 
-      <!-- Fenêtre vidéo PC placée directement au-dessus de la zone des cartes tirées -->
+      <!-- =====================================================================
+           FENÊTRE RETOUR VIDÉO PC TOUJOURS VISIBLE AU-DESSUS DES CARTES
+           ===================================================================== -->
       <section id="pcPipOverlay" class="pc-pip-wrapper" aria-label="Retour vidéo caméra live">
-        <div class="pc-pip-header">
+        <div id="pcPipDragHandle" class="pc-pip-header" title="Glisser pour déplacer légèrement ou utiliser les boutons">
           <div class="pc-pip-title-row">
-            <span id="pcPipStatusBadge" class="pc-pip-live-badge"><span class="pc-pip-live-dot"></span>En attente du téléphone</span>
+            <span id="pcPipStatusBadge" class="pc-pip-live-badge"><span class="pc-pip-live-dot"></span>En attente du signal</span>
             <span id="pcPipRoomLabel" class="pc-pip-caption">Caméra Chambre · ZR-4829</span>
           </div>
           <div class="pc-pip-controls">
-            <button type="button" id="btnPipSnapToCard" title="Capturer un instantané sur la carte active" aria-label="Capturer un instantané sur la carte" class="pc-pip-btn">📸</button>
+            <button type="button" id="btnPipReconnect" title="Reconnecter / Écouter le salon" aria-label="Reconnecter le flux vidéo" class="pc-pip-btn">↻</button>
+            <button type="button" id="btnPipSnapToCard" title="Instantané carte (capturer sur la carte active)" aria-label="Instantané carte" class="pc-pip-btn">📸</button>
             <button type="button" id="btnPipMinimize" title="Réduire / Agrandir la vidéo" aria-label="Réduire ou agrandir" class="pc-pip-btn">－</button>
             <button type="button" id="btnPipHide" title="Masquer la fenêtre vidéo" aria-label="Masquer la fenêtre vidéo" class="pc-pip-btn">✕</button>
           </div>
@@ -1686,13 +1725,13 @@
         <div id="pcPipBody" class="pc-pip-body">
           <video id="pcPipVideo" autoplay playsinline></video>
           <div id="pcPipDiagnosticOverlay" class="pc-pip-diagnostic-overlay">
-            <p id="pcPipDiagTitle" class="pc-pip-diag-title">En attente du téléphone</p>
+            <p id="pcPipDiagTitle" class="pc-pip-diag-title">En attente du signal</p>
             <p id="pcPipDiagDesc" class="pc-pip-diag-desc">
-              Ouvrez le lien ou le code de salon sur le smartphone en « Diffusion Caméra », puis cliquez sur « Écouter le salon » ici.
+              Lancez la diffusion sur le smartphone (code ZR-XXXX), puis cliquez sur « Reconnecter / Écouter » ou utilisez la liaison manuelle 2 étapes si le relais est bloqué.
             </p>
             <div class="pc-pip-diag-actions">
-              <button type="button" id="btnPipQuickListen" class="btn-timer-primary" style="padding:5px 11px;font-size:0.7rem;">Écouter le salon</button>
-              <button type="button" id="btnPipOpenRoomConfig" class="btn-timer-reset" style="padding:5px 11px;font-size:0.7rem;">Salon &amp; Secours SDP</button>
+              <button type="button" id="btnPipQuickListen" class="btn-timer-primary" style="padding:5px 11px;font-size:0.7rem;">Reconnecter / Écouter</button>
+              <button type="button" id="btnPipOpenRoomConfig" class="btn-timer-reset" style="padding:5px 11px;font-size:0.7rem;">Salon &amp; Liaison manuelle</button>
             </div>
           </div>
         </div>
@@ -1701,7 +1740,7 @@
       <!-- Barre de réaffichage rapide si la fenêtre vidéo PC a été masquée -->
       <div id="pcPipRestoreBar" class="panel-box panel-row-between hidden" style="padding:8px 12px;">
         <span id="pcPipRestoreLabel" style="font-size:0.72rem;font-weight:700;color:#fda4af;">Fenêtre retour vidéo masquée</span>
-        <button type="button" id="btnRestorePipOverlay" class="link-action-btn">Afficher vidéo</button>
+        <button type="button" id="btnRestorePipOverlay" class="link-action-btn">Afficher fenêtre vidéo</button>
       </div>
 
       <!-- 3. Carte tirée grand format -->
@@ -1717,24 +1756,24 @@
                 <span id="cardLevelBadge" class="badge-pill badge-lvl-1">Niveau 1 — Soft</span>
                 <span id="cardTargetBadge" class="badge-pill badge-target-femme">Femme</span>
               </div>
-              <p id="cardSuitName" class="suit-caption">Cœur · Sensualité & Lien</p>
+              <p id="cardSuitName" class="suit-caption">Cœur · Sensualité &amp; Lien</p>
             </div>
           </div>
 
-          <!-- Petits boutons icônes SVG compacts (28x28px) : Instantané, Photo/Vidéo, Supprimer -->
+          <!-- Petits boutons icônes SVG compacts (28x28px) : Instantané, Photo, Petite vidéo, Supprimer -->
           <div id="cardMediaToolbar" class="media-toolbar hidden">
-            <button type="button" id="btnMediaSnapshot" title="Prendre un instantané photo à la pioche" aria-label="Prendre un instantané photo" class="media-icon-btn snap-active">
+            <button type="button" id="btnMediaSnapshot" title="Prendre un instantané photo sur la carte" aria-label="Prendre un instantané photo" class="media-icon-btn snap-active">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
               </svg>
             </button>
-            <button type="button" id="btnMediaPhoto" title="Ajouter une photo" aria-label="Ajouter une photo" class="media-icon-btn">
+            <button type="button" id="btnMediaPhoto" title="Ajouter une photo sur la carte" aria-label="Ajouter une photo" class="media-icon-btn">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
               </svg>
             </button>
-            <button type="button" id="btnMediaVideo" title="Ajouter une petite vidéo" aria-label="Ajouter une petite vidéo" class="media-icon-btn">
+            <button type="button" id="btnMediaVideo" title="Ajouter une courte vidéo sur la carte" aria-label="Ajouter une petite vidéo" class="media-icon-btn">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
               </svg>
@@ -1819,7 +1858,7 @@
   <div id="editorDrawer" class="drawer-backdrop" role="dialog" aria-modal="true" aria-labelledby="editorDrawerTitle">
     <div class="drawer-panel sensitive-blur">
       <div class="drawer-header">
-        <h2 id="editorDrawerTitle" class="drawer-title">Gestionnaire & Éditeur (120 cartes)</h2>
+        <h2 id="editorDrawerTitle" class="drawer-title">Gestionnaire &amp; Éditeur (120 cartes)</h2>
         <button id="btnCloseEditorDrawer" type="button" class="btn-timer-reset">Fermer</button>
       </div>
 
@@ -1847,7 +1886,7 @@
               <label for="editLevel" class="field-label">Niveau</label>
               <select id="editLevel" class="field-control">
                 <option value="1">Niv. 1 — Soft</option>
-                <option value="2">Niv. 2 — Montée</option>
+                <option value="2">Niv. 2 — Sensuel</option>
                 <option value="3">Niv. 3 — Chaud</option>
                 <option value="4">Niv. 4 — Hard</option>
               </select>
@@ -1878,7 +1917,7 @@
               <div class="media-toolbar">
                 <button type="button" id="btnEditorSnapshot" title="Prendre un instantané photo" aria-label="Prendre un instantané photo" class="media-icon-btn snap-active">
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 48.774 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
                   </svg>
                 </button>
@@ -1909,7 +1948,7 @@
             <input type="file" id="editorInputVideo" accept="image/*,video/*" capture="environment" class="hidden" />
             <div id="editorMediaPreview" class="editor-media-preview hidden"></div>
             <p id="editorMediaStatus" class="media-hint-text">
-              Photos compressées automatiquement ; vidéos courtes (idéalement &lt; 25 Mo) enregistrées durablement dans le navigateur.
+              Photos compressées automatiquement ; vidéos courtes enregistrées durablement dans IndexedDB (avec repli LocalStorage).
             </p>
           </div>
 
@@ -1957,14 +1996,14 @@
   </div>
 
   <!-- =========================================================================
-       TIROIR / MODALE 2 : CAMÉRA LIVE P2P PAR CODE DE SALON (SMARTPHONE -> PC)
+       TIROIR / MODALE 2 : CAMÉRA LIVE P2P PAR CODE DE SALON & LIAISON MANUELLE
        ========================================================================= -->
   <div id="webrtcDrawer" class="drawer-backdrop" role="dialog" aria-modal="true" aria-labelledby="webrtcDrawerTitle">
     <div class="drawer-panel sensitive-blur">
       <div class="drawer-header">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <h2 id="webrtcDrawerTitle" class="drawer-title">Caméra Live P2P (Smartphone → PC)</h2>
-          <span id="webrtcStatusBadge" class="timer-pill">En attente du téléphone</span>
+          <span id="webrtcStatusBadge" class="timer-pill">En attente du signal</span>
         </div>
         <button id="btnCloseWebrtcDrawer" type="button" class="btn-timer-reset">Fermer</button>
       </div>
@@ -1973,18 +2012,18 @@
         <!-- Code de salon court + lien partageable -->
         <div class="panel-box" style="display:flex;flex-direction:column;gap:8px;">
           <div class="panel-row-between">
-            <label for="roomCodeInput" class="field-label" style="margin:0;color:#fecdd3;">Code de salon rapide (P2P direct)</label>
+            <label for="roomCodeInput" class="field-label" style="margin:0;color:#fecdd3;">Code de salon P2P (Smartphone → PC)</label>
             <div style="display:flex;gap:8px;">
               <button id="btnNewRoomCode" type="button" class="link-action-btn">Nouveau code</button>
-              <button id="btnCopyRoomLink" type="button" class="link-action-btn">Copier lien</button>
+              <button id="btnCopyRoomLink" type="button" class="link-action-btn">Copier lien ?cam=1</button>
             </div>
           </div>
           <div class="room-code-box">
             <input type="text" id="roomCodeInput" maxlength="12" value="ZR-4829" class="field-control room-code-input" />
-            <button id="btnOpenPhoneBroadcastMode" type="button" class="btn-timer-reset">📱 Diffusion Caméra</button>
+            <button id="btnOpenPhoneBroadcastMode" type="button" class="btn-timer-reset">📱 Vue Caméra Mobile</button>
           </div>
           <p class="media-hint-text">
-            Ouvrez le lien ou le code <strong>ZR-XXXX</strong> sur le smartphone en <strong>Diffusion Caméra</strong>, puis choisissez <strong>Récepteur (PC)</strong> ici.
+            Ouvrez le lien ou le code <strong>ZR-XXXX</strong> sur le smartphone en <strong>Vue Caméra Mobile</strong>, puis cliquez sur <strong>Écouter / Récepteur (PC)</strong> ici.
           </p>
         </div>
 
@@ -2000,7 +2039,7 @@
         <div id="webrtcVideoContainer" class="webrtc-stage">
           <video id="webrtcVideo" autoplay playsinline></video>
           <div id="webrtcPlaceholder" class="webrtc-placeholder">
-            En attente du téléphone : entrez le code de salon puis choisissez Récepteur (PC) ou Émetteur (Smartphone).
+            En attente du signal : choisissez Récepteur (PC) pour écouter le salon, ou utilisez la liaison manuelle 2 étapes ci-dessous.
           </div>
           <div id="webrtcOverlayControls" class="webrtc-overlay-btns hidden">
             <button id="btnSwitchWebrtcCam" type="button" class="btn-timer-reset" style="background:rgba(15,10,12,0.85);">🔄 Caméra</button>
@@ -2008,27 +2047,32 @@
           </div>
         </div>
 
-        <!-- Secours manuel SDP repliable en cas de réseau restrictif -->
+        <!-- Liaison manuelle 2 étapes infaillible sur GitHub Pages si le relais est bloqué -->
         <div class="panel-box" style="display:flex;flex-direction:column;gap:8px;">
           <div class="panel-row-between">
-            <span class="section-label">Repli manuel SDP (si relais ou réseau bloqué)</span>
+            <span class="section-label" style="color:#fcd34d;">Liaison manuelle 2 étapes (Offre PC ↔ Réponse Mobile)</span>
             <button id="btnToggleManualSdp" type="button" class="link-action-btn">Afficher / Masquer</button>
           </div>
 
-          <div id="webrtcSignalingBox" class="hidden" style="display:flex;flex-direction:column;gap:10px;">
+          <div id="webrtcSignalingBox" style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button id="btnPrepareManualOffer" type="button" class="btn-timer-reset" style="font-size:0.7rem;">
+                1. Générer code Offre (PC)
+              </button>
+              <button id="btnCopyLocalSdp" type="button" class="btn-timer-reset" style="font-size:0.7rem;color:#fcd34d;">
+                Copier le code généré
+              </button>
+            </div>
             <div>
-              <div class="panel-row-between" style="margin-bottom:4px;">
-                <label id="localSdpLabel" for="localSdpText" class="field-label" style="margin:0;">1. Code SDP généré à copier :</label>
-                <button id="btnCopyLocalSdp" type="button" style="font-size:0.7rem;color:#fcd34d;font-weight:700;">Copier le code</button>
-              </div>
-              <textarea id="localSdpText" readonly rows="2" class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+              <label id="localSdpLabel" for="localSdpText" class="field-label">Code SDP local (Offre ou Réponse à copier) :</label>
+              <textarea id="localSdpText" readonly rows="2" placeholder="Cliquez sur « Générer code Offre (PC) » ou « Récepteur (PC) » pour préparer le code..." class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
             </div>
 
             <div>
-              <label id="remoteSdpLabel" for="remoteSdpText" class="field-label">2. Collez le code SDP reçu de l'autre appareil :</label>
-              <textarea id="remoteSdpText" rows="2" placeholder="Collez ici le code SDP..." class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
+              <label id="remoteSdpLabel" for="remoteSdpText" class="field-label">2. Collez le code SDP reçu de l'autre appareil (Réponse du téléphone) :</label>
+              <textarea id="remoteSdpText" rows="2" placeholder="Collez ici le code SDP reçu..." class="field-control" style="font-family:monospace;font-size:0.65rem;"></textarea>
               <button id="btnApplyRemoteSdp" type="button" class="btn-timer-primary" style="width:100%;margin-top:8px;padding:8px;background:#059669;">
-                Valider la connexion P2P
+                Valider le code SDP &amp; connecter P2P
               </button>
             </div>
           </div>
@@ -2045,7 +2089,7 @@
       'use strict';
 
       // =======================================================================
-      // 1. CONSTANTES & CLÉS DE STOCKAGE 'zone_rouge_v12_120'
+      // 1. CONSTANTES & CLÉS DE STOCKAGE 'zone_rouge_v13_120'
       // =======================================================================
       const CARDS_PER_STAGE = 22;
       const TIMER_SECONDS = 120; // 02:00
@@ -2053,16 +2097,18 @@
       const MAX_IDB_VIDEO_BYTES = 35000000;  // ~35 Mo max conseillé en IndexedDB
       const IDB_NAME = 'ZoneRougePermanentDB';
       const IDB_STORE = 'cardMediaStore';
-      const STORAGE_KEY_DECK = 'zone_rouge_v12_120_deck';
-      const STORAGE_KEY_STATE = 'zone_rouge_v12_120_state';
-      const STORAGE_KEY_MEDIA = 'zone_rouge_v12_120_media';
-      const SIGNALING_RELAY_ENDPOINT = 'https://ntfy.sh';
+      const STORAGE_KEY_DECK = 'zone_rouge_v13_120_deck';
+      const STORAGE_KEY_STATE = 'zone_rouge_v13_120_state';
+      const STORAGE_KEY_MEDIA = 'zone_rouge_v13_120_media';
+      const SIGNALING_RELAYS = [
+        'https://ntfy.sh',
+        'https://ntfy.zone-rouge.invalid'
+      ];
 
       const LEGACY_KEYS = [
+        'zone_rouge_v12_120_deck', 'zone_rouge_v12_120_state', 'zone_rouge_v12_120_media',
         'zone_rouge_v11_120_deck', 'zone_rouge_v11_120_state', 'zone_rouge_v11_120_media',
-        'zone_rouge_v10_120_deck', 'zone_rouge_v10_120_state', 'zone_rouge_v10_120_media',
-        'zone_rouge_v9_120_deck', 'zone_rouge_v9_120_state', 'zone_rouge_v9_120_media',
-        'zone_rouge_v8_clean_deck', 'zone_rouge_v8_clean_state', 'zone_rouge_v8_clean_media'
+        'zone_rouge_v10_120_deck', 'zone_rouge_v10_120_state', 'zone_rouge_v10_120_media'
       ];
 
       const STAGE_META = {
@@ -2072,9 +2118,9 @@
           desc: 'Niveau 1 — Soft : Éveil, caresses, baisers & frissons (sans pénétration ni gode)'
         },
         2: {
-          short: 'Montée',
-          badge: 'Niveau 2 — Montée',
-          desc: 'Niveau 2 — Montée : Excitation, caresses appuyées & oral doux (sans gode)'
+          short: 'Sensuel',
+          badge: 'Niveau 2 — Sensuel',
+          desc: 'Niveau 2 — Sensuel : Excitation, caresses appuyées & oral doux (sans gode)'
         },
         3: {
           short: 'Chaud',
@@ -2105,10 +2151,7 @@
       //      intégrées EXCLUSIVEMENT au Niveau 4 ('homme' et 'femme')
       // =======================================================================
       const DEFAULT_CARDS = [
-        // =====================================================================
-        // ENSEIGNE ♥ CŒUR (30 cartes : 8 Niv.1, 7 Niv.2, 8 Niv.3, 7 Niv.4 | 15 femme / 15 homme)
-        // =====================================================================
-        // ♥ Niveau 1 — Soft (4 femme, 4 homme)
+        // ♥ CŒUR — Niveau 1 Soft (4 femme, 4 homme)
         { id: 101, suit: '♥', level: 1, target: 'femme', title: 'Baisers délicats le long de la clavicule', text: 'Pose une suite de baisers lents et doux du creux de ta gorge jusqu’à tes épaules en observant ta respiration calme.' },
         { id: 102, suit: '♥', level: 1, target: 'homme', title: 'Baisers tièdes dans le cou et la nuque', text: 'Incline la tête et laisse ton partenaire déposer des baisers lents et doux sur ta nuque, tes tempes et tes épaules.' },
         { id: 103, suit: '♥', level: 1, target: 'femme', title: 'Caresses plume sur le torse et les bras', text: 'Fais glisser le bout de tes doigts aussi légèrement qu’une plume sur ton torse, tes clavicules et tes bras pour éveiller les frissons.' },
@@ -2118,7 +2161,7 @@
         { id: 107, suit: '♥', level: 1, target: 'femme', title: 'Caresses lentes des doigts entrelacés', text: 'Assise face à ton partenaire, entrelace tes doigts aux siens et caressez lentement vos mains et vos avant-bras en gardant le contact visuel.' },
         { id: 108, suit: '♥', level: 1, target: 'homme', title: 'Frissons du souffle sur la nuque', text: 'Tourne la nuque vers ton partenaire et reçois sur ta peau le souffle tiède et des baisers très légers sans geste brusque.' },
 
-        // ♥ Niveau 2 — Montée (4 femme, 3 homme) — sans gode
+        // ♥ CŒUR — Niveau 2 Sensuel (4 femme, 3 homme)
         { id: 109, suit: '♥', level: 2, target: 'femme', title: 'Fellation protégée tout en douceur', text: 'Déroule un préservatif avec soin et réalise une fellation lente en alternant pression douce des lèvres, mouvements de langue et courtes pauses.' },
         { id: 110, suit: '♥', level: 2, target: 'homme', title: 'Cunnilingus doux et progressif', text: 'Installe-toi entre ses jambes et offre un cunnilingus lent et attentif, en caressant ses lèvres intimes et son clitoris avec douceur.' },
         { id: 111, suit: '♥', level: 2, target: 'femme', title: 'Caresse manuelle lente et enveloppante', text: 'Enveloppe le sexe de ton partenaire de ta main bien chaude et fais-la glisser lentement de la base à l’extrémité en observant ses réactions.' },
@@ -2127,7 +2170,7 @@
         { id: 114, suit: '♥', level: 2, target: 'homme', title: 'Baisers remontant à l’intérieur des cuisses', text: 'Embrasse et caresse lentement l’intérieur des cuisses de ta partenaire en remontant peu à peu jusqu’à frôler son intimité.' },
         { id: 115, suit: '♥', level: 2, target: 'femme', title: 'Étreinte peau contre peau et baisers profonds', text: 'Allongée peau contre peau sur le côté contre ton partenaire, enlace tes jambes et prolonge des baisers profonds et humides.' },
 
-        // ♥ Niveau 3 — Chaud (4 femme, 4 homme) — entrée du gode & pénétration
+        // ♥ CŒUR — Niveau 3 Chaud (4 femme, 4 homme)
         { id: 116, suit: '♥', level: 3, target: 'femme', title: 'Fellation appliquée et caresse des testicules', text: 'Offre une fellation humide et rythmée à ton partenaire tout en caressant doucement ses testicules et son périnée de ta main libre.' },
         { id: 117, suit: '♥', level: 3, target: 'homme', title: 'Cunnilingus profond et rythmé', text: 'Stimule le clitoris et l’entrée vaginale de ta partenaire avec la langue et les lèvres en maintenant un rythme régulier et enveloppant.' },
         { id: 118, suit: '♥', level: 3, target: 'femme', title: 'Chevauchée lente et profonde face à face', text: 'Assieds-toi face à face sur ton partenaire, guide son sexe en toi et ondule profondément en gardant vos bustes collés.' },
@@ -2137,7 +2180,7 @@
         { id: 122, suit: '♥', level: 3, target: 'femme', title: 'Fellation sur le gode avec salive et regard levé', text: 'Prends le gode lubrifié de salive en bouche et mène un mouvement régulier et appuyé tout en gardant ton regard levé vers ton partenaire.' },
         { id: 123, suit: '♥', level: 3, target: 'homme', title: 'Pénétration en cuillère et caresse clitoridienne', text: 'Allongés sur le côté en cuillère, engage une pénétration vaginale régulière tout en caressant le clitoris de ta partenaire du bout des doigts.' },
 
-        // ♥ Niveau 4 — Hard (3 femme, 4 homme) — intensité maximale, gode & frottements sur le visage
+        // ♥ CŒUR — Niveau 4 Hard (3 femme, 4 homme)
         { id: 124, suit: '♥', level: 4, target: 'femme', title: 'Gorge profonde intense avant pénétration', text: 'Offre une fellation profonde et vigoureuse à ton partenaire, puis enchaîne directement en le guidant en toi sans temps mort.' },
         { id: 125, suit: '♥', level: 4, target: 'homme', title: 'Frottements du sexe sur le visage de ta partenaire', text: 'Installe-toi confortablement et fais frotter ton sexe contre le visage de ta partenaire (joue, front, menton) avec une cadence soutenue et maîtrisée.' },
         { id: 126, suit: '♥', level: 4, target: 'femme', title: 'Frottements de ton sexe sur le visage de ton partenaire', text: 'Approche-toi du visage de ton partenaire et frotte ton sexe contre sa joue et son front avec une cadence soutenue et engagée.' },
@@ -2146,10 +2189,7 @@
         { id: 129, suit: '♥', level: 4, target: 'homme', title: 'Cadence haute au gode et pénétration rapide', text: 'Imprime une pénétration rapide et profonde avec le gode lubrifié, puis passe immédiatement à ta propre pénétration sans pause.' },
         { id: 130, suit: '♥', level: 4, target: 'femme', title: 'Chevauchée intense jusqu’au relâchement', text: 'Prends le contrôle total du rythme sur ton partenaire avec des mouvements profonds et rapides jusqu’à ce que le plaisir vous submerge.' },
 
-        // =====================================================================
-        // ENSEIGNE ♠ PIQUE (30 cartes : 7 Niv.1, 8 Niv.2, 7 Niv.3, 8 Niv.4 | 15 femme / 15 homme)
-        // =====================================================================
-        // ♠ Niveau 1 — Soft (4 femme, 3 homme)
+        // ♠ PIQUE — Niveau 1 Soft (4 femme, 3 homme)
         { id: 201, suit: '♠', level: 1, target: 'femme', title: 'Mains guidées sur tes épaules et ta taille', text: 'Prends délicatement les mains de ton partenaire et guide-les lentement sur tes épaules, ton dos et ta taille les yeux fermés.' },
         { id: 202, suit: '♠', level: 1, target: 'homme', title: 'Jeu du regard et immobilité douce', text: 'Garde les mains posées sur tes genoux et maintiens le regard pendant que ta partenaire explore ton visage et ton cou de baisers très lents.' },
         { id: 203, suit: '♠', level: 1, target: 'femme', title: 'Menton relevé et regard soutenu', text: 'Laisse ton partenaire relever délicatement ton menton d’un doigt et maintiens le contact visuel pendant qu’il t’embrasse lentement.' },
@@ -2158,7 +2198,7 @@
         { id: 206, suit: '♠', level: 1, target: 'homme', title: 'Main douce sur la nuque et respiration lente', text: 'Reçois une main posée avec douceur sur ta nuque et respire calmement pendant que ton partenaire t’embrasse le cou.' },
         { id: 207, suit: '♠', level: 1, target: 'femme', title: 'Consigne murmurée au creux de l’oreille', text: 'Écoute la consigne douce murmurée à ton oreille (fermer les yeux ou poser tes mains sur ses épaules) avant d’échanger un baiser lent.' },
 
-        // ♠ Niveau 2 — Montée (4 femme, 4 homme) — sans gode
+        // ♠ PIQUE — Niveau 2 Sensuel (4 femme, 4 homme)
         { id: 208, suit: '♠', level: 2, target: 'femme', title: 'Fellation lente et humide avec contrôle du rythme', text: 'Prends le sexe de ton partenaire en bouche et guide une fellation lente, humide et enveloppante en alternant rythme et pauses douces.' },
         { id: 209, suit: '♠', level: 2, target: 'homme', title: 'Cunnilingus lent en maintenant ses cuisses écartées', text: 'Écarte doucement les cuisses de ta partenaire et offre un cunnilingus lent et régulier en jouant avec la pointe de ta langue.' },
         { id: 210, suit: '♠', level: 2, target: 'femme', title: 'Caresses lentes sur l’aine et le bas-ventre', text: 'Laisse glisser les lèvres et les doigts de ton partenaire le long de ton aine et de ton bas-ventre pour faire monter l’impatience.' },
@@ -2168,7 +2208,7 @@
         { id: 214, suit: '♠', level: 2, target: 'femme', title: 'Dos cambré sous une main ferme et chaude', text: 'Cambre doucement le dos pendant que ton partenaire fait glisser sa main le long de ta colonne jusqu’à tes reins en t’embrassant.' },
         { id: 215, suit: '♠', level: 2, target: 'homme', title: 'Pose lente du préservatif et baisers préliminaires', text: 'Déroule le préservatif lentement et soigneusement, puis embrasse ta partenaire de la bouche jusqu’au bas-ventre.' },
 
-        // ♠ Niveau 3 — Chaud (4 femme, 3 homme) — entrée du gode & pénétration
+        // ♠ PIQUE — Niveau 3 Chaud (4 femme, 3 homme)
         { id: 216, suit: '♠', level: 3, target: 'femme', title: 'Fellation soutenue sur le gode regard levé', text: 'Prends le gode en bouche avec salive et adopte une cadence soutenue et profonde en gardant les yeux rivés dans ceux de ton partenaire.' },
         { id: 217, suit: '♠', level: 3, target: 'homme', title: 'Pénétration en levrette à cadence maîtrisée', text: 'Place ta partenaire à quatre pattes, tiens fermement ses hanches et engage une pénétration vaginale régulière et profonde.' },
         { id: 218, suit: '♠', level: 3, target: 'femme', title: 'Posture imposée et pénétration au gode', text: 'Mets-toi à quatre pattes ou sur le ventre hanches relevées pendant que ton partenaire te pénètre au gode lubrifié à un rythme appuyé.' },
@@ -2177,7 +2217,7 @@
         { id: 221, suit: '♠', level: 3, target: 'homme', title: 'Cunnilingus appuyé et caresse des hanches', text: 'Maintiens les hanches de ta partenaire et offre un cunnilingus soutenu et rythmé sur son clitoris et l’entrée de son sexe.' },
         { id: 222, suit: '♠', level: 3, target: 'femme', title: 'Fellation sur le gode avant prise en main', text: 'Travaille le gode avec la bouche et la salive à un rythme soutenu, puis enchaîne directement avec ta main lubrifiée.' },
 
-        // ♠ Niveau 4 — Hard (3 femme, 5 homme) — intensité maximale, gode & frottements sur le visage
+        // ♠ PIQUE — Niveau 4 Hard (3 femme, 5 homme)
         { id: 223, suit: '♠', level: 4, target: 'femme', title: 'Cadence haute et contrôle total au gode', text: 'Mène ou subis un rythme rapide, profond et ferme avec le gode dans une position engagée jusqu’à ce que le rythme te submerge.' },
         { id: 224, suit: '♠', level: 4, target: 'homme', title: 'Levrette profonde et rapide hanches saisies', text: 'Saisis fermement les hanches de ta partenaire à quatre pattes et impose une pénétration rapide, profonde et sans temps mort.' },
         { id: 225, suit: '♠', level: 4, target: 'homme', title: 'Frottements appuyés du sexe sur le visage de ta partenaire', text: 'Guide le visage de ta partenaire et frotte ton sexe contre ses joues et son front à un rythme ferme et soutenu.' },
@@ -2187,10 +2227,7 @@
         { id: 229, suit: '♠', level: 4, target: 'femme', title: 'Fellation intense sur le gode et chevauchée directe', text: 'Mène une fellation rapide et bien mouillée sur le gode, puis enchaîne immédiatement sur une chevauchée profonde et soutenue.' },
         { id: 230, suit: '♠', level: 4, target: 'homme', title: 'Cadence brute au gode et pénétration en levrette', text: 'Enchaîne une pénétration rapide au gode lubrifié puis une levrette profonde et soutenue sans interruption.' },
 
-        // =====================================================================
-        // ENSEIGNE ♦ CARREAU (30 cartes : 8 Niv.1, 7 Niv.2, 8 Niv.3, 7 Niv.4 | 15 femme / 15 homme)
-        // =====================================================================
-        // ♦ Niveau 1 — Soft (4 femme, 4 homme)
+        // ♦ CARREAU — Niveau 1 Soft (4 femme, 4 homme)
         { id: 301, suit: '♦', level: 1, target: 'homme', title: 'Caresse lente du visage et de la mâchoire', text: 'Fais glisser doucement le dos de tes doigts le long de la joue, de la mâchoire et du cou de ta partenaire en soutenant son regard.' },
         { id: 302, suit: '♦', level: 1, target: 'femme', title: 'Frissons du bout des ongles sur le dos', text: 'Laisse glisser le bout des ongles de ton partenaire très lentement et légèrement de ta nuque jusqu’au bas de ton dos.' },
         { id: 303, suit: '♦', level: 1, target: 'homme', title: 'Compliment sensuel murmuré sur sa peau', text: 'Décris à voix basse une courbe ou une réaction de ta partenaire tout en caressant lentement la zone citée.' },
@@ -2200,7 +2237,7 @@
         { id: 307, suit: '♦', level: 1, target: 'homme', title: 'Baiser lent puis léger retrait teasing', text: 'Embrasse ta partenaire doucement, recule d’un souffle en soutenant son regard, puis reprends un baiser plus profond.' },
         { id: 308, suit: '♦', level: 1, target: 'femme', title: 'Caresses lentes des hanches aux épaules', text: 'Laisse les mains chaudes de ton partenaire remonter lentement de tes hanches jusqu’à tes épaules en fermant les yeux.' },
 
-        // ♦ Niveau 2 — Montée (3 femme, 4 homme) — sans gode
+        // ♦ CARREAU — Niveau 2 Sensuel (3 femme, 4 homme)
         { id: 309, suit: '♦', level: 2, target: 'femme', title: 'Fellation lente avec alternance bouche et main', text: 'Alterne de courtes prises en bouche lentes et des glissements doux de ta main humidifiée de salive sur le sexe de ton partenaire.' },
         { id: 310, suit: '♦', level: 2, target: 'homme', title: 'Cunnilingus doux et caresses des cuisses', text: 'Masse l’intérieur des cuisses de ta partenaire et offre un cunnilingus lent et régulier en alternant langue douce et succion légère.' },
         { id: 311, suit: '♦', level: 2, target: 'femme', title: 'Caresse de ton propre corps sous son regard', text: 'Caresse lentement ta poitrine, ton ventre et ton sexe sous le regard rapproché de ton partenaire.' },
@@ -2209,7 +2246,7 @@
         { id: 314, suit: '♦', level: 2, target: 'femme', title: 'Jeu de souffle chaud et baisers lents', text: 'Reçois le souffle chaud et des baisers lents de ton partenaire sur ta poitrine, ton ventre et l’intérieur de tes cuisses.' },
         { id: 315, suit: '♦', level: 2, target: 'homme', title: 'Pose lente du préservatif et baisers préliminaires', text: 'Déroule le préservatif avec soin, puis fais monter l’excitation par des baisers et caresses douces avant toute pénétration.' },
 
-        // ♦ Niveau 3 — Chaud (4 femme, 4 homme) — entrée du gode & pénétration
+        // ♦ CARREAU — Niveau 3 Chaud (4 femme, 4 homme)
         { id: 316, suit: '♦', level: 3, target: 'femme', title: 'Fellation frontale sur le gode regard levé', text: 'À genoux face à ton partenaire, prends le gode en bouche avec salive à un rythme soutenu et profond en gardant les yeux levés.' },
         { id: 317, suit: '♦', level: 3, target: 'homme', title: 'Cunnilingus appuyé et stimulation à deux doigts', text: 'Combine un travail soutenu de la langue sur le clitoris de ta partenaire avec deux doigts lubrifiés en mouvement régulier.' },
         { id: 318, suit: '♦', level: 3, target: 'femme', title: 'Andromaque à cadence soutenue', text: 'Installe-toi à califourchon sur ton partenaire, guide sa pénétration et impose un rythme régulier et profond.' },
@@ -2219,7 +2256,7 @@
         { id: 322, suit: '♦', level: 3, target: 'homme', title: 'Pénétration protégée en posture latérale', text: 'Allongés face à face jambes entrelacées, engage une pénétration protégée profonde avec un angle précis et soutenu.' },
         { id: 323, suit: '♦', level: 3, target: 'femme', title: 'Fellation rythmée et caresses de l’entrejambe', text: 'Maintiens une fellation soutenue et humide tout en caressant l’entrejambe de ton partenaire d’une main.' },
 
-        // ♦ Niveau 4 — Hard (4 femme, 3 homme) — intensité maximale, gode & frottements sur le visage
+        // ♦ CARREAU — Niveau 4 Hard (4 femme, 3 homme)
         { id: 324, suit: '♦', level: 4, target: 'homme', title: 'Frottements du sexe contre le visage à rythme ferme', text: 'Fais glisser ton sexe contre le visage de ta partenaire à un rythme ferme et régulier en accompagnant le mouvement d’une main.' },
         { id: 325, suit: '♦', level: 4, target: 'femme', title: 'Frottements de ton sexe contre son visage à rythme ferme', text: 'Frotte ton sexe contre le visage de ton partenaire en maintenant une cadence soutenue et ferme avec des mouvements continus.' },
         { id: 326, suit: '♦', level: 4, target: 'homme', title: 'Levrette rapide et soutenue hanches tenues', text: 'Place ta partenaire en levrette et mène une pénétration rapide, profonde et continue jusqu’au sommet.' },
@@ -2228,10 +2265,7 @@
         { id: 329, suit: '♦', level: 4, target: 'femme', title: 'Chevauchée rapide buste droit regard fixe', text: 'Assise sur ton partenaire buste droit, enchaîne des coups de bassin rapides et profonds sans jamais détourner les yeux.' },
         { id: 330, suit: '♦', level: 4, target: 'femme', title: 'Cadence haute au gode et stimulation clitoridienne', text: 'Enchaîne une pénétration rapide et profonde au gode lubrifié tout en stimulant vivement ton clitoris sans interruption.' },
 
-        // =====================================================================
-        // ENSEIGNE ♣ TRÈFLE (30 cartes : 7 Niv.1, 8 Niv.2, 7 Niv.3, 8 Niv.4 | 15 femme / 15 homme)
-        // =====================================================================
-        // ♣ Niveau 1 — Soft (3 femme, 4 homme)
+        // ♣ TRÈFLE — Niveau 1 Soft (3 femme, 4 homme)
         { id: 401, suit: '♣', level: 1, target: 'homme', title: 'Caresses lentes des épaules jusqu’aux hanches', text: 'Fais glisser tes mains ouvertes et chaudes des épaules jusqu’aux hanches de ta partenaire en appuyant très doucement.' },
         { id: 402, suit: '♣', level: 1, target: 'femme', title: 'Chapelet de baisers du cou au sternum', text: 'Reçois de petits baisers lents et réguliers qui descendent de ta gorge jusqu’au creux de ta poitrine.' },
         { id: 403, suit: '♣', level: 1, target: 'homme', title: 'Massage doux des cuisses et des hanches', text: 'Fais glisser tes paumes lentement le long des hanches, des cuisses et des mollets de ta partenaire avec un toucher enveloppant.' },
@@ -2240,7 +2274,7 @@
         { id: 406, suit: '♣', level: 1, target: 'femme', title: 'Baiser lent et étreinte calme allongée', text: 'Allongée serrée contre ton partenaire, laisse ses mains explorer lentement ton dos et ta taille dans le calme.' },
         { id: 407, suit: '♣', level: 1, target: 'homme', title: 'Baisers légers sur les tempes et la gorge', text: 'Dépose des baisers légers et espacés sur les tempes, la mâchoire et la gorge de ta partenaire sans précipitation.' },
 
-        // ♣ Niveau 2 — Montée (4 femme, 4 homme) — sans gode
+        // ♣ TRÈFLE — Niveau 2 Sensuel (4 femme, 4 homme)
         { id: 408, suit: '♣', level: 2, target: 'femme', title: 'Début de fellation lente et enveloppante', text: 'Prends doucement le gland et le haut de la tige en bouche avec beaucoup de salive, en gardant un rythme lent et régulier.' },
         { id: 409, suit: '♣', level: 2, target: 'homme', title: 'Langue douce et lente sur sa vulve', text: 'Fais glisser ta langue lentement de bas en haut le long de sa vulve en marquant de légères pauses sur le clitoris.' },
         { id: 410, suit: '♣', level: 2, target: 'femme', title: 'Baisers insistants sur le ventre et les hanches', text: 'Reçois des baisers lents et insistants sur ton ventre, tes hanches et l’intérieur de tes cuisses.' },
@@ -2250,7 +2284,7 @@
         { id: 414, suit: '♣', level: 2, target: 'femme', title: 'Caresses appuyées de la nuque aux hanches', text: 'Laisse les mains chaudes de ton partenaire parcourir ta nuque, ton dos et tes hanches avec une pression régulière et sensuelle.' },
         { id: 415, suit: '♣', level: 2, target: 'homme', title: 'Frottement lent des sexes avec lubrifiant', text: 'Avec un peu de lubrifiant ou de salive, frotte lentement ton sexe contre celui de ta partenaire sans pénétrer pour faire monter la chaleur.' },
 
-        // ♣ Niveau 3 — Chaud (3 femme, 4 homme) — entrée du gode & pénétration
+        // ♣ TRÈFLE — Niveau 3 Chaud (3 femme, 4 homme)
         { id: 416, suit: '♣', level: 3, target: 'femme', title: 'Oral profond sur le gode & caresse intime', text: 'Prends le gode profondément en bouche avec cadence pendant que tu caresses ton sexe (ou te fais caresser) en même temps.' },
         { id: 417, suit: '♣', level: 3, target: 'homme', title: 'Pénétration vaginale profonde en missionnaire', text: 'Allongé sur ta partenaire, engage une pénétration vaginale régulière et profonde en soutenant ses hanches.' },
         { id: 418, suit: '♣', level: 3, target: 'femme', title: 'Fellation rythmée bouche et main combinées', text: 'Associe des allers-retours buccaux soutenus avec le mouvement ferme de ta main lubrifiée de salive à la base.' },
@@ -2259,7 +2293,7 @@
         { id: 421, suit: '♣', level: 3, target: 'homme', title: 'Cunnilingus soutenu puis pénétration immédiate', text: 'Offre d’abord un cunnilingus soutenu et humide à ta partenaire, puis engage immédiatement la pénétration.' },
         { id: 422, suit: '♣', level: 3, target: 'homme', title: 'Cadence régulière au gode et baisers profonds', text: 'Mène une pénétration régulière et profonde avec le gode lubrifié tout en embrassant ta partenaire intensément.' },
 
-        // ♣ Niveau 4 — Hard (5 femme, 3 homme) — intensité maximale, gode & frottements sur le visage
+        // ♣ TRÈFLE — Niveau 4 Hard (5 femme, 3 homme)
         { id: 423, suit: '♣', level: 4, target: 'femme', title: 'Frottements de ton sexe sur son visage à pleine cadence', text: 'Frotte ton sexe contre le visage de ton partenaire avec une cadence rapide et soutenue jusqu’à ce que le rythme atteigne son sommet.' },
         { id: 424, suit: '♣', level: 4, target: 'homme', title: 'Frottements du sexe sur son visage à pleine cadence', text: 'Imprime une cadence soutenue et appuyée en frottant ton sexe contre le visage de ta partenaire sans relâcher le contact.' },
         { id: 425, suit: '♣', level: 4, target: 'femme', title: 'Final intense à deux sur le gode', text: 'Menez un passage rapide, humide et engagé à deux sur le gode, puis enchaînez immédiatement sur la suite sans temps mort.' },
@@ -2616,27 +2650,37 @@
           document.body.classList.add('discreet-mode');
         }
 
-        const hashMatch = (window.location.hash || '').match(/room=([A-Za-z0-9_-]{3,16})/i);
-        const hasRoomParam = Boolean(hashMatch && hashMatch[1]);
-        if (hasRoomParam) {
-          document.getElementById('roomCodeInput').value = hashMatch[1].toUpperCase();
+        const searchParams = new URLSearchParams(window.location.search || '');
+        const camQuery = searchParams.get('cam') === '1' || searchParams.get('mode') === 'cam';
+        const roomQuery = searchParams.get('room');
+        const hashMatch = (window.location.hash || '').match(/(?:room|cam)=([A-Za-z0-9_-]{3,16})/i);
+        const hasHashCam = /(?:^|[#&])cam=1(?:&|$)/i.test(window.location.hash || '');
+
+        const detectedRoom = roomQuery || (hashMatch && hashMatch[1]);
+        if (detectedRoom && detectedRoom !== '1') {
+          document.getElementById('roomCodeInput').value = detectedRoom.toUpperCase();
         }
 
         bindEvents();
+        initPcPipDrag();
         updateSetupVisibilityUI();
         updateAlternationUI();
         updateFilterUI();
         updateStageUI();
         updateDeckBadge();
         resetTimerForNewCard();
-        updateLiveDiagnosticsUI('waiting', `Salon ${getNormalizedRoomCode()} · En attente du téléphone`, 'Ouvrez le lien ou le code de salon sur le smartphone en « Diffusion Caméra », puis cliquez sur « Écouter le salon » ici.');
+        updateLiveDiagnosticsUI(
+          'waiting',
+          'En attente du signal',
+          `Salon ${getNormalizedRoomCode()} prêt. Ouvrez la diffusion sur le smartphone puis cliquez sur « Reconnecter / Écouter » ici.`
+        );
 
         if (gameState.currentCardId) {
           const existing = deck.find(c => c.id === gameState.currentCardId);
           if (existing) renderActiveCard(existing, false);
         }
 
-        if (hasRoomParam && isMobileDevice()) {
+        if (camQuery || hasHashCam || (Boolean(detectedRoom && detectedRoom !== '1') && isMobileDevice())) {
           setPhoneBroadcastMode(true);
         } else {
           setPhoneBroadcastMode(false);
@@ -3152,7 +3196,7 @@
         }
 
         if (file.size > MAX_IDB_VIDEO_BYTES) {
-          showToast('Vidéo volumineuse : un clip court (< 25 Mo) est recommandé pour la sauvegarde permanente.', 'warn');
+          showToast('Vidéo volumineuse : un clip court (< 35 Mo) est recommandé pour la sauvegarde permanente.', 'warn');
         }
 
         const reader = new FileReader();
@@ -3212,7 +3256,7 @@
           preview.classList.add('hidden');
           preview.innerHTML = '';
           clearBtn.classList.add('hidden');
-          statusEl.textContent = statusMsg || 'Photos compressées automatiquement ; vidéos courtes (idéalement < 25 Mo) enregistrées durablement dans le navigateur.';
+          statusEl.textContent = statusMsg || 'Photos compressées automatiquement ; vidéos courtes enregistrées durablement dans IndexedDB (avec repli LocalStorage).';
           return;
         }
 
@@ -3325,7 +3369,7 @@
             recBtn.classList.remove('snap-active');
 
             if (blob.size > MAX_IDB_VIDEO_BYTES) {
-              showToast('Vidéo un peu lourde : privilégiez un clip court (< 25 Mo).', 'warn');
+              showToast('Vidéo un peu lourde : privilégiez un clip court (< 35 Mo).', 'warn');
             }
 
             const reader = new FileReader();
@@ -3360,7 +3404,7 @@
         }
 
         if (file.size > MAX_IDB_VIDEO_BYTES) {
-          showToast('Fichier vidéo volumineux : un clip court (< 25 Mo) est recommandé pour la sauvegarde permanente.', 'warn');
+          showToast('Fichier vidéo volumineux : un clip court (< 35 Mo) est recommandé pour la sauvegarde permanente.', 'warn');
         }
 
         const reader = new FileReader();
@@ -3605,6 +3649,7 @@
       let facingMode = 'environment';
       let broadcastChannel = null;
       let relayPollTimer = null;
+      let relayTimeoutTimer = null;
       let pipHiddenByUser = false;
       let pipMinimized = false;
       let livePhase = 'waiting'; // 'waiting' | 'signaling' | 'connected' | 'error'
@@ -3648,6 +3693,57 @@
             diagOverlay.classList.remove('hidden');
           }
         }
+      }
+
+      function initPcPipDrag() {
+        const wrapper = document.getElementById('pcPipOverlay');
+        const handle = document.getElementById('pcPipDragHandle');
+        if (!wrapper || !handle) return;
+
+        let activeDrag = false;
+        let startX = 0;
+        let startY = 0;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        const onStart = (clientX, clientY, target) => {
+          if (target && target.closest('button')) return;
+          activeDrag = true;
+          startX = clientX - offsetX;
+          startY = clientY - offsetY;
+          wrapper.classList.add('dragging');
+        };
+
+        const onMove = (clientX, clientY) => {
+          if (!activeDrag) return;
+          const dx = clientX - startX;
+          const dy = clientY - startY;
+          offsetX = Math.max(-40, Math.min(40, dx));
+          offsetY = Math.max(-24, Math.min(40, dy));
+          wrapper.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        };
+
+        const onEnd = () => {
+          if (!activeDrag) return;
+          activeDrag = false;
+          wrapper.classList.remove('dragging');
+        };
+
+        handle.addEventListener('mousedown', (e) => onStart(e.clientX, e.clientY, e.target));
+        window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+        window.addEventListener('mouseup', onEnd);
+
+        handle.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches[0]) {
+            onStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
+          }
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+          if (activeDrag && e.touches && e.touches[0]) {
+            onMove(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+        window.addEventListener('touchend', onEnd);
       }
 
       async function requestScreenWakeLock() {
@@ -3722,7 +3818,8 @@
 
         remoteStream = stream;
         pipVideo.srcObject = stream;
-        updateLiveDiagnosticsUI('connected', 'Connecté', `Flux vidéo actif sur le salon ${code}.`);
+        pipVideo.play().catch(() => {});
+        updateLiveDiagnosticsUI('connected', 'Flux vidéo reçu', `Retour vidéo actif sur le salon ${code}.`);
 
         if (pipHiddenByUser) {
           pipWrapper.classList.add('hidden');
@@ -3764,7 +3861,7 @@
         document.getElementById('roomCodeInput').value = code;
         document.getElementById('pcPipRoomLabel').textContent = `Caméra Chambre · ${code}`;
         try {
-          window.history.replaceState(null, '', `#room=${encodeURIComponent(code)}`);
+          window.history.replaceState(null, '', `?cam=1&room=${encodeURIComponent(code)}`);
         } catch (_) {}
         showToast(`Nouveau code de salon : ${code}`, 'info');
       }
@@ -3772,7 +3869,7 @@
       function copyRoomShareLink() {
         const code = getNormalizedRoomCode();
         const baseUrl = `${window.location.origin}${window.location.pathname}`;
-        const shareUrl = `${baseUrl}#room=${encodeURIComponent(code)}`;
+        const shareUrl = `${baseUrl}?cam=1&room=${encodeURIComponent(code)}`;
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(shareUrl).catch(() => {});
@@ -3783,7 +3880,7 @@
           helper.select();
           document.execCommand('copy');
           document.body.removeChild(helper);
-          showToast(`Lien du salon (${code}) copié.`, 'success');
+          showToast(`Lien caméra (${code}) copié.`, 'success');
         } catch (_) {
           showToast(`Code du salon : ${code}`, 'info');
         }
@@ -3798,6 +3895,19 @@
           clearInterval(relayPollTimer);
           relayPollTimer = null;
         }
+        if (relayTimeoutTimer !== null) {
+          clearTimeout(relayTimeoutTimer);
+          relayTimeoutTimer = null;
+        }
+      }
+
+      function fetchWithTimeout(url, options = {}, timeoutMs = 3500) {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+        const merged = controller ? { ...options, signal: controller.signal } : options;
+        return fetch(url, merged).finally(() => {
+          if (timer) clearTimeout(timer);
+        });
       }
 
       function setupRoomSignaling(roomCode, onSignalMessage) {
@@ -3805,6 +3915,7 @@
         seenSignalIds.clear();
         const topic = `zr-p2p-${roomCode.toLowerCase()}`;
         let relayReachable = false;
+        let relayFailures = 0;
 
         if ('BroadcastChannel' in window) {
           try {
@@ -3819,32 +3930,50 @@
         }
 
         const pollRelay = async () => {
-          try {
-            const res = await fetch(`${SIGNALING_RELAY_ENDPOINT}/${topic}/json?poll=1&since=30s`, { cache: 'no-store' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            relayReachable = true;
-            const rawText = await res.text();
-            const lines = rawText.trim().split('\n').filter(Boolean);
-            for (const line of lines) {
-              try {
-                const envelope = JSON.parse(line);
-                if (!envelope || !envelope.message) continue;
-                const msg = JSON.parse(envelope.message);
-                if (!msg || msg.senderId === clientInstanceId || seenSignalIds.has(msg.msgId)) continue;
-                seenSignalIds.add(msg.msgId);
-                onSignalMessage(msg);
-              } catch (_) {}
-            }
-          } catch (_) {
-            if (!relayReachable && livePhase !== 'connected') {
+          let succeededOnce = false;
+          for (const endpoint of SIGNALING_RELAYS) {
+            try {
+              const res = await fetchWithTimeout(`${endpoint}/${topic}/json?poll=1&since=30s`, { cache: 'no-store' }, 3200);
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              relayReachable = true;
+              succeededOnce = true;
+              const rawText = await res.text();
+              const lines = rawText.trim().split('\n').filter(Boolean);
+              for (const line of lines) {
+                try {
+                  const envelope = JSON.parse(line);
+                  if (!envelope || !envelope.message) continue;
+                  const msg = JSON.parse(envelope.message);
+                  if (!msg || msg.senderId === clientInstanceId || seenSignalIds.has(msg.msgId)) continue;
+                  seenSignalIds.add(msg.msgId);
+                  onSignalMessage(msg);
+                } catch (_) {}
+              }
+              break;
+            } catch (_) {}
+          }
+
+          if (!succeededOnce && !relayReachable) {
+            relayFailures += 1;
+            if (relayFailures >= 2 && livePhase !== 'connected') {
               updateLiveDiagnosticsUI(
                 'error',
-                'Échec / repli manuel',
-                'Le relais de signalisation public est ralenti ou bloqué sur ce réseau. Utilisez « Salon & Secours SDP » pour échanger les codes manuellement.'
+                'Relais bloqué → Utiliser liaison manuelle',
+                'Le relais public ne répond pas sur ce réseau. Utilisez la « Liaison manuelle 2 étapes » (Offre PC ↔ Réponse Mobile).'
               );
             }
           }
         };
+
+        relayTimeoutTimer = setTimeout(() => {
+          if (!relayReachable && livePhase !== 'connected') {
+            updateLiveDiagnosticsUI(
+              'error',
+              'Relais bloqué → Utiliser liaison manuelle',
+              'Délai de signalisation dépassé sur GitHub Pages. Ouvrez la « Liaison manuelle 2 étapes » pour échanger les codes Offre/Réponse.'
+            );
+          }
+        }, 5000);
 
         pollRelay();
         relayPollTimer = setInterval(pollRelay, 1600);
@@ -3863,16 +3992,24 @@
           try { broadcastChannel.postMessage(msg); } catch (_) {}
         }
 
-        try {
-          await fetch(`${SIGNALING_RELAY_ENDPOINT}/${topic}`, {
-            method: 'POST',
-            body: JSON.stringify(msg)
-          });
-        } catch (_) {}
+        for (const endpoint of SIGNALING_RELAYS) {
+          try {
+            const res = await fetchWithTimeout(`${endpoint}/${topic}`, {
+              method: 'POST',
+              body: JSON.stringify(msg)
+            }, 3000);
+            if (res.ok) break;
+          } catch (_) {}
+        }
       }
 
       function createPeerConnectionWithIce(roomCode) {
-        const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        const pc = new RTCPeerConnection({
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+          ]
+        });
         pc.onicecandidate = (event) => {
           if (event.candidate) {
             publishRoomSignal(roomCode, { kind: 'ice', candidate: event.candidate });
@@ -3886,8 +4023,8 @@
         rtcRole = 'sender';
         const roomCode = getNormalizedRoomCode();
         const phonePill = document.getElementById('phoneBroadcastStatusPill');
-        updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', `Activation de la caméra et annonce sur le salon ${roomCode}...`);
-        if (phonePill) phonePill.textContent = 'Signalisation...';
+        updateLiveDiagnosticsUI('signaling', 'Caméra téléphone OK', `Caméra activée · En attente du signal sur ${roomCode}...`);
+        if (phonePill) phonePill.textContent = 'Caméra téléphone OK';
 
         try {
           localStream = await navigator.mediaDevices.getUserMedia({
@@ -3906,6 +4043,7 @@
           if (phoneVid) {
             phoneVid.srcObject = localStream;
             phoneVid.muted = true;
+            phoneVid.play().catch(() => {});
           }
           if (phonePh) phonePh.classList.add('hidden');
 
@@ -3915,48 +4053,132 @@
           rtcPeer.oniceconnectionstatechange = () => {
             const st = rtcPeer ? rtcPeer.iceConnectionState : 'closed';
             if (phonePill) {
-              phonePill.textContent = (st === 'connected' || st === 'completed') ? 'Connecté' : st;
+              phonePill.textContent = (st === 'connected' || st === 'completed') ? 'Flux vidéo reçu' : st;
             }
-            if (st === 'connected' || st === 'completed') {
+            if (st === 'checking') {
+              updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', `Négociation ICE / P2P en cours sur ${roomCode}...`);
+            } else if (st === 'connected' || st === 'completed') {
               document.getElementById('liveDotHeader').classList.remove('hidden');
-              updateLiveDiagnosticsUI('connected', 'Connecté', `Caméra diffusée vers le salon ${roomCode}.`);
+              updateLiveDiagnosticsUI('connected', 'Flux vidéo reçu', `Caméra diffusée vers le PC sur ${roomCode}.`);
               showToast('Vidéo diffusée vers le PC !', 'success');
             } else if (st === 'failed' || st === 'disconnected') {
-              updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Connexion interrompue ou bloquée. Ouvrez « Salon & Secours SDP » si nécessaire.');
+              updateLiveDiagnosticsUI(
+                'error',
+                'Relais bloqué → Utiliser liaison manuelle',
+                'Connexion P2P interrompue. Utilisez la « Liaison manuelle 2 étapes » si le réseau bloque la liaison.'
+              );
             }
           };
 
           const offer = await rtcPeer.createOffer();
           await rtcPeer.setLocalDescription(offer);
-          document.getElementById('localSdpLabel').textContent = '1. Offre SDP (repli manuel) :';
-          document.getElementById('remoteSdpLabel').textContent = '2. Réponse SDP (repli manuel) :';
+          await waitIceComplete(rtcPeer);
+          document.getElementById('localSdpLabel').textContent = '1. Offre SDP du téléphone :';
+          document.getElementById('remoteSdpLabel').textContent = '2. Réponse SDP du PC :';
           document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
 
           setupRoomSignaling(roomCode, async (msg) => {
             if (!rtcPeer) return;
             if (msg.kind === 'answer' && msg.sdp) {
-              updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Réponse reçue du PC, établissement du flux vidéo...');
+              updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Réponse reçue du PC · Négociation ICE / P2P en cours...');
               await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp)).catch(() => {});
             } else if (msg.kind === 'ice' && msg.candidate) {
               await rtcPeer.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {});
             } else if (msg.kind === 'receiver-ready' && rtcPeer.localDescription) {
-              updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'PC détecté, envoi de l’offre vidéo...');
+              updateLiveDiagnosticsUI('signaling', 'En attente du signal', 'PC détecté · Envoi de l’offre vidéo...');
               await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
             }
           });
 
           await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
-          updateLiveDiagnosticsUI('waiting', 'En attente du téléphone', `Caméra active sur ${roomCode}. Ouvrez « Écouter le salon » sur le PC.`);
-          if (phonePill) phonePill.textContent = 'En attente du PC';
+          updateLiveDiagnosticsUI('waiting', 'Caméra téléphone OK', `Caméra active sur ${roomCode} · En attente du signal PC.`);
+          if (phonePill) phonePill.textContent = 'Caméra téléphone OK';
           showToast(`Diffusion active sur ${roomCode}.`, 'info');
         } catch (_) {
-          if (phonePill) phonePill.textContent = 'Échec / repli manuel';
+          if (phonePill) phonePill.textContent = 'Relais bloqué → Utiliser liaison manuelle';
           updateLiveDiagnosticsUI(
             'error',
-            'Échec / repli manuel',
-            'Accès caméra refusé ou contexte non sécurisé (HTTPS requis sur GitHub Pages).'
+            'Relais bloqué → Utiliser liaison manuelle',
+            'Caméra refusée ou HTTPS requis. Vérifiez les permissions caméra ou utilisez la liaison manuelle.'
           );
           showToast('Accès caméra refusé ou contexte non sécurisé (HTTPS requis).', 'error');
+        }
+      }
+
+      async function generatePhoneManualAnswerFromOffer() {
+        const rawOffer = (document.getElementById('phoneOfferInput').value || '').trim();
+        if (!rawOffer) {
+          showToast('Collez d’abord le code Offre généré sur le PC.', 'warn');
+          return;
+        }
+
+        const roomCode = getNormalizedRoomCode();
+        const phonePill = document.getElementById('phoneBroadcastStatusPill');
+
+        try {
+          if (!localStream) {
+            localStream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: { ideal: facingMode } },
+              audio: false
+            });
+            const phoneVid = document.getElementById('phoneBroadcastVideo');
+            const phonePh = document.getElementById('phoneBroadcastPlaceholder');
+            if (phoneVid) {
+              phoneVid.srcObject = localStream;
+              phoneVid.muted = true;
+              phoneVid.play().catch(() => {});
+            }
+            if (phonePh) phonePh.classList.add('hidden');
+          }
+
+          if (rtcPeer) {
+            try { rtcPeer.close(); } catch (_) {}
+          }
+          rtcRole = 'sender';
+          rtcPeer = createPeerConnectionWithIce(roomCode);
+          localStream.getTracks().forEach(track => rtcPeer.addTrack(track, localStream));
+
+          rtcPeer.oniceconnectionstatechange = () => {
+            const st = rtcPeer ? rtcPeer.iceConnectionState : 'closed';
+            if (phonePill) {
+              phonePill.textContent = (st === 'connected' || st === 'completed') ? 'Flux vidéo reçu' : 'Négociation ICE / P2P';
+            }
+            if (st === 'connected' || st === 'completed') {
+              updateLiveDiagnosticsUI('connected', 'Flux vidéo reçu', `Liaison manuelle P2P active sur ${roomCode}.`);
+              showToast('Liaison manuelle établie avec le PC !', 'success');
+            }
+          };
+
+          const offerDesc = JSON.parse(rawOffer);
+          await rtcPeer.setRemoteDescription(new RTCSessionDescription(offerDesc));
+          const answer = await rtcPeer.createAnswer();
+          await rtcPeer.setLocalDescription(answer);
+          await waitIceComplete(rtcPeer);
+
+          const answerJson = JSON.stringify(rtcPeer.localDescription);
+          document.getElementById('phoneAnswerOutput').value = answerJson;
+          if (phonePill) phonePill.textContent = 'Négociation ICE / P2P';
+          showToast('Code Réponse généré ! Copiez-le sur le PC.', 'success');
+        } catch (_) {
+          showToast('Offre SDP invalide ou caméra indisponible.', 'error');
+        }
+      }
+
+      function copyPhoneAnswer() {
+        const area = document.getElementById('phoneAnswerOutput');
+        if (!area || !area.value) {
+          showToast('Aucun code Réponse à copier.', 'warn');
+          return;
+        }
+        area.select();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(area.value).catch(() => {});
+          }
+          document.execCommand('copy');
+          showToast('Code Réponse copié.', 'success');
+        } catch (_) {
+          showToast('Copiez le code Réponse manuellement.', 'info');
         }
       }
 
@@ -3978,7 +4200,10 @@
           localStream = newStream;
           document.getElementById('webrtcVideo').srcObject = newStream;
           const phoneVid = document.getElementById('phoneBroadcastVideo');
-          if (phoneVid) phoneVid.srcObject = newStream;
+          if (phoneVid) {
+            phoneVid.srcObject = newStream;
+            phoneVid.play().catch(() => {});
+          }
 
           if (rtcPeer && newTrack) {
             const sender = rtcPeer.getSenders().find(s => s.track && s.track.kind === 'video');
@@ -3990,78 +4215,132 @@
         }
       }
 
+      function attachReceiverTrackHandlers(pc, roomCode) {
+        pc.ontrack = (event) => {
+          const videoEl = document.getElementById('webrtcVideo');
+          const stream = (event.streams && event.streams[0]) || new MediaStream([event.track]);
+          videoEl.srcObject = stream;
+          videoEl.play().catch(() => {});
+          document.getElementById('webrtcPlaceholder').classList.add('hidden');
+          document.getElementById('webrtcOverlayControls').classList.remove('hidden');
+          document.getElementById('liveDotHeader').classList.remove('hidden');
+          syncPcPipOverlay(stream, roomCode);
+          closeDrawer('webrtcDrawer');
+          showToast('Flux vidéo reçu au-dessus des cartes !', 'success');
+        };
+
+        pc.oniceconnectionstatechange = () => {
+          const st = pc ? pc.iceConnectionState : 'closed';
+          if (st === 'checking') {
+            updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', `Négociation ICE / P2P en cours sur le salon ${roomCode}...`);
+          } else if (st === 'connected' || st === 'completed') {
+            updateLiveDiagnosticsUI('connected', 'Flux vidéo reçu', `Flux vidéo actif sur le salon ${roomCode}.`);
+          } else if (st === 'failed' || st === 'disconnected') {
+            updateLiveDiagnosticsUI(
+              'error',
+              'Relais bloqué → Utiliser liaison manuelle',
+              'Liaison P2P interrompue. Utilisez la « Liaison manuelle 2 étapes » si le relais est bloqué.'
+            );
+          }
+        };
+      }
+
+      async function prepareManualOfferOnPc() {
+        stopWebrtc(true);
+        rtcRole = 'receiver';
+        pipHiddenByUser = false;
+        const roomCode = getNormalizedRoomCode();
+        updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Préparation de l’offre manuelle du PC...');
+
+        rtcPeer = createPeerConnectionWithIce(roomCode);
+        try {
+          rtcPeer.addTransceiver('video', { direction: 'recvonly' });
+        } catch (_) {}
+        attachReceiverTrackHandlers(rtcPeer, roomCode);
+
+        const offer = await rtcPeer.createOffer();
+        await rtcPeer.setLocalDescription(offer);
+        await waitIceComplete(rtcPeer);
+
+        document.getElementById('localSdpLabel').textContent = '1. Code Offre du PC (à coller sur le téléphone) :';
+        document.getElementById('remoteSdpLabel').textContent = '2. Code Réponse du téléphone (à coller ici) :';
+        document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
+        document.getElementById('webrtcSignalingBox').classList.remove('hidden');
+        updateLiveDiagnosticsUI('waiting', 'En attente du signal', 'Offre PC prête : copiez-la sur le téléphone puis collez sa réponse ici.');
+        showToast('Code Offre PC généré !', 'success');
+      }
+
       async function startWebrtcReceiver() {
         stopWebrtc(true);
         rtcRole = 'receiver';
         pipHiddenByUser = false;
         const roomCode = getNormalizedRoomCode();
-        updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', `Recherche du flux du smartphone sur le salon ${roomCode}...`);
+        updateLiveDiagnosticsUI('signaling', 'En attente du signal', `Écoute automatique sur le salon ${roomCode} + préparation offre manuelle...`);
 
         rtcPeer = createPeerConnectionWithIce(roomCode);
-        rtcPeer.ontrack = (event) => {
-          const videoEl = document.getElementById('webrtcVideo');
-          if (event.streams && event.streams[0]) {
-            videoEl.srcObject = event.streams[0];
-            document.getElementById('webrtcPlaceholder').classList.add('hidden');
-            document.getElementById('webrtcOverlayControls').classList.remove('hidden');
-            document.getElementById('liveDotHeader').classList.remove('hidden');
-            syncPcPipOverlay(event.streams[0], roomCode);
-            closeDrawer('webrtcDrawer');
-            showToast('Flux vidéo en direct affiché au-dessus des cartes !', 'success');
-          }
-        };
+        try {
+          rtcPeer.addTransceiver('video', { direction: 'recvonly' });
+        } catch (_) {}
+        attachReceiverTrackHandlers(rtcPeer, roomCode);
 
-        rtcPeer.oniceconnectionstatechange = () => {
-          const st = rtcPeer ? rtcPeer.iceConnectionState : 'closed';
-          if (st === 'connected' || st === 'completed') {
-            updateLiveDiagnosticsUI('connected', 'Connecté', `Flux vidéo actif sur le salon ${roomCode}.`);
-          } else if (st === 'failed' || st === 'disconnected') {
-            updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Liaison P2P interrompue. Utilisez le repli manuel SDP si le réseau bloque WebRTC.');
-          }
-        };
+        const offer = await rtcPeer.createOffer();
+        await rtcPeer.setLocalDescription(offer);
+        await waitIceComplete(rtcPeer);
 
-        document.getElementById('localSdpLabel').textContent = '2. Réponse SDP (repli manuel) :';
-        document.getElementById('remoteSdpLabel').textContent = '1. Offre SDP (repli manuel) :';
-        document.getElementById('localSdpText').value = '';
+        document.getElementById('localSdpLabel').textContent = '1. Code Offre du PC (secours manuel) :';
+        document.getElementById('remoteSdpLabel').textContent = '2. Code Réponse du téléphone (secours manuel) :';
+        document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
 
         let handledOffer = false;
         setupRoomSignaling(roomCode, async (msg) => {
           if (!rtcPeer) return;
           if (msg.kind === 'offer' && msg.sdp && !handledOffer) {
             handledOffer = true;
-            updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Offre reçue du smartphone, négociation en cours...');
+            updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Offre reçue du smartphone · Négociation ICE / P2P en cours...');
             try {
               await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
               const answer = await rtcPeer.createAnswer();
               await rtcPeer.setLocalDescription(answer);
+              await waitIceComplete(rtcPeer);
               document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
               await publishRoomSignal(roomCode, { kind: 'answer', sdp: rtcPeer.localDescription });
-              updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Réponse envoyée, ouverture de la vidéo...');
+              updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Réponse envoyée · Ouverture du flux vidéo...');
             } catch (_) {
-              updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Erreur lors du traitement de l’offre vidéo.');
+              updateLiveDiagnosticsUI('error', 'Relais bloqué → Utiliser liaison manuelle', 'Erreur lors du traitement de l’offre vidéo.');
             }
+          } else if (msg.kind === 'answer' && msg.sdp) {
+            updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Réponse reçue · Négociation ICE / P2P en cours...');
+            await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp)).catch(() => {});
           } else if (msg.kind === 'ice' && msg.candidate) {
             await rtcPeer.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {});
           }
         });
 
-        await publishRoomSignal(roomCode, { kind: 'receiver-ready' });
-        showToast(`Récepteur en écoute sur le salon ${roomCode}.`, 'info');
+        await publishRoomSignal(roomCode, { kind: 'receiver-ready', offer: rtcPeer.localDescription });
+        showToast(`Écoute active sur le salon ${roomCode}.`, 'info');
       }
 
       async function applyRemoteSdp() {
-        if (!rtcPeer) {
-          showToast('Choisissez Émetteur ou Récepteur d’abord.', 'warn');
-          return;
-        }
-        const raw = document.getElementById('remoteSdpText').value.trim();
+        const raw = (document.getElementById('remoteSdpText').value || '').trim();
         if (!raw) {
           showToast('Collez le code SDP reçu avant de valider.', 'warn');
           return;
         }
+
+        const roomCode = getNormalizedRoomCode();
+
+        if (!rtcPeer) {
+          rtcRole = 'receiver';
+          rtcPeer = createPeerConnectionWithIce(roomCode);
+          try {
+            rtcPeer.addTransceiver('video', { direction: 'recvonly' });
+          } catch (_) {}
+          attachReceiverTrackHandlers(rtcPeer, roomCode);
+        }
+
         try {
           const desc = JSON.parse(raw);
-          updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Validation du code SDP manuel...');
+          updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Validation du code SDP et négociation ICE / P2P...');
           await rtcPeer.setRemoteDescription(new RTCSessionDescription(desc));
 
           if (rtcRole === 'receiver' && desc.type === 'offer') {
@@ -4069,25 +4348,25 @@
             await rtcPeer.setLocalDescription(answer);
             await waitIceComplete(rtcPeer);
             document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
-            updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Réponse SDP générée : copiez-la vers le smartphone.');
-            showToast('Code réponse généré ! Copiez-le sur le Smartphone.', 'success');
+            updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Réponse SDP générée : copiez-la vers l’autre appareil.');
+            showToast('Code réponse généré ! Copiez-le sur l’autre appareil.', 'success');
           } else {
-            updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Connexion P2P manuelle en cours...');
+            updateLiveDiagnosticsUI('signaling', 'Négociation ICE / P2P', 'Connexion P2P manuelle en cours...');
             showToast('Connexion P2P en cours...', 'info');
           }
         } catch (_) {
-          updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Code SDP invalide. Vérifiez le texte collé.');
+          updateLiveDiagnosticsUI('error', 'Relais bloqué → Utiliser liaison manuelle', 'Code SDP invalide. Vérifiez le texte collé.');
           showToast('Code SDP invalide.', 'error');
         }
       }
 
       function waitIceComplete(pc) {
         return new Promise(resolve => {
-          if (pc.iceGatheringState === 'complete') {
+          if (!pc || pc.iceGatheringState === 'complete') {
             resolve();
             return;
           }
-          const t = setTimeout(() => resolve(), 2200);
+          const t = setTimeout(() => resolve(), 2000);
           pc.onicegatheringstatechange = () => {
             if (pc.iceGatheringState === 'complete') {
               clearTimeout(t);
@@ -4099,9 +4378,15 @@
 
       function copyLocalSdp() {
         const area = document.getElementById('localSdpText');
-        if (!area.value) return;
+        if (!area || !area.value) {
+          showToast('Aucun code SDP généré pour l’instant.', 'warn');
+          return;
+        }
         area.select();
         try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(area.value).catch(() => {});
+          }
           document.execCommand('copy');
           showToast('Code SDP copié dans le presse-papiers.', 'success');
         } catch (_) {
@@ -4116,7 +4401,7 @@
           localStream = null;
         }
         if (rtcPeer) {
-          rtcPeer.close();
+          try { rtcPeer.close(); } catch (_) {}
           rtcPeer = null;
         }
         const videoEl = document.getElementById('webrtcVideo');
@@ -4126,10 +4411,10 @@
         const phonePill = document.getElementById('phoneBroadcastStatusPill');
         if (phoneVid) phoneVid.srcObject = null;
         if (phonePh) phonePh.classList.remove('hidden');
-        if (phonePill) phonePill.textContent = 'Arrêté';
+        if (phonePill) phonePill.textContent = 'Prêt';
 
         syncPcPipOverlay(null);
-        updateLiveDiagnosticsUI('waiting', 'En attente du téléphone', 'Caméra coupée. Cliquez sur « Écouter le salon » pour relancer la liaison.');
+        updateLiveDiagnosticsUI('waiting', 'En attente du signal', 'Caméra arrêtée. Cliquez sur « Reconnecter / Écouter » pour relancer la liaison.');
         document.getElementById('webrtcPlaceholder').classList.remove('hidden');
         document.getElementById('webrtcOverlayControls').classList.add('hidden');
         document.getElementById('liveDotHeader').classList.add('hidden');
@@ -4193,7 +4478,7 @@
         document.getElementById('btnOpenWebrtcDrawer').addEventListener('click', () => openDrawer('webrtcDrawer'));
         document.getElementById('btnCloseWebrtcDrawer').addEventListener('click', () => closeDrawer('webrtcDrawer'));
 
-        // Vue Téléphone caméra uniquement & Fenêtre vidéo PC au-dessus des cartes
+        // Vue Téléphone caméra uniquement & Fenêtre retour vidéo PC au-dessus des cartes
         document.getElementById('btnOpenPhoneBroadcastMode').addEventListener('click', () => {
           setPhoneBroadcastMode(true);
           startWebrtcSender();
@@ -4201,9 +4486,14 @@
         document.getElementById('btnPhoneStartBroadcast').addEventListener('click', startWebrtcSender);
         document.getElementById('btnPhoneSwitchCam').addEventListener('click', switchWebrtcCamera);
         document.getElementById('btnPhoneStopBroadcast').addEventListener('click', () => stopWebrtc(false));
-        document.getElementById('btnPhoneWakeHint').addEventListener('click', requestScreenWakeLock);
+        document.getElementById('btnPhoneToggleManual').addEventListener('click', () => {
+          document.getElementById('phoneManualSignalingBox').classList.toggle('hidden');
+        });
+        document.getElementById('btnPhoneGenerateAnswer').addEventListener('click', generatePhoneManualAnswerFromOffer);
+        document.getElementById('btnPhoneCopyAnswer').addEventListener('click', copyPhoneAnswer);
         document.getElementById('btnPhoneExitToGame').addEventListener('click', () => setPhoneBroadcastMode(false));
 
+        document.getElementById('btnPipReconnect').addEventListener('click', startWebrtcReceiver);
         document.getElementById('btnPipQuickListen').addEventListener('click', startWebrtcReceiver);
         document.getElementById('btnPipOpenRoomConfig').addEventListener('click', () => {
           document.getElementById('webrtcSignalingBox').classList.remove('hidden');
@@ -4315,12 +4605,13 @@
           else if (btn.dataset.action === 'delete') deleteCardById(id);
         });
 
-        // Caméra Live P2P par code de salon
+        // Caméra Live P2P par code de salon + liaison manuelle 2 étapes
         document.getElementById('btnNewRoomCode').addEventListener('click', generateShortRoomCode);
         document.getElementById('btnCopyRoomLink').addEventListener('click', copyRoomShareLink);
         document.getElementById('btnToggleManualSdp').addEventListener('click', () => {
           document.getElementById('webrtcSignalingBox').classList.toggle('hidden');
         });
+        document.getElementById('btnPrepareManualOffer').addEventListener('click', prepareManualOfferOnPc);
         document.getElementById('btnWebrtcSender').addEventListener('click', startWebrtcSender);
         document.getElementById('btnWebrtcReceiver').addEventListener('click', startWebrtcReceiver);
         document.getElementById('stopWebrtcBtn').addEventListener('click', () => stopWebrtc(false));
