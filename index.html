@@ -6,22 +6,23 @@
   <title>Zone Rouge — Jeu de Cartes Couple (120 Cartes)</title>
   <style>
     /* =========================================================================
-       VARIABLES & THÈME SOMBRE VELOURS / ROUGE INCANDESCENT (AUTONOME)
+       VARIABLES & THÈME VELOURS ROUGE INCANDESCENT & OBSIDIENNE (#09070a / #130b10 / #d92648)
        ========================================================================= */
     :root {
-      --bg-base: #0a0507;
-      --bg-surface: #140a0e;
-      --bg-card-top: #221018;
-      --bg-card-bot: #11080c;
-      --bg-input: rgba(0, 0, 0, 0.48);
+      --bg-base: #09070a;
+      --bg-surface: #130b10;
+      --bg-card-top: #211018;
+      --bg-card-bot: #11080d;
+      --bg-input: rgba(0, 0, 0, 0.5);
 
       --text-main: #f8fafc;
       --text-muted: #fda4af;
-      --text-soft: rgba(254, 205, 211, 0.72);
+      --text-soft: rgba(254, 205, 211, 0.74);
 
-      --crimson-500: #f43f5e;
-      --crimson-600: #e11d48;
-      --crimson-700: #be123c;
+      --crimson-400: #fb7185;
+      --crimson-500: #d92648;
+      --crimson-600: #be123c;
+      --crimson-700: #9f1239;
       --crimson-950: #4c0519;
 
       --lvl1-color: #34d399;
@@ -33,15 +34,15 @@
       --lvl2-border: rgba(251, 191, 36, 0.42);
 
       --lvl3-color: #fb7185;
-      --lvl3-bg: rgba(244, 63, 94, 0.2);
-      --lvl3-border: rgba(251, 113, 133, 0.48);
+      --lvl3-bg: rgba(217, 38, 72, 0.22);
+      --lvl3-border: rgba(251, 113, 133, 0.5);
 
       --lvl4-color: #ff4d6d;
-      --lvl4-bg: rgba(225, 29, 72, 0.28);
-      --lvl4-border: rgba(255, 77, 109, 0.65);
+      --lvl4-bg: rgba(217, 38, 72, 0.3);
+      --lvl4-border: rgba(255, 77, 109, 0.68);
 
-      --border-subtle: rgba(244, 63, 94, 0.22);
-      --border-strong: rgba(244, 63, 94, 0.45);
+      --border-subtle: rgba(217, 38, 72, 0.24);
+      --border-strong: rgba(217, 38, 72, 0.48);
       --radius-sm: 10px;
       --radius-md: 14px;
       --radius-lg: 18px;
@@ -60,9 +61,9 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--bg-base);
       background-image:
-        radial-gradient(circle at 18% 0%, rgba(190, 18, 60, 0.24) 0%, transparent 45%),
-        radial-gradient(circle at 85% 95%, rgba(136, 19, 55, 0.24) 0%, transparent 52%),
-        linear-gradient(180deg, #0a0507 0%, #13080d 100%);
+        radial-gradient(circle at 18% 0%, rgba(217, 38, 72, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 85% 95%, rgba(136, 19, 55, 0.22) 0%, transparent 52%),
+        linear-gradient(180deg, #09070a 0%, #130b10 100%);
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
@@ -90,11 +91,11 @@
     @keyframes pulseEmblem {
       0%, 100% {
         transform: scale(1);
-        filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.55));
+        filter: drop-shadow(0 0 8px rgba(217, 38, 72, 0.55));
       }
       50% {
         transform: scale(1.06);
-        filter: drop-shadow(0 0 18px rgba(244, 63, 94, 0.92));
+        filter: drop-shadow(0 0 18px rgba(217, 38, 72, 0.92));
       }
     }
 
@@ -119,11 +120,11 @@
 
     @keyframes timerExpiredGlow {
       0%, 100% {
-        box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.45);
+        box-shadow: 0 0 0 0 rgba(217, 38, 72, 0.45);
         border-color: rgba(251, 113, 133, 0.8);
       }
       50% {
-        box-shadow: 0 0 18px 2px rgba(244, 63, 94, 0.35);
+        box-shadow: 0 0 18px 2px rgba(217, 38, 72, 0.35);
         border-color: rgba(253, 164, 175, 1);
       }
     }
@@ -134,7 +135,7 @@
     }
 
     /* =========================================================================
-       MODE DISCRET (FLOU DE CONFIDENTIALITÉ - TOUCHE H)
+       MODE DISCRET ("Notes & Lecture" - TOUCHE H)
        ========================================================================= */
     body.discreet-mode .sensitive-blur {
       filter: blur(18px);
@@ -147,8 +148,7 @@
       position: fixed;
       inset: 0;
       z-index: 60;
-      background: rgba(5, 3, 4, 0.86);
-      backdrop-filter: blur(12px);
+      background: #0d0f12;
       display: none;
       align-items: center;
       justify-content: center;
@@ -161,13 +161,41 @@
 
     .discreet-box {
       width: 100%;
-      max-width: 360px;
-      background: #12090d;
-      border: 1px solid var(--border-strong);
+      max-width: 390px;
+      background: #15181e;
+      border: 1px solid rgba(148, 163, 184, 0.2);
       border-radius: var(--radius-lg);
       padding: 24px;
-      text-align: center;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+      text-align: left;
+      color: #cbd5e1;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+    }
+
+    .discreet-note-lines {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin: 12px 0 16px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: #94a3b8;
+    }
+
+    .discreet-return-btn {
+      padding: 7px 12px;
+      border-radius: 8px;
+      background: rgba(148, 163, 184, 0.1);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      color: #94a3b8;
+      font-size: 0.74rem;
+      font-weight: 500;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .discreet-return-btn:hover {
+      background: rgba(148, 163, 184, 0.18);
+      color: #e2e8f0;
     }
 
     /* =========================================================================
@@ -261,7 +289,7 @@
     }
 
     .icon-pill-btn:hover, .icon-pill-btn:active {
-      background: rgba(225, 29, 72, 0.24);
+      background: rgba(217, 38, 72, 0.24);
       border-color: var(--border-strong);
     }
 
@@ -277,7 +305,7 @@
     }
 
     /* =========================================================================
-       MODE TÉLÉPHONE ÉPURÉ : DIFFUSION VIDÉO UNIQUEMENT
+       MODE TÉLÉPHONE ÉPURÉ : DIFFUSION CAMÉRA UNIQUEMENT
        ========================================================================= */
     .phone-broadcast-shell {
       background: linear-gradient(158deg, var(--bg-card-top) 0%, var(--bg-card-bot) 100%);
@@ -287,7 +315,7 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      box-shadow: 0 22px 50px -12px rgba(0, 0, 0, 0.88), 0 0 30px -10px rgba(225, 29, 72, 0.28);
+      box-shadow: 0 22px 50px -12px rgba(0, 0, 0, 0.88), 0 0 30px -10px rgba(217, 38, 72, 0.28);
     }
 
     .phone-status-banner {
@@ -333,12 +361,21 @@
     .pc-pip-wrapper {
       position: relative;
       z-index: 12;
-      background: linear-gradient(145deg, rgba(34, 16, 24, 0.96), rgba(14, 7, 11, 0.98));
+      background: linear-gradient(145deg, rgba(33, 16, 24, 0.97), rgba(13, 7, 11, 0.99));
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.75), 0 0 22px rgba(225, 29, 72, 0.22);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78), 0 0 22px rgba(217, 38, 72, 0.24);
       transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pc-pip-wrapper.state-connected {
+      border-color: rgba(52, 211, 153, 0.55);
+      box-shadow: 0 16px 38px rgba(0, 0, 0, 0.78), 0 0 22px rgba(16, 185, 129, 0.22);
+    }
+
+    .pc-pip-wrapper.state-error {
+      border-color: rgba(248, 113, 113, 0.65);
     }
 
     .pc-pip-header {
@@ -347,9 +384,10 @@
       justify-content: space-between;
       gap: 8px;
       padding: 8px 12px;
-      background: rgba(25, 11, 17, 0.95);
-      border-bottom: 1px solid rgba(244, 63, 94, 0.24);
+      background: rgba(24, 11, 17, 0.96);
+      border-bottom: 1px solid rgba(217, 38, 72, 0.25);
       user-select: none;
+      flex-wrap: wrap;
     }
 
     .pc-pip-title-row {
@@ -357,29 +395,48 @@
       align-items: center;
       gap: 7px;
       min-width: 0;
+      flex-wrap: wrap;
     }
 
     .pc-pip-live-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 2px 7px;
+      gap: 5px;
+      padding: 2px 8px;
       border-radius: var(--radius-full);
-      background: rgba(16, 185, 129, 0.18);
-      border: 1px solid rgba(52, 211, 153, 0.45);
-      color: #a7f3d0;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      color: #fde68a;
       font-size: 0.62rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       flex-shrink: 0;
+    }
+
+    .pc-pip-live-badge.connected {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: rgba(52, 211, 153, 0.5);
+      color: #a7f3d0;
+    }
+
+    .pc-pip-live-badge.signaling {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: rgba(56, 189, 248, 0.48);
+      color: #bae6fd;
+    }
+
+    .pc-pip-live-badge.error {
+      background: rgba(239, 68, 68, 0.22);
+      border-color: rgba(248, 113, 113, 0.55);
+      color: #fecaca;
     }
 
     .pc-pip-live-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #34d399;
+      background: currentColor;
     }
 
     .pc-pip-caption {
@@ -405,7 +462,7 @@
       min-height: 28px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(244, 63, 94, 0.25);
+      border: 1px solid rgba(217, 38, 72, 0.28);
       color: #fecdd3;
       font-size: 0.74rem;
       font-weight: 700;
@@ -416,7 +473,7 @@
     }
 
     .pc-pip-btn:hover {
-      background: rgba(225, 29, 72, 0.32);
+      background: rgba(217, 38, 72, 0.34);
       color: #ffffff;
     }
 
@@ -425,8 +482,11 @@
       width: 100%;
       aspect-ratio: 16 / 9;
       max-height: 230px;
-      background: #000000;
+      background: #050304;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .pc-pip-body.minimized {
@@ -440,11 +500,45 @@
       display: block;
     }
 
+    .pc-pip-diagnostic-overlay {
+      position: absolute;
+      inset: 0;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 8px;
+      background: radial-gradient(circle at 50% 40%, rgba(76, 5, 25, 0.28), rgba(5, 3, 4, 0.88));
+    }
+
+    .pc-pip-diag-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .pc-pip-diag-desc {
+      font-size: 0.7rem;
+      color: var(--text-soft);
+      max-width: 440px;
+    }
+
+    .pc-pip-diag-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
     /* =========================================================================
        PANNEAUX & CONTRÔLES DU JEU
        ========================================================================= */
     .panel-box {
-      background: rgba(20, 10, 14, 0.92);
+      background: rgba(19, 11, 16, 0.94);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 12px;
@@ -500,7 +594,7 @@
       padding: 8px 10px;
       border-radius: var(--radius-sm);
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(244, 63, 94, 0.2);
+      border: 1px solid rgba(217, 38, 72, 0.22);
       color: #fecdd3;
       font-size: 0.73rem;
       font-weight: 700;
@@ -562,7 +656,7 @@
       padding: 8px 4px;
       border-radius: 12px;
       background: rgba(0, 0, 0, 0.38);
-      border: 1px solid rgba(244, 63, 94, 0.18);
+      border: 1px solid rgba(217, 38, 72, 0.18);
       color: rgba(254, 205, 211, 0.72);
       transition: all 0.2s ease;
     }
@@ -609,7 +703,7 @@
       background: var(--lvl4-bg);
       border-color: var(--lvl4-border);
       color: #ffffff;
-      box-shadow: 0 0 16px rgba(225, 29, 72, 0.4);
+      box-shadow: 0 0 16px rgba(217, 38, 72, 0.4);
     }
 
     .stage-btn.completed-stage {
@@ -647,7 +741,7 @@
     .gauge-seg.fill-4 {
       background: var(--lvl4-color);
       border-color: #fda4af;
-      box-shadow: 0 0 10px rgba(225, 29, 72, 0.75);
+      box-shadow: 0 0 10px rgba(217, 38, 72, 0.75);
     }
 
     /* Filtres rapides */
@@ -669,7 +763,7 @@
     }
 
     .chip-btn.active {
-      background: var(--crimson-600);
+      background: var(--crimson-500);
       color: #fff;
     }
 
@@ -691,7 +785,7 @@
        ========================================================================= */
     .velvet-card {
       background: linear-gradient(158deg, var(--bg-card-top) 0%, var(--bg-card-bot) 100%);
-      border: 1px solid rgba(244, 63, 94, 0.36);
+      border: 1px solid rgba(217, 38, 72, 0.38);
       border-radius: var(--radius-xl);
       padding: 18px;
       min-height: 310px;
@@ -702,7 +796,7 @@
       overflow: hidden;
       box-shadow:
         0 22px 50px -12px rgba(0, 0, 0, 0.88),
-        0 0 34px -8px rgba(225, 29, 72, 0.28),
+        0 0 34px -8px rgba(217, 38, 72, 0.28),
         inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
@@ -713,7 +807,7 @@
       font-family: Georgia, serif;
       font-size: 145px;
       line-height: 1;
-      color: rgba(244, 63, 94, 0.06);
+      color: rgba(217, 38, 72, 0.06);
       pointer-events: none;
       user-select: none;
     }
@@ -794,7 +888,7 @@
       min-height: 28px;
       border-radius: var(--radius-full);
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(244, 63, 94, 0.3);
+      border: 1px solid rgba(217, 38, 72, 0.3);
       color: #fda4af;
       display: inline-flex;
       align-items: center;
@@ -803,7 +897,7 @@
     }
 
     .media-icon-btn:hover, .media-icon-btn:active {
-      background: rgba(225, 29, 72, 0.3);
+      background: rgba(217, 38, 72, 0.32);
       border-color: rgba(251, 113, 133, 0.7);
       color: #ffffff;
     }
@@ -827,7 +921,7 @@
     /* Aperçu média dans le formulaire de création / édition */
     .editor-media-box {
       background: rgba(0, 0, 0, 0.42);
-      border: 1px dashed rgba(244, 63, 94, 0.35);
+      border: 1px dashed rgba(217, 38, 72, 0.35);
       border-radius: var(--radius-md);
       padding: 10px;
       display: flex;
@@ -947,7 +1041,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(244, 63, 94, 0.22);
+      border: 1px solid rgba(217, 38, 72, 0.22);
       color: #fecdd3;
     }
 
@@ -973,16 +1067,16 @@
     .btn-timer-primary {
       padding: 6px 12px;
       border-radius: 10px;
-      background: var(--crimson-600);
+      background: var(--crimson-500);
       color: #ffffff;
       font-size: 0.74rem;
       font-weight: 700;
       transition: background 0.16s ease, transform 0.1s ease;
     }
 
-    .btn-timer-primary:hover { background: var(--crimson-500); }
+    .btn-timer-primary:hover { background: var(--crimson-400); }
     .btn-timer-primary.paused-state { background: #d97706; }
-    .btn-timer-primary.expired-state { background: #e11d48; box-shadow: 0 0 12px rgba(244, 63, 94, 0.6); }
+    .btn-timer-primary.expired-state { background: var(--crimson-500); box-shadow: 0 0 12px rgba(217, 38, 72, 0.6); }
 
     .btn-timer-reset {
       padding: 6px 10px;
@@ -1023,13 +1117,13 @@
       font-size: 0.68rem;
       color: var(--text-soft);
       padding-top: 9px;
-      border-top: 1px solid rgba(244, 63, 94, 0.16);
+      border-top: 1px solid rgba(217, 38, 72, 0.16);
       position: relative;
       z-index: 2;
     }
 
     /* =========================================================================
-       BOUTONS PRINCIPAUX DE TIRAGE & RECOMMANDER
+       BOUTONS PRINCIPAUX DE TIRAGE & RECOMMENCER
        ========================================================================= */
     .draw-actions-grid {
       display: grid;
@@ -1046,7 +1140,7 @@
     .btn-draw-main {
       padding: 14px 16px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      background: linear-gradient(135deg, #d92648 0%, #be123c 100%);
       border: 1px solid rgba(253, 164, 175, 0.35);
       color: #ffffff;
       font-size: 0.92rem;
@@ -1055,7 +1149,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 10px 26px rgba(190, 18, 60, 0.45);
+      box-shadow: 0 10px 26px rgba(217, 38, 72, 0.42);
       transition: transform 0.12s ease, filter 0.18s ease;
     }
 
@@ -1097,7 +1191,7 @@
     }
 
     .btn-restart-game:hover {
-      background: rgba(225, 29, 72, 0.18);
+      background: rgba(217, 38, 72, 0.18);
       border-color: var(--border-strong);
       color: #ffffff;
     }
@@ -1131,7 +1225,7 @@
       width: 100%;
       max-width: 660px;
       max-height: 90vh;
-      background: #13090d;
+      background: #130b10;
       border: 1px solid var(--border-strong);
       border-radius: 22px 22px 0 0;
       display: flex;
@@ -1222,7 +1316,7 @@
       padding: 10px 12px;
       border-radius: 12px;
       background: rgba(0, 0, 0, 0.42);
-      border: 1px solid rgba(244, 63, 94, 0.18);
+      border: 1px solid rgba(217, 38, 72, 0.18);
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -1355,19 +1449,24 @@
 </head>
 <body>
 
-  <!-- Écran de confidentialité Mode Discret (Touche H) -->
+  <!-- Écran neutre "Notes & Lecture" en Mode Discret (Touche H) -->
   <div class="discreet-overlay" id="discreetOverlay">
     <div class="discreet-box">
-      <div style="width:46px;height:46px;margin:0 auto 12px;border-radius:50%;background:rgba(76,5,25,0.85);border:1px solid rgba(244,63,94,0.45);display:flex;align-items:center;justify-content:center;color:#fb7185;">
-        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-        </svg>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <span style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#64748b;font-weight:700;">Notes &amp; Lecture</span>
+        <span style="font-size:0.68rem;color:#64748b;">Touche H</span>
       </div>
-      <h2 style="font-size:1rem;font-weight:700;margin-bottom:6px;">Zone Rouge — En pause</h2>
-      <p style="font-size:0.76rem;color:var(--text-soft);margin-bottom:16px;">Écran discret actif (touche H). Touchez le bouton ci-dessous pour revenir à la session.</p>
-      <button id="btnResumeDiscreet" type="button" class="btn-draw-main" style="width:100%;padding:10px 14px;font-size:0.82rem;">
-        Reprendre la session
-      </button>
+      <h2 style="font-size:0.95rem;font-weight:600;color:#e2e8f0;margin-bottom:6px;">Brouillon &amp; repères de lecture</h2>
+      <div class="discreet-note-lines">
+        <p>• Vérifier la structure des chapitres et les transitions.</p>
+        <p>• Relire les annotations de rythme et de mise en page.</p>
+        <p>• Reprendre la lecture lorsque vous êtes prêt.</p>
+      </div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button id="btnResumeDiscreet" type="button" class="discreet-return-btn">
+          Reprendre
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1397,7 +1496,7 @@
         <!-- Emblème SVG Kamasutra pulsant dans un losange rouge velours -->
         <div class="brand-emblem emblem-pulse">
           <svg width="28" height="28" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-            <path d="M18 2.5L33.5 18L18 33.5L2.5 18L18 2.5Z" stroke="#fb7185" stroke-width="1.6" fill="rgba(225,29,72,0.24)" />
+            <path d="M18 2.5L33.5 18L18 33.5L2.5 18L18 2.5Z" stroke="#fb7185" stroke-width="1.6" fill="rgba(217,38,72,0.24)" />
             <circle cx="18" cy="18" r="10.8" stroke="#fda4af" stroke-width="0.9" stroke-dasharray="2.2 2.2" opacity="0.65" />
             <circle cx="13.2" cy="12.2" r="2.1" fill="#fff1f2" />
             <path d="M13.6 14.8C15.5 16.4 17.8 18.2 20.5 20.2L19.1 22.1C16.6 20.3 14.3 18.7 12.2 17.1C11.4 16.5 11.7 15.2 12.6 14.8C13 14.6 13.3 14.6 13.6 14.8Z" fill="#fff1f2" />
@@ -1443,7 +1542,7 @@
     <section id="phoneBroadcastView" class="phone-broadcast-shell sensitive-blur hidden" aria-label="Diffusion vidéo téléphone">
       <div class="phone-status-banner">
         <div>
-          <span class="section-label" style="display:block;">Mode Téléphone · Vidéo uniquement</span>
+          <span class="section-label" style="display:block;">Diffusion Caméra · Téléphone</span>
           <strong id="phoneBroadcastRoomBadge" style="font-family:ui-monospace,monospace;font-size:0.9rem;color:#ffffff;">Salon ZR-4829</strong>
         </div>
         <span id="phoneBroadcastStatusPill" class="timer-pill">Prêt</span>
@@ -1452,7 +1551,7 @@
       <div class="phone-video-box">
         <video id="phoneBroadcastVideo" autoplay playsinline muted></video>
         <div id="phoneBroadcastPlaceholder" class="webrtc-placeholder">
-          Appuyez sur « Lancer la diffusion » pour envoyer la vidéo vers le PC.
+          Appuyez sur « Lancer la diffusion » pour envoyer la vidéo vers le PC via le code de salon.
         </div>
       </div>
 
@@ -1467,6 +1566,7 @@
 
       <div class="panel-row-between" style="padding-top:4px;">
         <button id="btnPhoneStopBroadcast" type="button" class="link-action-btn">Arrêter la diffusion</button>
+        <button id="btnPhoneWakeHint" type="button" class="link-action-btn">Garder l'écran éveillé</button>
         <button id="btnPhoneExitToGame" type="button" class="link-action-btn">Ouvrir le jeu complet</button>
       </div>
     </section>
@@ -1551,7 +1651,7 @@
             <span id="nextTurnBadge" class="next-turn-pill turn-femme">Tour suivant : Femme</span>
           </div>
 
-          <div class="panel-row-between" style="padding-top:8px;border-top:1px solid rgba(244,63,94,0.14);">
+          <div class="panel-row-between" style="padding-top:8px;border-top:1px solid rgba(217,38,72,0.14);">
             <div class="filter-group" id="targetFilterGroup">
               <button type="button" data-target="all" class="chip-btn active">Alternance (F/H)</button>
               <button type="button" data-target="femme" class="chip-btn">Femme</button>
@@ -1571,10 +1671,10 @@
       </div>
 
       <!-- Fenêtre vidéo PC placée directement au-dessus de la zone des cartes tirées -->
-      <section id="pcPipOverlay" class="pc-pip-wrapper hidden" aria-label="Retour vidéo caméra live">
+      <section id="pcPipOverlay" class="pc-pip-wrapper" aria-label="Retour vidéo caméra live">
         <div class="pc-pip-header">
           <div class="pc-pip-title-row">
-            <span class="pc-pip-live-badge"><span class="pc-pip-live-dot"></span>Live</span>
+            <span id="pcPipStatusBadge" class="pc-pip-live-badge"><span class="pc-pip-live-dot"></span>En attente du téléphone</span>
             <span id="pcPipRoomLabel" class="pc-pip-caption">Caméra Chambre · ZR-4829</span>
           </div>
           <div class="pc-pip-controls">
@@ -1585,12 +1685,22 @@
         </div>
         <div id="pcPipBody" class="pc-pip-body">
           <video id="pcPipVideo" autoplay playsinline></video>
+          <div id="pcPipDiagnosticOverlay" class="pc-pip-diagnostic-overlay">
+            <p id="pcPipDiagTitle" class="pc-pip-diag-title">En attente du téléphone</p>
+            <p id="pcPipDiagDesc" class="pc-pip-diag-desc">
+              Ouvrez le lien ou le code de salon sur le smartphone en « Diffusion Caméra », puis cliquez sur « Écouter le salon » ici.
+            </p>
+            <div class="pc-pip-diag-actions">
+              <button type="button" id="btnPipQuickListen" class="btn-timer-primary" style="padding:5px 11px;font-size:0.7rem;">Écouter le salon</button>
+              <button type="button" id="btnPipOpenRoomConfig" class="btn-timer-reset" style="padding:5px 11px;font-size:0.7rem;">Salon &amp; Secours SDP</button>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Barre de réaffichage rapide si la fenêtre vidéo PC a été masquée -->
       <div id="pcPipRestoreBar" class="panel-box panel-row-between hidden" style="padding:8px 12px;">
-        <span style="font-size:0.72rem;font-weight:700;color:#a7f3d0;">● Flux caméra smartphone actif</span>
+        <span id="pcPipRestoreLabel" style="font-size:0.72rem;font-weight:700;color:#fda4af;">Fenêtre retour vidéo masquée</span>
         <button type="button" id="btnRestorePipOverlay" class="link-action-btn">Afficher vidéo</button>
       </div>
 
@@ -1639,7 +1749,7 @@
 
         <!-- Inputs fichiers cachés pour photo ou petite vidéo -->
         <input type="file" id="inputPhoto" accept="image/*" class="hidden" />
-        <input type="file" id="inputVideo" accept="video/*" capture="environment" class="hidden" />
+        <input type="file" id="inputVideo" accept="image/*,video/*" capture="environment" class="hidden" />
 
         <!-- Contenu central de la carte -->
         <div class="card-body">
@@ -1796,7 +1906,7 @@
               </div>
             </div>
             <input type="file" id="editorInputPhoto" accept="image/*" class="hidden" />
-            <input type="file" id="editorInputVideo" accept="video/*" capture="environment" class="hidden" />
+            <input type="file" id="editorInputVideo" accept="image/*,video/*" capture="environment" class="hidden" />
             <div id="editorMediaPreview" class="editor-media-preview hidden"></div>
             <p id="editorMediaStatus" class="media-hint-text">
               Photos compressées automatiquement ; vidéos courtes (idéalement &lt; 25 Mo) enregistrées durablement dans le navigateur.
@@ -1854,7 +1964,7 @@
       <div class="drawer-header">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <h2 id="webrtcDrawerTitle" class="drawer-title">Caméra Live P2P (Smartphone → PC)</h2>
-          <span id="webrtcStatusBadge" class="timer-pill">Hors ligne</span>
+          <span id="webrtcStatusBadge" class="timer-pill">En attente du téléphone</span>
         </div>
         <button id="btnCloseWebrtcDrawer" type="button" class="btn-timer-reset">Fermer</button>
       </div>
@@ -1871,10 +1981,10 @@
           </div>
           <div class="room-code-box">
             <input type="text" id="roomCodeInput" maxlength="12" value="ZR-4829" class="field-control room-code-input" />
-            <button id="btnOpenPhoneBroadcastMode" type="button" class="btn-timer-reset">📱 Vue téléphone</button>
+            <button id="btnOpenPhoneBroadcastMode" type="button" class="btn-timer-reset">📱 Diffusion Caméra</button>
           </div>
           <p class="media-hint-text">
-            Ouvrez le lien sur le smartphone pour lancer la vue caméra dédiée, ou choisissez <strong>Émetteur</strong> / <strong>Récepteur (PC)</strong> avec le même code.
+            Ouvrez le lien ou le code <strong>ZR-XXXX</strong> sur le smartphone en <strong>Diffusion Caméra</strong>, puis choisissez <strong>Récepteur (PC)</strong> ici.
           </p>
         </div>
 
@@ -1890,7 +2000,7 @@
         <div id="webrtcVideoContainer" class="webrtc-stage">
           <video id="webrtcVideo" autoplay playsinline></video>
           <div id="webrtcPlaceholder" class="webrtc-placeholder">
-            Entrez un code de salon puis choisissez Émetteur (Smartphone) ou Récepteur (PC).
+            En attente du téléphone : entrez le code de salon puis choisissez Récepteur (PC) ou Émetteur (Smartphone).
           </div>
           <div id="webrtcOverlayControls" class="webrtc-overlay-btns hidden">
             <button id="btnSwitchWebrtcCam" type="button" class="btn-timer-reset" style="background:rgba(15,10,12,0.85);">🔄 Caméra</button>
@@ -1901,7 +2011,7 @@
         <!-- Secours manuel SDP repliable en cas de réseau restrictif -->
         <div class="panel-box" style="display:flex;flex-direction:column;gap:8px;">
           <div class="panel-row-between">
-            <span class="section-label">Secours manuel SDP (si besoin)</span>
+            <span class="section-label">Repli manuel SDP (si relais ou réseau bloqué)</span>
             <button id="btnToggleManualSdp" type="button" class="link-action-btn">Afficher / Masquer</button>
           </div>
 
@@ -2170,6 +2280,7 @@
       let editorRecordStream = null;
       const sessionOnlyMediaMap = {};
       let phoneBroadcastOnlyMode = false;
+      let wakeLockSentinel = null;
       let gameState = {
         alternationMode: 'femme-first', // 'femme-first' ou 'homme-first'
         nextTurnTarget: 'femme',         // 'femme' ou 'homme'
@@ -2239,7 +2350,7 @@
         timerState.remaining = TIMER_SECONDS;
         timerState.expired = false;
         startTimerLoop();
-        showToast(`Série ${timerState.series} (02:00) démarrée`, 'info');
+        showToast(`Nouvelle série : Série ${timerState.series} (02:00) démarrée`, 'info');
       }
 
       function startTimerLoop() {
@@ -2263,7 +2374,7 @@
             stopTimerInterval();
             renderTimerUI();
             playSoftChime();
-            showToast(`Temps écoulé (Série ${timerState.series}) — Cliquez sur "Relancer +2 min" pour enchaîner.`, 'warn');
+            showToast(`Temps écoulé (Série ${timerState.series}) — Cliquez sur "Nouvelle série" ou "Relancer +2 min".`, 'warn');
           }
         }, 1000);
       }
@@ -2518,6 +2629,7 @@
         updateStageUI();
         updateDeckBadge();
         resetTimerForNewCard();
+        updateLiveDiagnosticsUI('waiting', `Salon ${getNormalizedRoomCode()} · En attente du téléphone`, 'Ouvrez le lien ou le code de salon sur le smartphone en « Diffusion Caméra », puis cliquez sur « Écouter le salon » ici.');
 
         if (gameState.currentCardId) {
           const existing = deck.find(c => c.id === gameState.currentCardId);
@@ -2804,6 +2916,16 @@
 
         const expectedTarget = getExpectedTargetForDraw();
         let pool = getFilteredPool(stage, expectedTarget, gameState.filterSuit);
+        let fallbackToOtherGender = false;
+
+        if (pool.length === 0 && gameState.filterTarget === 'all') {
+          const otherTarget = getOppositeTarget(expectedTarget);
+          pool = getFilteredPool(stage, otherTarget, gameState.filterSuit);
+          if (pool.length > 0) {
+            fallbackToOtherGender = true;
+            showToast(`Aucune carte ${expectedTarget === 'homme' ? 'Homme' : 'Femme'} avec ces filtres : repli sur ${otherTarget === 'homme' ? 'Homme' : 'Femme'}.`, 'warn');
+          }
+        }
 
         if (pool.length === 0) {
           pool = getFilteredPool(stage, expectedTarget, 'all');
@@ -2841,7 +2963,7 @@
 
         if (gameState.filterTarget === 'all') {
           const drawnTarget = normalizeTarget(chosen.target);
-          gameState.nextTurnTarget = getOppositeTarget(drawnTarget);
+          gameState.nextTurnTarget = fallbackToOtherGender ? expectedTarget : getOppositeTarget(drawnTarget);
         } else {
           gameState.nextTurnTarget = gameState.filterTarget;
         }
@@ -3027,6 +3149,10 @@
           await saveMediaForCard(cardId, { type: 'image', dataUrl: compressedUrl, name: file.name });
           renderCardMediaPreview(cardId);
           return;
+        }
+
+        if (file.size > MAX_IDB_VIDEO_BYTES) {
+          showToast('Vidéo volumineuse : un clip court (< 25 Mo) est recommandé pour la sauvegarde permanente.', 'warn');
         }
 
         const reader = new FileReader();
@@ -3234,7 +3360,7 @@
         }
 
         if (file.size > MAX_IDB_VIDEO_BYTES) {
-          showToast('Fichier vidéo volumineux : un clip court (< 25 Mo) est recommandé.', 'warn');
+          showToast('Fichier vidéo volumineux : un clip court (< 25 Mo) est recommandé pour la sauvegarde permanente.', 'warn');
         }
 
         const reader = new FileReader();
@@ -3481,8 +3607,59 @@
       let relayPollTimer = null;
       let pipHiddenByUser = false;
       let pipMinimized = false;
+      let livePhase = 'waiting'; // 'waiting' | 'signaling' | 'connected' | 'error'
       const seenSignalIds = new Set();
       const clientInstanceId = 'zr_' + Math.random().toString(36).slice(2, 9);
+
+      function updateLiveDiagnosticsUI(phase, shortLabel, detailText) {
+        livePhase = phase;
+        const wrapper = document.getElementById('pcPipOverlay');
+        const badge = document.getElementById('pcPipStatusBadge');
+        const diagOverlay = document.getElementById('pcPipDiagnosticOverlay');
+        const diagTitle = document.getElementById('pcPipDiagTitle');
+        const diagDesc = document.getElementById('pcPipDiagDesc');
+        const drawerBadge = document.getElementById('webrtcStatusBadge');
+
+        if (wrapper) {
+          wrapper.classList.remove('state-connected', 'state-error');
+          if (phase === 'connected') wrapper.classList.add('state-connected');
+          if (phase === 'error') wrapper.classList.add('state-error');
+        }
+
+        if (badge) {
+          badge.className = 'pc-pip-live-badge';
+          if (phase === 'connected') badge.classList.add('connected');
+          else if (phase === 'signaling') badge.classList.add('signaling');
+          else if (phase === 'error') badge.classList.add('error');
+          badge.innerHTML = `<span class="pc-pip-live-dot"></span>${escapeHtml(shortLabel)}`;
+        }
+
+        if (drawerBadge) {
+          drawerBadge.textContent = shortLabel;
+        }
+
+        if (diagTitle) diagTitle.textContent = shortLabel;
+        if (diagDesc && detailText) diagDesc.textContent = detailText;
+
+        if (diagOverlay) {
+          if (phase === 'connected' && remoteStream) {
+            diagOverlay.classList.add('hidden');
+          } else {
+            diagOverlay.classList.remove('hidden');
+          }
+        }
+      }
+
+      async function requestScreenWakeLock() {
+        try {
+          if ('wakeLock' in navigator && !wakeLockSentinel) {
+            wakeLockSentinel = await navigator.wakeLock.request('screen');
+            showToast('Écran maintenu actif pendant la diffusion.', 'success');
+          }
+        } catch (_) {
+          showToast('Astuce : gardez la page ouverte et l’écran déverrouillé pendant la diffusion.', 'info');
+        }
+      }
 
       function setPhoneBroadcastMode(enabled) {
         phoneBroadcastOnlyMode = Boolean(enabled);
@@ -3502,8 +3679,9 @@
           mainView.classList.add('hidden');
           if (editorBtn) editorBtn.classList.add('hidden');
           if (rtcBtn) rtcBtn.classList.add('hidden');
-          if (subtitleEl) subtitleEl.innerHTML = '<strong>Caméra uniquement</strong>';
+          if (subtitleEl) subtitleEl.innerHTML = '<strong>Diffusion Caméra</strong>';
           if (roomBadge) roomBadge.textContent = `Salon ${getNormalizedRoomCode()}`;
+          requestScreenWakeLock();
         } else {
           phoneView.classList.add('hidden');
           mainView.classList.remove('hidden');
@@ -3524,20 +3702,27 @@
 
         if (!pipWrapper || !pipVideo || !restoreBar) return;
 
+        const code = roomCode || getNormalizedRoomCode();
+        if (roomLabel) {
+          roomLabel.textContent = `Caméra Chambre · ${code}`;
+        }
+
         if (!stream) {
           remoteStream = null;
-          pipHiddenByUser = false;
           pipVideo.srcObject = null;
-          pipWrapper.classList.add('hidden');
-          restoreBar.classList.add('hidden');
+          if (pipHiddenByUser) {
+            pipWrapper.classList.add('hidden');
+            restoreBar.classList.remove('hidden');
+          } else {
+            pipWrapper.classList.remove('hidden');
+            restoreBar.classList.add('hidden');
+          }
           return;
         }
 
         remoteStream = stream;
         pipVideo.srcObject = stream;
-        if (roomLabel) {
-          roomLabel.textContent = `Caméra Chambre · ${roomCode || getNormalizedRoomCode()}`;
-        }
+        updateLiveDiagnosticsUI('connected', 'Connecté', `Flux vidéo actif sur le salon ${code}.`);
 
         if (pipHiddenByUser) {
           pipWrapper.classList.add('hidden');
@@ -3557,13 +3742,11 @@
       }
 
       function hidePipOverlay() {
-        if (!remoteStream) return;
         pipHiddenByUser = true;
         syncPcPipOverlay(remoteStream);
       }
 
       function restorePipOverlay() {
-        if (!remoteStream) return;
         pipHiddenByUser = false;
         syncPcPipOverlay(remoteStream);
       }
@@ -3579,6 +3762,7 @@
         const num = Math.floor(1000 + Math.random() * 9000);
         const code = `ZR-${num}`;
         document.getElementById('roomCodeInput').value = code;
+        document.getElementById('pcPipRoomLabel').textContent = `Caméra Chambre · ${code}`;
         try {
           window.history.replaceState(null, '', `#room=${encodeURIComponent(code)}`);
         } catch (_) {}
@@ -3620,6 +3804,7 @@
         cleanupSignalingChannels();
         seenSignalIds.clear();
         const topic = `zr-p2p-${roomCode.toLowerCase()}`;
+        let relayReachable = false;
 
         if ('BroadcastChannel' in window) {
           try {
@@ -3636,7 +3821,8 @@
         const pollRelay = async () => {
           try {
             const res = await fetch(`${SIGNALING_RELAY_ENDPOINT}/${topic}/json?poll=1&since=30s`, { cache: 'no-store' });
-            if (!res.ok) return;
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            relayReachable = true;
             const rawText = await res.text();
             const lines = rawText.trim().split('\n').filter(Boolean);
             for (const line of lines) {
@@ -3649,7 +3835,15 @@
                 onSignalMessage(msg);
               } catch (_) {}
             }
-          } catch (_) {}
+          } catch (_) {
+            if (!relayReachable && livePhase !== 'connected') {
+              updateLiveDiagnosticsUI(
+                'error',
+                'Échec / repli manuel',
+                'Le relais de signalisation public est ralenti ou bloqué sur ce réseau. Utilisez « Salon & Secours SDP » pour échanger les codes manuellement.'
+              );
+            }
+          }
         };
 
         pollRelay();
@@ -3691,10 +3885,9 @@
         stopWebrtc(true);
         rtcRole = 'sender';
         const roomCode = getNormalizedRoomCode();
-        const statusBadge = document.getElementById('webrtcStatusBadge');
         const phonePill = document.getElementById('phoneBroadcastStatusPill');
-        statusBadge.textContent = `Salon ${roomCode} · Caméra...`;
-        if (phonePill) phonePill.textContent = 'Caméra...';
+        updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', `Activation de la caméra et annonce sur le salon ${roomCode}...`);
+        if (phonePill) phonePill.textContent = 'Signalisation...';
 
         try {
           localStream = await navigator.mediaDevices.getUserMedia({
@@ -3721,40 +3914,48 @@
 
           rtcPeer.oniceconnectionstatechange = () => {
             const st = rtcPeer ? rtcPeer.iceConnectionState : 'closed';
-            statusBadge.textContent = `État : ${st}`;
             if (phonePill) {
-              phonePill.textContent = (st === 'connected' || st === 'completed') ? 'En diffusion' : st;
+              phonePill.textContent = (st === 'connected' || st === 'completed') ? 'Connecté' : st;
             }
             if (st === 'connected' || st === 'completed') {
               document.getElementById('liveDotHeader').classList.remove('hidden');
+              updateLiveDiagnosticsUI('connected', 'Connecté', `Caméra diffusée vers le salon ${roomCode}.`);
               showToast('Vidéo diffusée vers le PC !', 'success');
+            } else if (st === 'failed' || st === 'disconnected') {
+              updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Connexion interrompue ou bloquée. Ouvrez « Salon & Secours SDP » si nécessaire.');
             }
           };
 
           const offer = await rtcPeer.createOffer();
           await rtcPeer.setLocalDescription(offer);
-          document.getElementById('localSdpLabel').textContent = '1. Offre SDP (secours manuel) :';
-          document.getElementById('remoteSdpLabel').textContent = '2. Réponse SDP (secours manuel) :';
+          document.getElementById('localSdpLabel').textContent = '1. Offre SDP (repli manuel) :';
+          document.getElementById('remoteSdpLabel').textContent = '2. Réponse SDP (repli manuel) :';
           document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
 
           setupRoomSignaling(roomCode, async (msg) => {
             if (!rtcPeer) return;
             if (msg.kind === 'answer' && msg.sdp) {
+              updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Réponse reçue du PC, établissement du flux vidéo...');
               await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp)).catch(() => {});
             } else if (msg.kind === 'ice' && msg.candidate) {
               await rtcPeer.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {});
             } else if (msg.kind === 'receiver-ready' && rtcPeer.localDescription) {
+              updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'PC détecté, envoi de l’offre vidéo...');
               await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
             }
           });
 
           await publishRoomSignal(roomCode, { kind: 'offer', sdp: rtcPeer.localDescription });
-          statusBadge.textContent = `Salon ${roomCode} · En attente du PC`;
-          if (phonePill) phonePill.textContent = 'Diffusion active';
+          updateLiveDiagnosticsUI('waiting', 'En attente du téléphone', `Caméra active sur ${roomCode}. Ouvrez « Écouter le salon » sur le PC.`);
+          if (phonePill) phonePill.textContent = 'En attente du PC';
           showToast(`Diffusion active sur ${roomCode}.`, 'info');
         } catch (_) {
-          statusBadge.textContent = 'Erreur caméra';
-          if (phonePill) phonePill.textContent = 'Caméra refusée';
+          if (phonePill) phonePill.textContent = 'Échec / repli manuel';
+          updateLiveDiagnosticsUI(
+            'error',
+            'Échec / repli manuel',
+            'Accès caméra refusé ou contexte non sécurisé (HTTPS requis sur GitHub Pages).'
+          );
           showToast('Accès caméra refusé ou contexte non sécurisé (HTTPS requis).', 'error');
         }
       }
@@ -3792,9 +3993,9 @@
       async function startWebrtcReceiver() {
         stopWebrtc(true);
         rtcRole = 'receiver';
+        pipHiddenByUser = false;
         const roomCode = getNormalizedRoomCode();
-        const statusBadge = document.getElementById('webrtcStatusBadge');
-        statusBadge.textContent = `Salon ${roomCode} · Connexion...`;
+        updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', `Recherche du flux du smartphone sur le salon ${roomCode}...`);
 
         rtcPeer = createPeerConnectionWithIce(roomCode);
         rtcPeer.ontrack = (event) => {
@@ -3804,7 +4005,6 @@
             document.getElementById('webrtcPlaceholder').classList.add('hidden');
             document.getElementById('webrtcOverlayControls').classList.remove('hidden');
             document.getElementById('liveDotHeader').classList.remove('hidden');
-            statusBadge.textContent = 'En direct';
             syncPcPipOverlay(event.streams[0], roomCode);
             closeDrawer('webrtcDrawer');
             showToast('Flux vidéo en direct affiché au-dessus des cartes !', 'success');
@@ -3813,11 +4013,15 @@
 
         rtcPeer.oniceconnectionstatechange = () => {
           const st = rtcPeer ? rtcPeer.iceConnectionState : 'closed';
-          statusBadge.textContent = `État : ${st}`;
+          if (st === 'connected' || st === 'completed') {
+            updateLiveDiagnosticsUI('connected', 'Connecté', `Flux vidéo actif sur le salon ${roomCode}.`);
+          } else if (st === 'failed' || st === 'disconnected') {
+            updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Liaison P2P interrompue. Utilisez le repli manuel SDP si le réseau bloque WebRTC.');
+          }
         };
 
-        document.getElementById('localSdpLabel').textContent = '2. Réponse SDP (secours manuel) :';
-        document.getElementById('remoteSdpLabel').textContent = '1. Offre SDP (secours manuel) :';
+        document.getElementById('localSdpLabel').textContent = '2. Réponse SDP (repli manuel) :';
+        document.getElementById('remoteSdpLabel').textContent = '1. Offre SDP (repli manuel) :';
         document.getElementById('localSdpText').value = '';
 
         let handledOffer = false;
@@ -3825,14 +4029,17 @@
           if (!rtcPeer) return;
           if (msg.kind === 'offer' && msg.sdp && !handledOffer) {
             handledOffer = true;
+            updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Offre reçue du smartphone, négociation en cours...');
             try {
               await rtcPeer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
               const answer = await rtcPeer.createAnswer();
               await rtcPeer.setLocalDescription(answer);
               document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
               await publishRoomSignal(roomCode, { kind: 'answer', sdp: rtcPeer.localDescription });
-              statusBadge.textContent = `Salon ${roomCode} · Liaison P2P établie`;
-            } catch (_) {}
+              updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Réponse envoyée, ouverture de la vidéo...');
+            } catch (_) {
+              updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Erreur lors du traitement de l’offre vidéo.');
+            }
           } else if (msg.kind === 'ice' && msg.candidate) {
             await rtcPeer.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {});
           }
@@ -3854,6 +4061,7 @@
         }
         try {
           const desc = JSON.parse(raw);
+          updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Validation du code SDP manuel...');
           await rtcPeer.setRemoteDescription(new RTCSessionDescription(desc));
 
           if (rtcRole === 'receiver' && desc.type === 'offer') {
@@ -3861,12 +4069,14 @@
             await rtcPeer.setLocalDescription(answer);
             await waitIceComplete(rtcPeer);
             document.getElementById('localSdpText').value = JSON.stringify(rtcPeer.localDescription);
-            document.getElementById('webrtcStatusBadge').textContent = 'Réponse prête · Copiez vers Smartphone';
+            updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Réponse SDP générée : copiez-la vers le smartphone.');
             showToast('Code réponse généré ! Copiez-le sur le Smartphone.', 'success');
           } else {
+            updateLiveDiagnosticsUI('signaling', 'Signalisation en cours', 'Connexion P2P manuelle en cours...');
             showToast('Connexion P2P en cours...', 'info');
           }
         } catch (_) {
+          updateLiveDiagnosticsUI('error', 'Échec / repli manuel', 'Code SDP invalide. Vérifiez le texte collé.');
           showToast('Code SDP invalide.', 'error');
         }
       }
@@ -3919,10 +4129,10 @@
         if (phonePill) phonePill.textContent = 'Arrêté';
 
         syncPcPipOverlay(null);
+        updateLiveDiagnosticsUI('waiting', 'En attente du téléphone', 'Caméra coupée. Cliquez sur « Écouter le salon » pour relancer la liaison.');
         document.getElementById('webrtcPlaceholder').classList.remove('hidden');
         document.getElementById('webrtcOverlayControls').classList.add('hidden');
         document.getElementById('liveDotHeader').classList.add('hidden');
-        document.getElementById('webrtcStatusBadge').textContent = 'Hors ligne';
         if (!silent) showToast('Diffusion caméra coupée.', 'info');
       }
 
@@ -3991,8 +4201,14 @@
         document.getElementById('btnPhoneStartBroadcast').addEventListener('click', startWebrtcSender);
         document.getElementById('btnPhoneSwitchCam').addEventListener('click', switchWebrtcCamera);
         document.getElementById('btnPhoneStopBroadcast').addEventListener('click', () => stopWebrtc(false));
+        document.getElementById('btnPhoneWakeHint').addEventListener('click', requestScreenWakeLock);
         document.getElementById('btnPhoneExitToGame').addEventListener('click', () => setPhoneBroadcastMode(false));
 
+        document.getElementById('btnPipQuickListen').addEventListener('click', startWebrtcReceiver);
+        document.getElementById('btnPipOpenRoomConfig').addEventListener('click', () => {
+          document.getElementById('webrtcSignalingBox').classList.remove('hidden');
+          openDrawer('webrtcDrawer');
+        });
         document.getElementById('btnPipSnapToCard').addEventListener('click', captureSnapshotForCard);
         document.getElementById('btnPipMinimize').addEventListener('click', togglePipMinimize);
         document.getElementById('btnPipHide').addEventListener('click', hidePipOverlay);
